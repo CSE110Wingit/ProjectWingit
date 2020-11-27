@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 
 public class WingitUtils {
+    public static String SAVE_FILE_PATH = "./userSaveFile.txt";
 
     /**
      * Does a SHA256 hash of the given password string and returns a string in hex
@@ -46,20 +47,16 @@ public class WingitUtils {
     // Saves all user login information to a file in the app
     public void saveLoginInfo(String username, String passwordHash) {
         try{
-            // Create file object
-            File file = new File("userInformation.txt");
-
             deleteLoginInfo();                      
 
-            // Creating buffers needed to write to file
-            FileWriter fw = new FileWriter(file);
-            BufferedWriter bw = new BufferedWriter(fw);
+            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(SAVE_FILE_PATH)));
 
             // Create contents of the file
-            String content = username + '\n' + passwordHash;
+            String content = username + ',' + passwordHash;
 
             // Writes and closes content
             bw.write(content);
+            bw.flush();
             bw.close();
 
         } catch (IOException e) {
