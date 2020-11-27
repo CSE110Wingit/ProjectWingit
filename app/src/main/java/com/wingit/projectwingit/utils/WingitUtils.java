@@ -76,6 +76,6 @@ public class WingitUtils {
     // Deletes the file with the user login information
     public void deleteLoginInfo() {
         File file = new File("userInformation.txt");
-        file.delete();        
+        if (file.exists()) file.delete();        
     }
 }
