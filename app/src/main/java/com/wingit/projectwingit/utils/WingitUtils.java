@@ -45,32 +45,27 @@ public class WingitUtils {
 
     // Saves all user login information to a file in the app
     public void saveLoginInfo(String username, String passwordHash) {
-            try{
-                    // Create file object
-                    File file = new File("userInformation.txt");
-                    
-                    // Check if the file already exists
-                    if(file.exists()) {
-                            //Delete already existing file
-                            deleteLoginInfo();
-                    }                            
+        try{
+            // Create file object
+            File file = new File("userInformation.txt");
 
-                    // Creating buffers needed to write to file
-                    FileWriter fw = new FileWriter(file);
-                    BufferedWriter bw = new BufferedWriter(fw);
+            deleteLoginInfo();                      
 
-                    // Create contents of the file
-                    String content = username + '\n' + passwordHash;
+            // Creating buffers needed to write to file
+            FileWriter fw = new FileWriter(file);
+            BufferedWriter bw = new BufferedWriter(fw);
 
-                    // Writes and closes content
-                    bw.write(content);
-                    bw.close();
+            // Create contents of the file
+            String content = username + '\n' + passwordHash;
 
-            } catch (IOException ex) {
-                    //IDK what to put here for an error so
-                    System.out.println("Exception occurred:");
-                    ex.printStackTrace();
-            }
+            // Writes and closes content
+            bw.write(content);
+            bw.close();
+
+        } catch (IOException e) {
+            //IDK what to put here for an error so
+            WingitLogging.error("Exception occurred: " + e.getMessage());
+        }
     }
 
     // Deletes the file with the user login information
