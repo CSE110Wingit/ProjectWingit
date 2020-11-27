@@ -5,6 +5,9 @@ import com.wingit.projectwingit.debug.WingitErrors;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.io.File; // File class to make new files
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 public class WingitUtils {
 
@@ -38,5 +41,41 @@ public class WingitUtils {
      */
     public boolean checkAcceptablePassword(String password){
         return password.length() >= 8;
+    }
+
+    // Saves all user login information to a file in the app
+    public void saveLoginInfo(String username, String passwordHash) {
+            try{
+                    // Create file object
+                    File file = new File("userInformation.txt");
+                    
+                    // Check if the file already exists
+                    if(file.exists()) {
+                            //Delete already existing file
+                            deleteLoginInfo();
+                    }                            
+
+                    // Creating buffers needed to write to file
+                    FileWriter fw = new FileWriter(file);
+                    BufferedWriter bw = new BufferedWriter(fw);
+
+                    // Create contents of the file
+                    String content = username + '\n' + passwordHash;
+
+                    // Writes and closes content
+                    bw.write(content);
+                    bw.close();
+
+            } catch (IOException ex) {
+                    //IDK what to put here for an error so
+                    System.out.println("Exception occurred:");
+                    ex.printStackTrace();
+            }
+    }
+
+    // Deletes the file with the user login information
+    public void deleteLoginInfo() {
+        File file = new File("userInformation.txt");
+        file.delete();        
     }
 }
