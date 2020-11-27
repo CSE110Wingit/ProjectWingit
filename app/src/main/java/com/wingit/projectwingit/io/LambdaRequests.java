@@ -69,6 +69,33 @@ public class LambdaRequests {
     }
 
     /**
+     * SR7 Request change password. DONE BY LOUIS
+     * @param usernameOrEmail the username or the email or the user
+     * @return
+     */
+    public static LambdaResponse requestChangePasswordCode(String usernameOrEmail){
+        try{
+            if (userOrEmail.contains("@")){
+                String[] params = {
+                        EMAIL_STR, userOrEmail,
+                        EVENT_TYPE_STR, EVENT_REQUEST_CHANGE_PASSWORD_STR,
+                };
+                return sendRequest("GET", params);
+            }
+
+            String[] params = {
+                    USERNAME_STR, userOrEmail,
+                    EVENT_TYPE_STR, EVENT_REQUEST_CHANGE_PASSWORD_STR,
+            };
+            return sendRequest("GET", params);
+
+        }catch (IOException e){
+            return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
+                    "Error sending change password code request: " + e.getMessage());
+        }
+    }
+
+    /**
      * SR8 User Account Password Change. DONE BY LOUIS
      * @param username the username, as implied by the name of the parameter
      * @param oldPasswordHash the old password hash, the current one
@@ -90,7 +117,6 @@ public class LambdaRequests {
                     "Error sending user account password change request: " + e.getMessage());
         }
     }
-
 
     /**
      * SR9 edit an account's personal characteristics DONE BY LOUIS
@@ -116,8 +142,6 @@ public class LambdaRequests {
                     "Error sending edit personal characteristics request: " + e.getMessage());
         }
     }
-
-
 
     /**
      * S23 Create a recipe DONE BY LOUIS
