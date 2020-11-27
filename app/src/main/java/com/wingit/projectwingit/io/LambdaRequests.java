@@ -69,6 +69,86 @@ public class LambdaRequests {
     }
 
     /**
+     * SR8 User Account Password Change. DONE BY LOUIS
+     * @param username the username, as implied by the name of the parameter
+     * @param oldPasswordHash the old password hash, the current one
+     * @param newPasswordHash the new password hash, the desired one
+     * @return
+     */
+    public static LambdaResponse userAccountPasswordChange(String username, String oldPasswordHash, String newPasswordHash ){
+        try{
+            String[] params = {
+                    USERNAME_STR, username,
+                    OLD_PASSWORD_HASH_STR, nutAllergy,
+                    NEW_PASSWORD_HASH_STR, glutenFree,
+                    EVENT_TYPE_STR, EVENT_USER_ACCOUNT_PASSWORD_CHANGE_STR,
+            };
+
+            return sendRequest("POST", params);
+        }catch (IOException e){
+            return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
+                    "Error sending user account password change request: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * SR9 edit an account's personal characteristics DONE BY LOUIS
+     * @param username the username, as implied by the name of the parameter
+     * @param nutAllergy can the user handle nuts or are they allergic to them
+     * @param glutenFree Is the user free of gluten
+     * @param spicinessLevel how spicy does the user want their wings to be
+     * @return
+     */
+    public static LambdaResponse editPersonalCharacteristics(String username, String nutAllergy, String glutenFree, String spicinessLevel ){
+        try{
+            String[] params = {
+                    USERNAME_STR, username,
+                    NUT_ALLERGY_STR, nutAllergy,
+                    GLUTEN_FREE_STR, glutenFree,
+                    SPICINESS_LEVEL_STR, spicinessLevel,
+                    EVENT_TYPE_STR, EVENT_EDIT_PERSONAL_CHARACTERISTICS_STR,
+            };
+
+            return sendRequest("POST", params);
+        }catch (IOException e){
+            return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
+                    "Error sending edit personal characteristics request: " + e.getMessage());
+        }
+    }
+
+
+
+    /**
+     * S23 Create a recipe DONE BY LOUIS
+     * @param recipeAuthor The author of the recipe.
+     * @param recipeTitle The title of the recipe.
+     * @param recipeIngredients The ingredients of the recipe.
+     * @param recipeDescription The description of the recipe. 
+     * @param recipeTutorial The tutorial of the recipe.
+     * @param recipePrivate The privacy of the recipe. If other people can search for it or not.
+     * @return
+     */
+    public static LambdaResponse createRecipe(String recipeAuthor, String recipeTitle, String recipeIngredients, String recipeDescription, String recipeTutorial, String recipePrivate ){
+        try{
+            String[] params = {
+                    AUTHOR_STR, recipeAuthor,
+                    TITLE_STR, recipeTitle,
+                    INGREDIENTS_STR, recipeIngredients,
+                    DESCRIPTION_STR, recipeDescription,
+                    TUTORIAL_STR, recipeTutorial,
+                    PRIVACY_STRING, recipePrivate,
+                    EVENT_TYPE_STR, EVENT_CREAT_RECIPE_STR,
+            };
+
+            return sendRequest("POST", params);
+        }catch (IOException e){
+            return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
+                    "Error sending create recipe request: " + e.getMessage());
+        }
+    }
+
+    /**
      * Send the prepared request and get back the response
      */
     private static LambdaResponse sendRequest(String httpMethod, String[] params) throws IOException{
