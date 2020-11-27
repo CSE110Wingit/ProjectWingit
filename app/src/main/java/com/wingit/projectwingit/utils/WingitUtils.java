@@ -10,7 +10,7 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 
 public class WingitUtils {
-    public static String SAVE_FILE_PATH = "./userSaveFile.txt";
+    public static final String SAVE_FILE_PATH = "./userSaveFile.txt";
 
     /**
      * Does a SHA256 hash of the given password string and returns a string in hex
@@ -67,7 +67,7 @@ public class WingitUtils {
 
     // Deletes the file with the user login information
     public void deleteLoginInfo() {
-        File file = new File("userInformation.txt");
+        File file = new File(SAVE_FILE_PATH);
         if (file.exists()) file.delete();        
     }
 }
