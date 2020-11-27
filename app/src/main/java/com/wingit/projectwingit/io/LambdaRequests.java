@@ -37,7 +37,7 @@ public class LambdaRequests {
                     "Error sending createAccount request: " + e.getMessage());
         }
     }
-
+    
     /**
      * Login to an account
      * @param userOrEmail either the username or the email
@@ -65,6 +65,27 @@ public class LambdaRequests {
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending login request: " + e.getMessage());
+        }
+    }
+
+    /**
+	* SR6 Delete User Account
+	* @param userOrEmail the username or email
+	* @param passwordHash the password hash
+	* @return
+	*/
+    public static LambdaResponse deleteAccount(String userOrEmail, String passwordHash){
+        try{
+            String[] params = {
+                    USERNAME_STR, getUserOrEmail(userOrEmail),
+                    PASSWORD_HASH_STR, passwordHash,
+                    EVENT_TYPE_STR, EVENT_USER_DELETE_ACCOUNT_STR,
+            };
+            return sendRequest("DELETE", params);
+
+        }catch (IOException e){
+            return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
+                    "Error sending delete account request: " + e.getMessage());
         }
     }
 
@@ -106,8 +127,8 @@ public class LambdaRequests {
         try{
             String[] params = {
                     USERNAME_STR, username,
-                    OLD_PASSWORD_HASH_STR, nutAllergy,
-                    NEW_PASSWORD_HASH_STR, glutenFree,
+                    OLD_PASSWORD_HASH_STR, oldPasswordHash,
+                    NEW_PASSWORD_HASH_STR, newPasswordHash,
                     EVENT_TYPE_STR, EVENT_USER_ACCOUNT_PASSWORD_CHANGE_STR,
             };
 
@@ -143,6 +164,30 @@ public class LambdaRequests {
         }
     }
 
+    /**
+	* SR11 query recipes
+	* @param recipeName the name of the recipe that is being searched for
+	* @param nutAllergy determines if the user is allergic to nuts
+	* @param glutenFree determines if the user can have recipes with gluten
+	* @param spicinessLevel determines the user's spicy preference level
+	*/
+    public static LambdaResponse queryRecipe(String query, String nutAllergy, String glutenFree, String spicinessLevel ){
+        try{
+            String[] params = {
+                    RECIPE_QUERY_STR, query,
+                    NUT_ALLERGY_STR, nutAllergy,
+                    GLUTEN_FREE_STR, glutenFree,
+                    SPICINESS_LEVEL_STR, spicinessLevel,
+                    EVENT_TYPE_STR, EVENT_QUERY_RECIPE_STR,
+            };
+
+            return sendRequest("GET", params);
+        }catch (IOException e){
+            return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
+                    "Error sending search recipe request: " + e.getMessage());
+        }
+    }
+	
     /**
      * S23 Create a recipe DONE BY LOUIS
      * @param recipeAuthor The author of the recipe.
