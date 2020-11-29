@@ -43,31 +43,4 @@ public class WingitUtils {
     public boolean checkAcceptablePassword(String password){
         return password.length() >= 8;
     }
-
-    // Saves all user login information to a file in the app
-    public void saveLoginInfo(String username, String passwordHash) {
-        try{
-            deleteLoginInfo();                      
-
-            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(SAVE_FILE_PATH)));
-
-            // Create contents of the file
-            String content = username + ',' + passwordHash;
-
-            // Writes and closes content
-            bw.write(content);
-            bw.flush();
-            bw.close();
-
-        } catch (IOException e) {
-            //IDK what to put here for an error so
-            WingitLogging.error("Exception occurred: " + e.getMessage());
-        }
-    }
-
-    // Deletes the file with the user login information
-    public void deleteLoginInfo() {
-        File file = new File(SAVE_FILE_PATH);
-        if (file.exists()) file.delete();        
-    }
 }
