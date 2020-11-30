@@ -10,6 +10,9 @@ def lambda_handler(event, context):
     :param context: the current context
         See info for context here: https://docs.aws.amazon.com/lambda/latest/dg/python-context.html
     """
+
+    # Main error thing to at least hopefully catch any error that occurs
+    #try:
     if event[HTTP_METHOD_STR] == GET_REQUEST_STR:
         return _get(event, context)
     elif event[HTTP_METHOD_STR] == POST_REQUEST_STR:
@@ -18,6 +21,8 @@ def lambda_handler(event, context):
         return _delete(event, context)
     else:
         return error(ERROR_UNIMPLEMENTED_HTTP_REQUEST, event[HTTP_METHOD_STR])
+    #except Exception as e:
+        #return error(ERROR_INTERNAL_SERVER_ERROR, repr(e))
 
 
 def _get(event, context):
@@ -45,6 +50,12 @@ def _get(event, context):
     elif event_type == EVENT_GET_PASSWORD_CHANGE_CODE_STR:
         return get_password_change_code(params)
 
+    elif event_type == EVENT_GET_RECIPE_STR:
+        return get_recipe(params)
+
+    elif event_type == EVENT_QUERY_RECIPES_STR:
+        return query_recipes(params)
+
     else:
         # If the event type is unknown, show an error
         return error(ERROR_UNKNOWN_EVENT_TYPE, GET_REQUEST_STR, event_type)
@@ -67,6 +78,21 @@ def _post(event, context):
     elif event_type == EVENT_CHANGE_PASSWORD_STR:
         return change_password(body)
 
+    elif event_type == EVENT_CREATE_RECIPE_STR:
+        return create_recipe(body)
+
+    elif event_type == EVENT_UPDATE_USER_PROFILE_STR:
+        return update_user_profile(body)
+
+    elif event_type == EVENT_UPDATE_USER_FAVORITES_STR:
+        return update_user_favorites(body)
+
+    elif event_type == EVENT_UPDATE_RECIPE_STR:
+        return update_recipe(body)
+
+    elif event_type == EVENT_RATE_RECIPE_STR:
+        return rate_recipe(body)
+
     else:
         # If the event type is unknown, show an error
         return error(ERROR_UNKNOWN_EVENT_TYPE, POST_REQUEST_STR, event_type)
@@ -84,6 +110,9 @@ def _delete(event, context):
     # Creating an account
     if event_type == EVENT_DELETE_ACCOUNT_STR:
         return delete_account(body)
+
+    elif event_type == EVENT_DELETE_RECIPE_STR:
+        return delete_recipe(body)
 
     else:
         # If the event type is unknown, show an error
@@ -126,7 +155,7 @@ def _parse_url(url_params):
     ret = {}
     for substring in url_params.split('&'):
         left, right = substring.split('=')
-        right = urllib.parse.unquote(right)
+        right = urllib.parse.unquote(right).replace("+", " ")
         if left in ret:
             ret[left] = [ret[left], right] if isinstance(ret[left], str) else ret[left] + [right]
         else:

@@ -15,6 +15,7 @@ ERROR_IMPOSSIBLE_ERROR = (-1, "It should be impossible to get this error, what o
 ERROR_MISSING_PARAMS = (1, "Missing param '%s'", True)
 ERROR_UNKNOWN_ERROR = (2, "Unknown error occurred: %s", True)
 ERROR_UNIMPLEMENTED_HTTP_REQUEST = (3, 'Unimplemented http request type: %s', True)
+ERROR_INTERNAL_SERVER_ERROR = (4, "Unknown internal server error: %s", True)
 
 # Error codes 100-199: errors involving the event_type
 ERROR_NO_EVENT_TYPE = (100, "No event type was passed", False)
@@ -37,6 +38,17 @@ ERROR_INVALID_PASSWORD_CHANGE_CODE = (211, "Invalid password change code", False
 # Error codes 300-399: errors involving s3 bucket access
 ERROR_UNKNOWN_S3_REASON = (300, "Unknown reason for accessing S3 bucket: %s", True)
 ERROR_UNKNOWN_BOTO3_ERROR = (301, "Unknown boto3 error occurred: %s", True)
+
+# Error codes 400-499: errors involving recipes
+ERROR_INVALID_NUT_ALLERGY = (400, "Invalid nut allergy value (should be boolean): %s", True)
+ERROR_INVALID_GLUTEN_FREE = (401, "Invalid gluten free value (should be boolean): %s", True)
+ERROR_INVALID_SPICINESS = (402, "Invalid spiciness value (should be integer in range [0, 5], or -1 for no preference)"
+                                ": %s", True)
+ERROR_INVALID_RECIPE_PRIVATE = (403, "Invalid recipe private value (should be boolean): %s", True)
+ERROR_UNKNOWN_RECIPE = (404, "Error 404: recipe not found (id:%s)", True)
+ERROR_INVALID_RECIPE_ID = (405, "Invalid recipe id: %s", True)
+ERROR_RECIPE_NOT_FAVORITED = (406, "Recipe (id: %s) is not favorited by user '%s', but tried to delete", True)
+ERROR_INVALID_RATING = (407, "Invalid recipe rating (should be integer in range [0, 5]): %s", True)
 
 # The error codes, and their reverse dictionaries
 # This is done in a really weird way because I'm smart (or maybe just lazy...)

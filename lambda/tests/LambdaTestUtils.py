@@ -5,6 +5,7 @@ import requests
 import random
 import string
 import json
+import os
 import urllib.parse
 from lambda_code.lambda_function import lambda_handler
 from lambda_code.constants import MAX_USERNAME_SIZE, GET_REQUEST_STR, POST_REQUEST_STR, HTTP_METHOD_STR, \
@@ -13,6 +14,7 @@ from BuildConstants import IMPLEMENTED_HTTP_METHODS
 
 _REQUEST_URL = "https://mvmb9qdwti.execute-api.us-west-1.amazonaws.com/WingitProduction/wingitresource"
 _HEX_CHARS = "0123456789abcdefABCDEF"
+_INIT_RECIPES_DIR = "./initial_recipes"
 
 REQUEST_TYPE_ONLINE = True  # Whether or not we are testing online or offline
 
@@ -94,8 +96,32 @@ def get_binary_permutations(n):
     """
     Returns a list of strings of binary representations of all integers in range [0, 2**n)
     """
-
     def pad(s):
         return ('0' * (n - len(s)) + s) if len(s) < n else s
 
     return [pad(bin(i)[2:]) for i in range(2 ** n)]
+
+
+def read_recipe_info():
+    ret = []
+    ret_pics = []
+    for i, file in enumerate(os.listdir(_INIT_RECIPES_DIR)):
+        if file.endswith(".txt"):
+            with open(os.path.join(_INIT_RECIPES_DIR, file), 'r') as f:
+                fields = _split_list(f.readlines())
+                ret.append(fields)
+            ret_pics.append(os.path.join(_INIT_RECIPES_DIR, file.replace('.txt', '.jpg')))
+
+    return ret, ret_pics
+
+
+def _split_list(lines):
+    ret = []
+    curr = ""
+    for line in lines:
+        if line == '\n':
+            ret.append(curr[:-1])
+            curr = ""
+        else:
+            curr += line
+    return ret + [curr]

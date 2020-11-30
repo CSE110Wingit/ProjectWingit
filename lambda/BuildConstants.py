@@ -1,4 +1,4 @@
-from lambda_code.constants import *
+from lambda_code.s3_utils import *
 from lambda_code.utils import gen_crypt, generate_verification_code, fix_email
 import hashlib
 
@@ -26,8 +26,12 @@ TEST_ACCOUNT_UNVERIFIED_KWARGS = {
     PASSWORD_HASH_STR: gen_crypt(TEST_ACCOUNT_PASSWORD_HASH)
 }
 
+JUST_WINGIT_USERNAME = 'JustWingit'
+JUST_WINGIT_PASSWORD_HASH = hashlib.sha256(b"wingit!1").hexdigest()
+JUST_WINGIT_EMAIL = "cse110wingit@gmail.com"
+
 # SQL info
-DELETE_USERS_TABLE_SQL = "DROP TABLE IF EXISTS %s" % USERS_TABLE_NAME
+DELETE_TABLE_SQL = "DROP TABLE IF EXISTS %s"
 
 # Data for making the sql database
 _VARCHAR_SIZE = 255
@@ -35,17 +39,45 @@ _SERVER_PASSWORD_HASH_SIZE = len(gen_crypt("dfaonefdkaj"))
 
 # Just need to input a tuple here with the string name for the column, and what datatype should be
 _CREATE_USERS_TABLE_ARGS = [
-    (USERNAME_STR, "varchar(%d) not null" % _VARCHAR_SIZE),
-    (EMAIL_STR, "varchar(%d) not null" % _VARCHAR_SIZE),
+    (USERNAME_STR, "varchar(%d) NOT NULL" % _VARCHAR_SIZE),
+    (EMAIL_STR, "varchar(%d) NOT NULL" % _VARCHAR_SIZE),
     (VERIFICATION_CODE_STR, "char(%d)" % VERIFICATION_CODE_SIZE),
     (CREATION_TIME_STR, "bigint"),
-    (PASSWORD_HASH_STR, "char(%d) not null" % _SERVER_PASSWORD_HASH_SIZE),
+    (PASSWORD_HASH_STR, "char(%d) NOT NULL" % _SERVER_PASSWORD_HASH_SIZE),
     (PASSWORD_CHANGE_CODE_STR, "char(%d)" % VERIFICATION_CODE_SIZE),
     (PASSWORD_CHANGE_CODE_CREATION_TIME_STR, "bigint"),
+    (NUT_ALLERGY_STR, "tinyint DEFAULT 0"),
+    (GLUTEN_FREE_STR, "tinyint DEFAULT 0"),
+    (SPICINESS_LEVEL_STR, "int DEFAULT -1"),
+    (FAVORITED_RECIPES_STR, "varchar(2000) DEFAULT ''"),
+    (RATED_RECIPES_STR, "varchar(2000) DEFAULT ''"),
+    (CREATED_RECIPES_STR, "varchar(2000) DEFAULT ''"),
 ]
 
 CREATE_USERS_TABLE_SQL = """CREATE TABLE %s (
 %s);""" % (USERS_TABLE_NAME, ''.join(_str + " " + _type + ",\n" for _str, _type in _CREATE_USERS_TABLE_ARGS)[:-2])
+
+_CREATE_RECIPES_TABLE_ARGS = [
+    (RECIPE_ID_STR, "int NOT NULL"),
+    (RECIPE_TITLE_STR, "varchar(%d)" % _VARCHAR_SIZE),
+    (RECIPE_TOTAL_RATING_STR, "int"),
+    (RECIPE_NUMBER_OF_RATINGS_STR, "int"),
+    (RECIPE_INGREDIENTS_STR, "TEXT"),
+    (RECIPE_DESCRIPTION_STR, "TEXT"),
+    (RECIPE_TUTORIAL_STR, "TEXT"),
+    (RECIPE_PICTURE_STR, "char(%d)" % (len(S3_BUCKET_URL) + len(RECIPE_IMAGES_DIR) + RANDOM_S3_FILENAME_SIZE + 10)),
+    (RECIPE_AUTHOR_STR, "varchar(%d) DEFAULT ''" % _VARCHAR_SIZE),
+    (RECIPE_PRIVATE_STR, "tinyint"),
+    (NUT_ALLERGY_STR, "tinyint DEFAULT 0 NOT NULL"),
+    (GLUTEN_FREE_STR, "tinyint DEFAULT 0 NOT NULL"),
+    (SPICINESS_LEVEL_STR, "int DEFAULT 0"),
+]
+
+CREATE_RECIPES_TABLE_SQL = """CREATE TABLE %s (
+%s
+)
+DEFAULT CHARSET=utf8
+""" % (RECIPES_TABLE_NAME, ''.join(_str + " " + _type + ",\n" for _str, _type in _CREATE_RECIPES_TABLE_ARGS)[:-2])
 
 
 def make_insert_sql(table_name, **kwargs):
@@ -87,7 +119,9 @@ public class %(classname)s {
 
 JAVA_CONSTANTS_FILE_DATA = _gen_java_data(["API_URL", "RETURN_INFO_STR", "RETURN_ERROR_MESSAGE_STR",
                                            "RETURN_ERROR_CODE_STR", "EVENT_TYPE_STR", "EVENT_CREATE_ACCOUNT_STR",
-                                           "EVENT_LOGIN_STR", "PASSWORD_HASH_STR", "USERNAME_STR", "EMAIL_STR"])
+                                           "EVENT_LOGIN_STR", "PASSWORD_HASH_STR", "USERNAME_STR", "EMAIL_STR",
+                                           "NUT_ALLERGY_STR", "GLUTEN_FREE_STR", "SPICINESS_LEVEL_STR",
+                                           "EVENT_CREATE_RECIPE_STR", "EVENT_GET_RECIPE_STR", "RECIPE_ID_STR"])
 
 
 ###############

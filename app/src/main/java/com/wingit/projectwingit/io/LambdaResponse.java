@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import okhttp3.Call;
 import okhttp3.Response;
 
+import static com.wingit.projectwingit.utils.WingitLambdaConstants.*;
+
 /**
  * The returned response from a LambdaRequest. It exists as a separate thread that is returned
  * from LambdaRequests and immediately executed so we get around the whole "having to execute
@@ -76,9 +78,43 @@ public class LambdaResponse extends Thread{
             this.errorState = ErrorState.SERVER_ERROR;
             this.errorMessage = "Error Code " + this.json.getString(WingitLambdaConstants.RETURN_ERROR_CODE_STR)
                 + ": " + this.json.getString(WingitLambdaConstants.RETURN_ERROR_MESSAGE_STR);
+        }
+        else if (!this.json.isNull("message")){
+            this.errorState = ErrorState.SERVER_ERROR;
+            this.errorMessage = "ERROR_UNCAUGHT_SERVER_ERROR: Error was not caught by main try/catch block:\n" + json.getString("message");
         }else{
             this.errorState = ErrorState.NO_ERROR;
             this.errorMessage = this.json.getString(WingitLambdaConstants.RETURN_INFO_STR);
+        }
+
+        fixJSONResponse();
+    }
+
+    /**
+     * Converts incomming strings to appropriate types if needed
+     */
+    private void fixJSONResponse(){
+        try {
+            if (!json.isNull(NUT_ALLERGY_STR)) {
+                String str = json.getString(NUT_ALLERGY_STR);
+                json.remove(NUT_ALLERGY_STR);
+                json.put(NUT_ALLERGY_STR, str.toLowerCase().equals("true"));
+            }
+
+            if (!json.isNull(GLUTEN_FREE_STR)) {
+                String str = json.getString(GLUTEN_FREE_STR);
+                json.remove(GLUTEN_FREE_STR);
+                json.put(GLUTEN_FREE_STR, str.toLowerCase().equals("true"));
+            }
+
+            if (!json.isNull(SPICINESS_LEVEL_STR)) {
+                String str = json.getString(SPICINESS_LEVEL_STR);
+                json.remove(SPICINESS_LEVEL_STR);
+                json.put(SPICINESS_LEVEL_STR, Integer.parseInt(str));
+            }
+        }catch (JSONException e){
+            this.errorState = ErrorState.CLIENT_ERROR;
+            this.errorMessage = "Exception fixing JSON response: " + e.getMessage();
         }
     }
 

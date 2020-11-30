@@ -22,6 +22,12 @@ def create_account(body):
         return rest
     username, email, password_hash = rest[USERNAME_STR], rest[EMAIL_STR], rest[PASSWORD_HASH_STR]
 
+    all_good, *rest = get_possible_params(body, params=[NUT_ALLERGY_STR, GLUTEN_FREE_STR, SPICINESS_LEVEL_STR],
+                                          defaults=[False, False, -1])
+    if not all_good:
+        return rest[0]
+    nut_allergy, gluten_free, spiciness = rest
+
     # All of this is dependant on the SQL database existing and the connection existing,
     #   so we will put it all in a try-catch since things can break easily
     try:
@@ -43,7 +49,8 @@ def create_account(body):
         # Everything looks good, make the account
         verification_code = generate_verification_code()
         server_password_hash = gen_crypt(password_hash)
-        account_info = (username, email, verification_code, current_time(), server_password_hash)
+        account_info = (username, email, verification_code, current_time(), server_password_hash, nut_allergy,
+                        gluten_free, spiciness)
 
         cursor.execute(CREATE_ACCOUNT_SQL, account_info)
         conn.commit()  # Commit the changes to the database
@@ -101,7 +108,8 @@ def _verify_login_credentials(params, require_verified=True):
     :return: a tuple with 1st element: False if there was an error, True if all good, 2nd element: the return
         error if there was an error, or the username of the login (irregardless of if the user gave email or username)
     """
-    all_good, ret_dict = get_cleaned_params(params, (USERNAME_STR, EMAIL_STR), (PASSWORD_HASH_STR, PASSWORD_CHANGE_CODE_STR))
+    all_good, ret_dict = get_cleaned_params(params, (USERNAME_STR, EMAIL_STR),
+                                            (PASSWORD_HASH_STR, PASSWORD_CHANGE_CODE_STR))
 
     if not all_good:
         return False, ret_dict
@@ -137,7 +145,8 @@ def _verify_login_credentials(params, require_verified=True):
             return False, error(ERROR_INCORRECT_PASSWORD)
 
         elif change_code is not None and (change_code != result[PASSWORD_CHANGE_CODE_STR] or
-                                          current_time() - result[PASSWORD_CHANGE_CODE_CREATION_TIME_STR] > CHANGE_PASSWORD_TIMEOUT):
+                                          current_time() - result[
+                                              PASSWORD_CHANGE_CODE_CREATION_TIME_STR] > CHANGE_PASSWORD_TIMEOUT):
             return False, error(ERROR_INVALID_PASSWORD_CHANGE_CODE)
 
         return True, result[USERNAME_STR]
@@ -151,10 +160,22 @@ def login_account(params):
     Returns the string "Credentials Accepted" to affirm that the username/email
     (defaults to email if both are given) match the given password_hash
     """
-    all_good, e = _verify_login_credentials(params)
+    all_good, username = _verify_login_credentials(params)
     if not all_good:
-        return e
-    return return_message(good_message='Credentials Accepted!')
+        return username
+
+    # Get all the user info
+    try:
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, username)
+        result = cursor.fetchone()
+
+        user_info = {s: result[s] for s in USER_PREFERENCES_FIELDS}
+    except Exception as e:
+        return error(ERROR_UNKNOWN_ERROR, repr(e))
+
+    return return_message(good_message='Credentials Accepted!', data=user_info)
 
 
 def delete_account(body):
@@ -182,23 +203,31 @@ def get_s3_permissions(params):
     Gets a presigned url for an s3 bucket so a user can upload a file
     """
     # Make sure we have correct params
-    all_good, rest = get_cleaned_params(params, PASSWORD_HASH_STR, S3_REASON_STR)
+    all_good, rest = get_cleaned_params(params, PASSWORD_HASH_STR, S3_REASON_STR, IMAGE_FILE_EXTENSION_STR)
     if not all_good:
         return rest
-    password_hash, reason = rest[PASSWORD_HASH_STR], rest[S3_REASON_STR]
+    password_hash, reason, file_ext = rest[PASSWORD_HASH_STR], rest[S3_REASON_STR], rest[IMAGE_FILE_EXTENSION_STR]
 
     # Attempt to login with the given credentials, and if it fails, return the login error
     all_good, username = _verify_login_credentials(params)
     if not all_good:
         return username
-    
-    # It worked, so now we need to build the extra info for the return message
-    all_good, extra_s3_info = get_extra_s3_info(username, reason)
-    if not all_good:
-        return extra_s3_info
 
     if reason == S3_REASON_UPLOAD_USER_PROFILE_IMAGE:
+        all_good, extra_s3_info = get_extra_s3_info(username, reason, file_ext)
+        if not all_good:
+            return extra_s3_info
         all_good, ret = create_presigned_post(extra_s3_info[S3_IMAGE_DEST_STR])
+
+    elif reason == S3_REASON_UPLOAD_RECIPE_IMAGE:
+        recipe_pic_id = generate_verification_code()
+
+        all_good, extra_s3_info = get_extra_s3_info(recipe_pic_id, reason, file_ext)
+        if not all_good:
+            return extra_s3_info
+        all_good, ret = create_presigned_post(extra_s3_info[S3_IMAGE_DEST_STR])
+        ret[RECIPE_PICTURE_ID_STR] = recipe_pic_id
+
     else:
         return error(ERROR_IMPOSSIBLE_ERROR, "get_s3_permissions (reason should already be good now because "
                                              "get_extra_s3_info should have checked it)")
@@ -264,5 +293,347 @@ def get_password_change_code(params):
         conn.commit()
 
         return send_password_change_code_email(username, result[EMAIL_STR], code)
+    except Exception as e:
+        return error(ERROR_UNKNOWN_ERROR, repr(e))
+
+
+def create_recipe(body):
+    """
+    Creates and adds a new recipe to the database
+    """
+    all_good, username = _verify_login_credentials(body)
+    if not all_good:
+        return username
+
+    all_good, ret_dict = get_cleaned_params(body, RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR,
+                                            RECIPE_TUTORIAL_STR, RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR,
+                                            SPICINESS_LEVEL_STR)
+    if not all_good:
+        return ret_dict
+    data = [ret_dict[s] for s in [RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR,
+                                  RECIPE_TUTORIAL_STR, RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR,
+                                  SPICINESS_LEVEL_STR]]
+
+    # Check for a possible recipe_picture id
+    recipe_pic = body[RECIPE_PICTURE_STR] if RECIPE_PICTURE_STR in body else None
+
+    # Update recipes table, then users created recipes table
+    try:
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+
+        # Get next recipe id
+        cursor.execute(GET_NEXT_RECIPE_ID_SQL)
+        recipe_id = cursor.fetchone()[NEXT_RECIPE_ID_STR]
+        rest = [recipe_id] + data + [recipe_pic, username]
+
+        # Create the recipe in the table
+        cursor.execute(CREATE_RECIPE_SQL, rest)
+
+        # Add to user's list of created recipe
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, username)
+        recipes = cursor.fetchone()[CREATED_RECIPES_STR]
+        recipes = str(recipe_id) if recipes is None or recipes == '' else recipes + "," + str(recipe_id)
+        cursor.execute(UPDATE_CREATED_RECIPES_SQL, [recipes, username])
+
+        conn.commit()
+    except Exception as e:
+        return error(ERROR_UNKNOWN_ERROR, repr(e))
+
+    return return_message(good_message="Recipe Created!")
+
+
+def get_recipe(params):
+    """
+    Gets a recipe by id
+    """
+    all_good, ret_dict = get_cleaned_params(params, RECIPE_ID_STR)
+    if not all_good:
+        return ret_dict
+    recipe_id = ret_dict[RECIPE_ID_STR]
+
+    try:
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+
+        # Get next recipe id
+        cursor.execute(GET_RECIPE_BY_ID_SQL, [recipe_id])
+        result = cursor.fetchone()
+
+        if result is None:
+            return error(ERROR_UNKNOWN_RECIPE, recipe_id)
+
+        # If it's not private, just return
+        if result[RECIPE_PRIVATE_STR] == 0:
+            return return_message(good_message="Recipe Found!", data=_make_recipe_return(result))
+
+        # Otherwise, try to login and make sure it is the right user
+        all_good, username = _verify_login_credentials(params)
+
+        if all_good and result[RECIPE_AUTHOR_STR] == username:
+            return return_message(good_message="Recipe Found!", data=_make_recipe_return(result))
+
+        return error(ERROR_UNKNOWN_RECIPE, recipe_id)
+    except Exception as e:
+        return error(ERROR_UNKNOWN_ERROR, repr(e))
+
+
+def delete_recipe(body):
+    """
+    Deletes a recipe
+    """
+    all_good, username = _verify_login_credentials(body)
+    if not all_good:
+        return username
+
+    all_good, ret_dict = get_cleaned_params(body, RECIPE_ID_STR)
+    if not all_good:
+        return ret_dict
+    recipe_id = ret_dict[RECIPE_ID_STR]
+
+    try:
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+
+        # Get next recipe id
+        cursor.execute(GET_RECIPE_BY_ID_SQL, [recipe_id])
+        result = cursor.fetchone()
+
+        if result is None or result[RECIPE_AUTHOR_STR] != username:
+            return error(ERROR_UNKNOWN_RECIPE, recipe_id)
+
+        cursor.execute(DELETE_RECIPE_SQL, [recipe_id])
+
+        # Update for the user
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, username)
+        ids = cursor.fetchone()[CREATED_RECIPES_STR].split(",")
+        ids.remove(str(recipe_id))
+
+        cursor.execute(UPDATE_CREATED_RECIPES_SQL, [','.join(ids), username])
+        conn.commit()
+
+        return return_message(good_message="Recipe Deleted!")
+    except Exception as e:
+        return error(ERROR_UNKNOWN_ERROR, repr(e))
+
+
+def _make_recipe_return(result):
+    return {
+        RECIPE_TITLE_STR: result[RECIPE_TITLE_STR],
+        RECIPE_DESCRIPTION_STR: result[RECIPE_DESCRIPTION_STR],
+        RECIPE_INGREDIENTS_STR: result[RECIPE_INGREDIENTS_STR],
+        RECIPE_TUTORIAL_STR: result[RECIPE_TUTORIAL_STR],
+        RECIPE_PICTURE_STR: result[RECIPE_PICTURE_STR],
+        RECIPE_AUTHOR_STR: result[RECIPE_AUTHOR_STR],
+        NUT_ALLERGY_STR: result[NUT_ALLERGY_STR],
+        GLUTEN_FREE_STR: result[GLUTEN_FREE_STR],
+        SPICINESS_LEVEL_STR: result[SPICINESS_LEVEL_STR],
+        RECIPE_RATING_STR: result[RECIPE_TOTAL_RATING_STR] / result[RECIPE_NUMBER_OF_RATINGS_STR] \
+            if result[RECIPE_TOTAL_RATING_STR] is not None else None,
+    }
+
+
+def update_recipe(body):
+    """
+    Updates the recipe in the db
+    """
+    all_good, username = _verify_login_credentials(body)
+    if not all_good:
+        return username
+
+    all_good, ret_dict = get_cleaned_params(body, RECIPE_ID_STR)
+    if not all_good:
+        return ret_dict
+    recipe_id = ret_dict[RECIPE_ID_STR]
+
+    recipe_params = [RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR, RECIPE_TUTORIAL_STR,
+                     RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR, SPICINESS_LEVEL_STR, RECIPE_PICTURE_STR]
+    new_recipe_params = [(body[s] if s in body else None) for s in recipe_params]
+
+    try:
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_RECIPE_BY_ID_SQL, [recipe_id])
+        result = cursor.fetchone()
+
+        # Error if there was no recipe, or if the user does not own that recipe
+        if result is None:
+            return error(ERROR_UNKNOWN_RECIPE, recipe_id)
+        if result[RECIPE_AUTHOR_STR] != username:
+            return error(ERROR_UNKNOWN_RECIPE, recipe_id)
+
+        # Update new_recipe_params with the stuff from the db for everything that was not defined
+        new_recipe_params = [(result[recipe_params[i]] if p is None else p) for i, p in enumerate(new_recipe_params)] + [recipe_id]
+
+        cursor.execute(UPDATE_RECIPE_SQL, new_recipe_params)
+        conn.commit()
+
+        return return_message(good_message="Recipe Updated!")
+    except Exception as e:
+        return error(ERROR_UNKNOWN_ERROR, repr(e))
+
+
+def update_user_profile(body):
+    """
+    Update user profile info (not rated recipes, saved recipes, or created recipes)
+    """
+    all_good, username = _verify_login_credentials(body)
+    if not all_good:
+        return username
+
+    all_good, ret_dict = get_cleaned_params(body, NEW_USERNAME_STR, NEW_EMAIL_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR,
+                                            SPICINESS_LEVEL_STR)
+    if not all_good:
+        return ret_dict
+
+    # Get the old profile info first
+    try:
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, username)
+        result = cursor.fetchone()
+
+        new_username = result[USERNAME_STR] if ret_dict[NEW_USERNAME_STR] == '' else ret_dict[NEW_USERNAME_STR]
+        new_email = result[EMAIL_STR] if ret_dict[NEW_EMAIL_STR] == '' else ret_dict[NEW_EMAIL_STR]
+        new_nut, new_glut, new_spicy = ret_dict[NUT_ALLERGY_STR], ret_dict[GLUTEN_FREE_STR], ret_dict[
+            SPICINESS_LEVEL_STR]
+
+        # Check for username/email already exists
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, new_username)
+        if cursor.fetchone() is not None:
+            return error(ERROR_USERNAME_ALREADY_EXISTS, new_username)
+        cursor.execute(GET_WHERE_EMAIL_LIKE_SQL, new_email)
+        if cursor.fetchone() is not None:
+            return error(ERROR_EMAIL_ALREADY_IN_USE, new_email)
+
+        cursor.execute(UPDATE_USER_PROFILE_SQL, [new_username, new_email, new_nut, new_glut, new_spicy, username])
+        conn.commit()
+
+        return return_message(good_message="Profile Updated!")
+    except Exception as e:
+        return error(ERROR_UNKNOWN_ERROR, repr(e))
+
+
+def update_user_favorites(body):
+    """
+    Updates user favorites (either adds or removes)
+    """
+    all_good, username = _verify_login_credentials(body)
+    if not all_good:
+        return username
+
+    all_good, ret_dict = get_cleaned_params(body, RECIPE_ID_STR)
+    if not all_good:
+        return ret_dict
+    recipe_id = ret_dict[RECIPE_ID_STR]
+
+    try:
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_RECIPE_BY_ID_SQL, abs(recipe_id))
+        if cursor.fetchone() is None:
+            return error(ERROR_UNKNOWN_RECIPE, abs(recipe_id))
+
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, [username])
+        result = cursor.fetchone()[FAVORITED_RECIPES_STR]
+        ids = [] if result == '' else result.split(",")
+
+        if recipe_id < 0:
+            recipe_id = -recipe_id
+            if str(recipe_id) not in ids:
+                return error(ERROR_RECIPE_NOT_FAVORITED, username, recipe_id)
+            ids.remove(str(recipe_id))
+        else:
+            ids.append(str(recipe_id))
+
+        cursor.execute(UPDATE_FAVORITED_RECIEPS_SQL, [','.join(ids), username])
+        conn.commit()
+        return return_message(good_message="User Favorites Update!")
+
+    except Exception as e:
+        return error(ERROR_UNKNOWN_ERROR, repr(e))
+
+
+def rate_recipe(body):
+    """
+    Either adds a new rating to the recipe and user, or updates a previous rating
+    """
+    all_good, username = _verify_login_credentials(body)
+    if not all_good:
+        return username
+
+    all_good, ret_dict = get_cleaned_params(body, RECIPE_ID_STR, RECIPE_RATING_STR)
+    if not all_good:
+        return ret_dict
+    recipe_id, rating = ret_dict[RECIPE_ID_STR], ret_dict[RECIPE_RATING_STR]
+
+    try:
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, [username])
+        result = cursor.fetchone()
+
+        # Check if the user has rated this recipe before
+        ids = [] if result[RATED_RECIPES_STR] == '' else result[RATED_RECIPES_STR].split(',')
+        ids, ratings = ([], []) if len(ids) == 0 else ([i.split(':')[0] for i in ids], [i.split(':')[1] for i in ids])
+
+        if str(recipe_id) in ids:
+            recipe_rating_inc = rating - int(ratings[ids.index(recipe_id)])
+            recipe_rating_count = 0
+            ratings[ids.index(recipe_id)] = rating
+        else:
+            recipe_rating_inc = rating
+            recipe_rating_count = 1
+            ids.append(str(recipe_id))
+            ratings.append(str(rating))
+
+        # Make sure this recipe is not private
+        cursor.execute(GET_RECIPE_BY_ID_SQL, [recipe_id])
+        result = cursor.fetchone()
+        if result is None or result[RECIPE_PRIVATE_STR] == 1:
+            return error(ERROR_UNKNOWN_RECIPE, [recipe_id])
+
+        # Update the recipe ratings
+        cursor.execute(UPDATE_RECIPE_RATING_SQL, [recipe_rating_inc, recipe_rating_count, recipe_id])
+        conn.commit()
+
+        # Update the user info
+        rated_recipes = ",".join([ids[i] + ':' + ratings[i] for i in range(len(ids))])
+        cursor.execute(UPDATE_RATED_RECIPES_SQL, [rated_recipes, username])
+        conn.commit()
+
+        return return_message(good_message="Recipe Ratings Updated!")
+    except Exception as e:
+        return error(ERROR_UNKNOWN_ERROR, repr(e))
+
+
+def query_recipes(params):
+    """
+    Queries the database for recipes based on input
+    """
+    all_good, username = _verify_login_credentials(params)
+    if not all_good:
+        return username
+
+    all_good, ret_dict = get_cleaned_params(params, QUERY_STR)
+    if not all_good:
+        return ret_dict
+    query = ret_dict[QUERY_STR]
+    nut_allergy = params[NUT_ALLERGY_STR] if NUT_ALLERGY_STR in params else None
+    gluten_free = params[GLUTEN_FREE_STR] if GLUTEN_FREE_STR in params else None
+    spiciness = params[SPICINESS_LEVEL_STR] if SPICINESS_LEVEL_STR in params else None
+
+    if query == '':
+        return return_message(good_message="Empty Query!", data={QUERY_RESULTS_STR: ""})
+
+    try:
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_ALL_PUBLIC_RECIPES_SQL)
+        public_results = cursor.fetchall()
+        cursor.execute(GET_ALL_PRIVATE_RECIPES_SQL, [username])
+        private_results = cursor.fetchall()
+
+        return do_query(query, nut_allergy, gluten_free, spiciness, public_results, private_results)
     except Exception as e:
         return error(ERROR_UNKNOWN_ERROR, repr(e))

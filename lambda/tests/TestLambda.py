@@ -47,6 +47,7 @@ class TestLambda:
         response = request(**params)
         self.assert_true(RETURN_ERROR_CODE_STR not in response, "Error from server with params %s:\n%s" %
                          (params, response))
+        return response
 
     def assert_server_error(self, error_tup=None, **params):
         """
@@ -57,10 +58,10 @@ class TestLambda:
                          "No error from params: %s, \nFull message: %s" % (params, response))
 
         if error_tup is not None:
-            err_str = "Error codes not equal for expected code '%s', instead got '%s'\nFull Error: %s"
+            err_str = "Error codes not equal for expected code '%s', instead got '%s'\nFull Error: %s\nParams: %s"
             self.assert_equal(response[RETURN_ERROR_CODE_STR], error_tup[0],
                               err_str % (ALL_ERROR_NAMES_BY_CODE[error_tup[0]],
-                                         ALL_ERROR_NAMES_BY_CODE[response[RETURN_ERROR_CODE_STR]], response))
+                                         ALL_ERROR_NAMES_BY_CODE[response[RETURN_ERROR_CODE_STR]], response, params))
 
     def assert_server_handles_bad_username(self, **params):
         """
@@ -232,6 +233,34 @@ class TestLambda:
         params[EMAIL_STR] = TEST_ACCOUNT_VERIFIED_EMAIL[:4] + "......" + TEST_ACCOUNT_VERIFIED_EMAIL[4:]
         self.assert_server_error(**params)
 
+        # Bad user preferences
+        params = {
+            EMAIL_STR: random_valid_email(),
+            USERNAME_STR: random_valid_username(),
+            PASSWORD_HASH_STR: random_valid_password_hash(),
+            NUT_ALLERGY_STR: True,
+            GLUTEN_FREE_STR: True,
+            SPICINESS_LEVEL_STR: "sdsda",
+            HTTP_METHOD_STR: POST_REQUEST_STR,
+            EVENT_TYPE_STR: EVENT_CREATE_ACCOUNT_STR
+        }
+
+        self.assert_server_error(ERROR_INVALID_SPICINESS, **params)
+        params[SPICINESS_LEVEL_STR] = -2
+        self.assert_server_error(ERROR_INVALID_SPICINESS, **params)
+        params[SPICINESS_LEVEL_STR] = 6
+        self.assert_server_error(ERROR_INVALID_SPICINESS, **params)
+        params[SPICINESS_LEVEL_STR] = True
+        self.assert_server_error(ERROR_INVALID_SPICINESS, **params)
+
+        params[SPICINESS_LEVEL_STR] = 5
+        params[NUT_ALLERGY_STR] = 0
+        self.assert_server_error(ERROR_INVALID_NUT_ALLERGY, **params)
+
+        params[NUT_ALLERGY_STR] = True
+        params[GLUTEN_FREE_STR] = 0
+        self.assert_server_error(ERROR_INVALID_GLUTEN_FREE, **params)
+
     def test_account_login(self):
         """
         Testing login to an existing user account
@@ -339,6 +368,9 @@ class TestLambda:
             EMAIL_STR: email,
             PASSWORD_HASH_STR: password_hash,
             HTTP_METHOD_STR: POST_REQUEST_STR,
+            SPICINESS_LEVEL_STR: 3,
+            NUT_ALLERGY_STR: False,
+            GLUTEN_FREE_STR: True
         }
 
         # Create the account
@@ -496,6 +528,483 @@ class TestLambda:
         }
         self.assert_no_server_error(**params)
 
+    def test_create_recipe_fails(self):
+        params = {
+            EVENT_TYPE_STR: EVENT_CREATE_RECIPE_STR,
+            HTTP_METHOD_STR: POST_REQUEST_STR,
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
+            RECIPE_TITLE_STR: "Fake title",
+            RECIPE_INGREDIENTS_STR: "Lots of\n ingredients\n in this",
+            RECIPE_DESCRIPTION_STR: "Descibr",
+            RECIPE_TUTORIAL_STR: "THIS IS A TUTORIAL",
+            RECIPE_PRIVATE_STR: False,
+            NUT_ALLERGY_STR: False,
+            GLUTEN_FREE_STR: False,
+            SPICINESS_LEVEL_STR: 0,
+        }
+
+        self.assert_server_handles_invalid_inputs(**params)
+
+        # Check if an unverified account does it
+        params[USERNAME_STR] = TEST_ACCOUNT_UNVERIFIED_USERNAME
+        self.assert_server_error(ERROR_ACCOUNT_UNVERIFIED, **params)
+
+        # Check if password is wrong
+        params[USERNAME_STR] = TEST_ACCOUNT_VERIFIED_USERNAME
+        params[PASSWORD_HASH_STR] = random_valid_password_hash()
+        self.assert_server_error(ERROR_INCORRECT_PASSWORD, **params)
+
+    def test_get_recipe_fails(self):
+        params = {
+            EVENT_TYPE_STR: EVENT_GET_RECIPE_STR,
+            HTTP_METHOD_STR: GET_REQUEST_STR,
+            RECIPE_ID_STR: -2,
+        }
+
+        self.assert_server_handles_invalid_inputs(**params)
+
+        # Getting recipe that is private without info
+        self.assert_server_error(ERROR_UNKNOWN_RECIPE, **params)
+
+        # Getting recipe that is private and not in user's created recipes
+        params.update({
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH
+        })
+        self.assert_server_error(ERROR_UNKNOWN_RECIPE, **params)
+
+    def test_delete_recipe_fails(self):
+        params = {
+            EVENT_TYPE_STR: EVENT_DELETE_RECIPE_STR,
+            HTTP_METHOD_STR: DELETE_REQUEST_STR,
+            RECIPE_ID_STR: -2,
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH
+        }
+        self.assert_server_handles_invalid_inputs(**params)
+
+        # Check if an unverified account does it
+        params[USERNAME_STR] = TEST_ACCOUNT_UNVERIFIED_USERNAME
+        self.assert_server_error(ERROR_ACCOUNT_UNVERIFIED, **params)
+
+        # Check if password is wrong
+        params[USERNAME_STR] = TEST_ACCOUNT_VERIFIED_USERNAME
+        params[PASSWORD_HASH_STR] = random_valid_password_hash()
+        self.assert_server_error(ERROR_INCORRECT_PASSWORD, **params)
+
+        # Check if bad recipe_id
+        params[RECIPE_ID_STR] = "aaa"
+        params[PASSWORD_HASH_STR] = TEST_ACCOUNT_PASSWORD_HASH
+        self.assert_server_error(ERROR_INVALID_RECIPE_ID, **params)
+
+        # Check if the user does not own that thingy
+        params[RECIPE_ID_STR] = -2
+        self.assert_server_error(ERROR_UNKNOWN_RECIPE, **params)
+
+    def testlast_create_get_delete_recipe(self):
+        # Create two private recipes
+        params = {
+            EVENT_TYPE_STR: EVENT_CREATE_RECIPE_STR,
+            HTTP_METHOD_STR: POST_REQUEST_STR,
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
+            RECIPE_TITLE_STR: "Fake title",
+            RECIPE_INGREDIENTS_STR: "Lots of\n ingredients\n in this",
+            RECIPE_DESCRIPTION_STR: "Descibr",
+            RECIPE_TUTORIAL_STR: "THIS IS A TUTORIAL",
+            RECIPE_PRIVATE_STR: True,
+            NUT_ALLERGY_STR: False,
+            GLUTEN_FREE_STR: False,
+            SPICINESS_LEVEL_STR: 0,
+        }
+        self.assert_no_server_error(**params)
+        params[RECIPE_TITLE_STR] = "FAKE TITLE 2"
+        self.assert_no_server_error(**params)
+
+        # Get the most recent recipe
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_NEXT_RECIPE_ID_SQL)
+        recipe_id = cursor.fetchone()[NEXT_RECIPE_ID_STR] - 2
+
+        # Make sure it is updated correctly on the user profile
+        created_recipes_str = str(recipe_id - 2) + "," + str(recipe_id)
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, [TEST_ACCOUNT_VERIFIED_USERNAME])
+        self.assert_true(cursor.fetchone()[CREATED_RECIPES_STR] == created_recipes_str)
+
+        # Get public recipe
+        params = {
+            EVENT_TYPE_STR: EVENT_GET_RECIPE_STR,
+            HTTP_METHOD_STR: GET_REQUEST_STR,
+            RECIPE_ID_STR: -1,
+        }
+        self.assert_no_server_error(**params)
+
+        # Get personal private recipe
+        params.update({
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
+        })
+        self.assert_no_server_error(**params)
+
+        # Check recipe string is correct
+        created_recipes_str = str(recipe_id - 2) + "," + str(recipe_id)
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, [TEST_ACCOUNT_VERIFIED_USERNAME])
+        self.assert_true(cursor.fetchone()[CREATED_RECIPES_STR] == created_recipes_str)
+
+        # Delete recipe1
+        params = {
+            EVENT_TYPE_STR: EVENT_DELETE_RECIPE_STR,
+            HTTP_METHOD_STR: DELETE_REQUEST_STR,
+            RECIPE_ID_STR: recipe_id,
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH
+        }
+        self.assert_no_server_error(**params)
+
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        created_recipes_str = str(recipe_id - 2)
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, [TEST_ACCOUNT_VERIFIED_USERNAME])
+        self.assert_true(cursor.fetchone()[CREATED_RECIPES_STR] == created_recipes_str)
+
+        # Delete recipe2
+        params[RECIPE_ID_STR] = recipe_id - 2
+        self.assert_no_server_error(**params)
+
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, [TEST_ACCOUNT_VERIFIED_USERNAME])
+        self.assert_true(cursor.fetchone()[CREATED_RECIPES_STR] == '')
+
+    def testlast_update_user_profile(self):
+        params = {
+            EVENT_TYPE_STR: EVENT_UPDATE_USER_PROFILE_STR,
+            HTTP_METHOD_STR: POST_REQUEST_STR,
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
+            NEW_USERNAME_STR: '',
+            NEW_EMAIL_STR: '',
+            NUT_ALLERGY_STR: False,
+            GLUTEN_FREE_STR: False,
+            SPICINESS_LEVEL_STR: -1,
+        }
+        self.assert_server_handles_invalid_inputs(**params)
+
+        # Test cant change username/email to ones that already exist
+        params[NEW_USERNAME_STR] = TEST_ACCOUNT_UNVERIFIED_USERNAME
+        self.assert_server_error(ERROR_USERNAME_ALREADY_EXISTS, **params)
+        params[NEW_USERNAME_STR] = TEST_ACCOUNT_VERIFIED_USERNAME
+        params[NEW_EMAIL_STR] = TEST_ACCOUNT_UNVERIFIED_EMAIL
+        self.assert_server_error(ERROR_USERNAME_ALREADY_EXISTS, **params)
+
+        # Test things actually change
+        email, username = random_valid_email(), random_valid_username()
+        params[NEW_USERNAME_STR] = username
+        params[NEW_EMAIL_STR] = email
+        params[NUT_ALLERGY_STR] = True
+        params[GLUTEN_FREE_STR] = True
+        params[SPICINESS_LEVEL_STR] = 3
+        self.assert_no_server_error(**params)
+
+        # Get from the database to check it is all correct
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, [username])
+        result = cursor.fetchone()
+        self.assert_true(result[EMAIL_STR] == email)
+        self.assert_true(result[NUT_ALLERGY_STR] == 1)
+        self.assert_true(result[GLUTEN_FREE_STR] == 1)
+        self.assert_true(result[SPICINESS_LEVEL_STR] == 3)
+
+        # Update it all back to what it should be
+        params.update({
+            USERNAME_STR: username,
+            EMAIL_STR: email,
+            NEW_USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            NEW_EMAIL_STR: TEST_ACCOUNT_VERIFIED_EMAIL.lower().replace('.', '').replace('gmailcom', 'gmail.com'),
+            NUT_ALLERGY_STR: False,
+            GLUTEN_FREE_STR: False,
+            SPICINESS_LEVEL_STR: -1
+        })
+        self.assert_no_server_error(**params)
+
+    def test_update_get_user_favorites(self):
+        params = {
+            EVENT_TYPE_STR: EVENT_UPDATE_USER_FAVORITES_STR,
+            HTTP_METHOD_STR: POST_REQUEST_STR,
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
+            RECIPE_ID_STR: -1
+        }
+        self.assert_server_handles_invalid_inputs(**params)
+
+        # Add in some temporary recipes
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO {0} ({1}) VALUES (%s)".format(RECIPES_TABLE_NAME, RECIPE_ID_STR), 2)
+        cursor.execute("INSERT INTO {0} ({1}) VALUES (%s)".format(RECIPES_TABLE_NAME, RECIPE_ID_STR), 3)
+        cursor.execute("INSERT INTO {0} ({1}) VALUES (%s)".format(RECIPES_TABLE_NAME, RECIPE_ID_STR), 4)
+        conn.commit()
+
+        # UPDATE
+        # check for recipes that do not exist
+        params[RECIPE_ID_STR] = 999999999
+        self.assert_server_error(ERROR_UNKNOWN_RECIPE, **params)
+
+        # Recipes that are not yet favorited
+        params[RECIPE_ID_STR] = -2
+        self.assert_server_error(ERROR_RECIPE_NOT_FAVORITED, **params)
+
+        # Add in some favorited recipes
+        params[RECIPE_ID_STR] = 2
+        self.assert_no_server_error(**params)
+        params[RECIPE_ID_STR] = 3
+        self.assert_no_server_error(**params)
+        params[RECIPE_ID_STR] = 4
+        self.assert_no_server_error(**params)
+
+        # Make sure it is as it should be
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, TEST_ACCOUNT_VERIFIED_USERNAME)
+        self.assert_true(cursor.fetchone()[FAVORITED_RECIPES_STR] == ','.join(['2', '3', '4']))
+
+        # Delete all of the added ones
+        params[EVENT_TYPE_STR] = EVENT_UPDATE_USER_FAVORITES_STR
+        params[HTTP_METHOD_STR] = POST_REQUEST_STR
+        params[RECIPE_ID_STR] = -2
+        self.assert_no_server_error(**params)
+        params[RECIPE_ID_STR] = -3
+        self.assert_no_server_error(**params)
+        params[RECIPE_ID_STR] = -4
+        self.assert_no_server_error(**params)
+
+        # Make sure its good now
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, TEST_ACCOUNT_VERIFIED_USERNAME)
+        self.assert_true(cursor.fetchone()[FAVORITED_RECIPES_STR] == '')
+
+        # Delete temp recipes
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM {0} WHERE {1}=%s".format(RECIPES_TABLE_NAME, RECIPE_ID_STR), 2)
+        cursor.execute("DELETE FROM {0} WHERE {1}=%s".format(RECIPES_TABLE_NAME, RECIPE_ID_STR), 3)
+        cursor.execute("DELETE FROM {0} WHERE {1}=%s".format(RECIPES_TABLE_NAME, RECIPE_ID_STR), 4)
+        conn.commit()
+
+    def test_update_recipe(self):
+        params = {
+            EVENT_TYPE_STR: EVENT_UPDATE_RECIPE_STR,
+            HTTP_METHOD_STR: POST_REQUEST_STR,
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
+            RECIPE_ID_STR: -1
+        }
+        self.assert_server_handles_invalid_inputs(**params)
+
+        # Can't update a recipe that one does not own
+        self.assert_server_error(ERROR_UNKNOWN_RECIPE, **params)
+
+        # Can't update a recipe that does not exist
+        params[RECIPE_ID_STR] = -3566
+        self.assert_server_error(ERROR_UNKNOWN_RECIPE, **params)
+
+        # Make a recipe owned by TEST_ACCOUNT_VERIFIED
+        recipe_id = -123412
+        create_args = [recipe_id, "A", "B", "", "JFDANSIJPNFIUANSFUINJAS", False, False, False, -1,
+                       "RECIPE_PICTURE_STR", TEST_ACCOUNT_VERIFIED_USERNAME]
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(CREATE_RECIPE_SQL, create_args)
+        conn.commit()
+
+        # Make sure we can edit that one
+        new_recipe_args = {
+            RECIPE_ID_STR: recipe_id,
+            RECIPE_TITLE_STR: "AAAAA",
+            RECIPE_DESCRIPTION_STR: "BBBB",
+            RECIPE_INGREDIENTS_STR: "CCCCC",
+            RECIPE_TUTORIAL_STR: "NEW TUTORIAL",
+            RECIPE_PRIVATE_STR: 1,
+            NUT_ALLERGY_STR: 1,
+            GLUTEN_FREE_STR: 1,
+            SPICINESS_LEVEL_STR: 5,
+            RECIPE_PICTURE_STR: ""
+        }
+        params.update(new_recipe_args)
+
+        self.assert_no_server_error(**params)
+
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_RECIPE_BY_ID_SQL, [new_recipe_args[RECIPE_ID_STR]])
+        result = cursor.fetchone()
+
+        for k, v in new_recipe_args.items():
+            self.assert_true(result[k] == v, "Updating, %s != %s" % (result[k], v))
+
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM {0} WHERE {1}=%s".format(RECIPES_TABLE_NAME, RECIPE_ID_STR),
+                       [new_recipe_args[RECIPE_ID_STR]])
+        conn.commit()
+
+    def test_rate_recipe(self):
+        params = {
+            EVENT_TYPE_STR: EVENT_RATE_RECIPE_STR,
+            HTTP_METHOD_STR: POST_REQUEST_STR,
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
+            RECIPE_ID_STR: -1,
+            RECIPE_RATING_STR: 4,
+        }
+
+        self.assert_server_handles_invalid_inputs(**params)
+
+        # Check rating is bad
+        params[RECIPE_RATING_STR] = -1
+        self.assert_server_error(ERROR_INVALID_RATING, **params)
+        params[RECIPE_RATING_STR] = 6
+        self.assert_server_error(ERROR_INVALID_RATING, **params)
+
+        # Check if the recipe doesn't exist
+        params[RECIPE_RATING_STR] = 5
+        params[RECIPE_ID_STR] = -1824781
+        self.assert_server_error(ERROR_UNKNOWN_RECIPE, **params)
+
+        # Check if recipe exists, but is private and shouldn't be rated
+        params[RECIPE_ID_STR] = -2
+        self.assert_server_error(ERROR_UNKNOWN_RECIPE, **params)
+
+        # Add in a few recipes that are able to rate
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        recipe1 = [-142, "title1", "", "", "", False, False, False, -1, "", "sda"]
+        recipe2 = [-143, "title2", "", "", "", False, False, False, -1, "", "sda2"]
+        recipe3 = [-144, "title3", "", "", "", False, False, False, -1, "", "sda3"]
+        cursor.execute(CREATE_RECIPE_SQL, recipe1)
+        cursor.execute(CREATE_RECIPE_SQL, recipe2)
+        cursor.execute(CREATE_RECIPE_SQL, recipe3)
+        conn.commit()
+
+        # Rate the recipes
+        ratings = [5, 3, 0]
+        params[RECIPE_ID_STR] = recipe1[0]
+        params[RECIPE_RATING_STR] = ratings[0]
+        self.assert_no_server_error(**params)
+        params[RECIPE_ID_STR] = recipe2[0]
+        params[RECIPE_RATING_STR] = ratings[1]
+        self.assert_no_server_error(**params)
+        params[RECIPE_ID_STR] = recipe3[0]
+        params[RECIPE_RATING_STR] = ratings[2]
+        self.assert_no_server_error(**params)
+
+        # Check the thingy is correct
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, [TEST_ACCOUNT_VERIFIED_USERNAME])
+        self.assert_equal(cursor.fetchone()[RATED_RECIPES_STR],
+                          ','.join([str(recipe1[0]) + ':' + str(ratings[0]),
+                                    str(recipe2[0]) + ':' + str(ratings[1]),
+                                    str(recipe3[0]) + ':' + str(ratings[2]), ]))
+
+        # Delete the created recipes and reset the rated recipes in username
+        cursor.execute("DELETE FROM {0} WHERE {1}=%s".format(RECIPES_TABLE_NAME, RECIPE_ID_STR), [recipe1[0]])
+        cursor.execute("DELETE FROM {0} WHERE {1}=%s".format(RECIPES_TABLE_NAME, RECIPE_ID_STR), [recipe2[0]])
+        cursor.execute("DELETE FROM {0} WHERE {1}=%s".format(RECIPES_TABLE_NAME, RECIPE_ID_STR), [recipe3[0]])
+        cursor.execute("UPDATE {0} SET {1}='' WHERE {2} LIKE %s".format(USERS_TABLE_NAME, RATED_RECIPES_STR, USERNAME_STR),
+                       [TEST_ACCOUNT_VERIFIED_USERNAME])
+        conn.commit()
+
+    def testverylast_search_engine(self):
+        params = {
+            EVENT_TYPE_STR: EVENT_QUERY_RECIPES_STR,
+            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
+            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
+            HTTP_METHOD_STR: GET_REQUEST_STR,
+            QUERY_STR: "",
+        }
+        self.assert_server_handles_invalid_inputs(**params)
+
+        # Sent empty query should return empty string
+        self.assert_equal(self.assert_no_server_error(**params)[QUERY_RESULTS_STR], "")
+        params[QUERY_STR] = "  \n\n\t  "
+        self.assert_equal(self.assert_no_server_error(**params)[QUERY_RESULTS_STR], "")
+
+        # Do all of the creating of the recipes if we are offline only so it doesn't happen twice
+        conn = get_new_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM {0}".format(RECIPES_TABLE_NAME))
+        results = cursor.fetchall()
+
+        if len(results) < 5:
+            print("AA")
+
+            # Create the new recipes if they do not already exist
+            recipe_info, pics = read_recipe_info()
+
+            # Make a new user
+            params = {
+                EVENT_TYPE_STR: EVENT_CREATE_ACCOUNT_STR,
+                USERNAME_STR: JUST_WINGIT_USERNAME,
+                EMAIL_STR: JUST_WINGIT_EMAIL,
+                PASSWORD_HASH_STR: JUST_WINGIT_PASSWORD_HASH,
+                HTTP_METHOD_STR: POST_REQUEST_STR,
+            }
+            request(**params)
+
+            # Verify the user
+            conn = get_new_db_conn()
+            cursor = conn.cursor()
+            cursor.execute(UPDATE_VERIFICATION_CODE_SQL, JUST_WINGIT_USERNAME)
+            conn.commit()
+
+            # Create each new recipe for the database
+            for recipe, pic in zip(recipe_info, pics):
+                file_ext = pic.split('.')[-1]
+                # Get a link to the s3 upload and upload it
+                params = {
+                    EVENT_TYPE_STR: EVENT_GET_S3_URL_STR,
+                    USERNAME_STR: JUST_WINGIT_USERNAME,
+                    PASSWORD_HASH_STR: JUST_WINGIT_PASSWORD_HASH,
+                    HTTP_METHOD_STR: GET_REQUEST_STR,
+                    S3_REASON_STR: S3_REASON_UPLOAD_RECIPE_IMAGE,
+                    IMAGE_FILE_EXTENSION_STR: file_ext,
+                }
+                response = request(**params)
+                requests.post(response['url'], data=response['fields'], files={'file': (response[RECIPE_PICTURE_ID_STR], open(pic, 'rb'))})
+
+                params = {
+                    EVENT_TYPE_STR: EVENT_CREATE_RECIPE_STR,
+                    USERNAME_STR: JUST_WINGIT_USERNAME,
+                    PASSWORD_HASH_STR: JUST_WINGIT_PASSWORD_HASH,
+                    HTTP_METHOD_STR: POST_REQUEST_STR,
+                    RECIPE_PICTURE_STR: S3_BUCKET_URL + RECIPE_IMAGES_DIR + "/" + response[RECIPE_PICTURE_ID_STR] + "." + file_ext,
+                    RECIPE_TITLE_STR: recipe[0],
+                    RECIPE_INGREDIENTS_STR: recipe[1],
+                    RECIPE_DESCRIPTION_STR: recipe[2],
+                    RECIPE_TUTORIAL_STR: recipe[3],
+                    NUT_ALLERGY_STR: recipe[4] == '1',
+                    GLUTEN_FREE_STR: recipe[5] == '1',
+                    SPICINESS_LEVEL_STR: int(recipe[6]),
+                    RECIPE_PRIVATE_STR: False,
+                }
+                self.assert_no_server_error(**params)
+
+        # Actual testing of search engine
+        params = {
+            EVENT_TYPE_STR: EVENT_QUERY_RECIPES_STR,
+            HTTP_METHOD_STR: GET_REQUEST_STR,
+            USERNAME_STR: JUST_WINGIT_USERNAME,
+            PASSWORD_HASH_STR: JUST_WINGIT_PASSWORD_HASH,
+            QUERY_STR: "Crispy Chicken Wings"
+        }
+
+        print(request(**params))
+
     def test_s3_presigned_url(self):
         """
         Test get_s3_presigned_url for various reasons
@@ -506,8 +1015,13 @@ class TestLambda:
             PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
             HTTP_METHOD_STR: GET_REQUEST_STR,
             S3_REASON_STR: S3_REASON_UPLOAD_USER_PROFILE_IMAGE,
+            IMAGE_FILE_EXTENSION_STR: 'png',
         }
+        self.assert_server_handles_invalid_inputs(**params)
 
+        params.update({
+            S3_REASON_STR: S3_REASON_UPLOAD_RECIPE_IMAGE,
+        })
         self.assert_server_handles_invalid_inputs(**params)
 
     def test_misc(self):
@@ -559,4 +1073,15 @@ class TestLambda:
             self.__getattribute__(s)()
             tests_run += 1
             print("Test Passed!")
+
+        for s in [s for s in dir(self) if s.startswith('testverylast_')]:
+            print("Testing: %s()..." % s)
+            self.__getattribute__(s)()
+            tests_run += 1
+            print("Test Passed!")
         print("\nPassed all %d tests!\n" % tests_run)
+
+    def single_test(self, method_name):
+        print("Testing: %s()..." % method_name)
+        self.__getattribute__(method_name)()
+        print("Test Passed!")

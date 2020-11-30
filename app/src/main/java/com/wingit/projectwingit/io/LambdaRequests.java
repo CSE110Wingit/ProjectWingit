@@ -20,15 +20,26 @@ public class LambdaRequests {
      * @param username the username
      * @param email the email
      * @param passwordHash the password needs to be hashed first before giving to this method
+     * @param nutAllergy whether or not the user has a nut allergy (should default to False from
+     *                   the frontend if user does not specify)
+     * @param glutenFree whether or not the user prefers gluten free food (again, should default
+     *                   to false in frontend)
+     * @param preferredSpiciness preferred spiciness level as integer in range [0, 5] (inclusive).
+     *                           If the user does not specify, then set to -1
      * @return A LambdaResponse of the response
      */
-    public static LambdaResponse createAccount(String username, String email, String passwordHash){
+    public static LambdaResponse createAccount(String username, String email, String passwordHash,
+                                               Boolean nutAllergy, Boolean glutenFree,
+                                               int preferredSpiciness){
         try{
             String[] params = {
                     USERNAME_STR, username,
                     EMAIL_STR, email,
                     PASSWORD_HASH_STR, passwordHash,
                     EVENT_TYPE_STR, EVENT_CREATE_ACCOUNT_STR,
+                    NUT_ALLERGY_STR, nutAllergy.toString(),
+                    GLUTEN_FREE_STR, glutenFree.toString(),
+                    SPICINESS_LEVEL_STR, preferredSpiciness == -1 ? "None" : "" + preferredSpiciness
             };
 
             return sendRequest("POST", params);
@@ -42,29 +53,37 @@ public class LambdaRequests {
      * Login to an account
      * @param userOrEmail either the username or the email
      * @param passwordHash the hash of the password
-     * @return
      */
     public static LambdaResponse login(String userOrEmail, String passwordHash){
         try{
-            if (userOrEmail.contains("@")){
-                String[] params = {
-                        EMAIL_STR, userOrEmail,
-                        PASSWORD_HASH_STR, passwordHash,
-                        EVENT_TYPE_STR, EVENT_LOGIN_STR,
-                };
-                return sendRequest("GET", params);
-            }
-
             String[] params = {
-                    USERNAME_STR, userOrEmail,
+                    getUserOrEmail(userOrEmail), userOrEmail,
                     PASSWORD_HASH_STR, passwordHash,
                     EVENT_TYPE_STR, EVENT_LOGIN_STR,
             };
             return sendRequest("GET", params);
-
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending login request: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Gets a recipe in the database with the given id
+     * @param recipeId the recipe id
+     */
+    public static LambdaResponse getRecipe(int recipeId, String userOrEmail, String passwordHash){
+        try{
+            String[] params = {
+                    EVENT_TYPE_STR, EVENT_GET_RECIPE_STR,
+                    RECIPE_ID_STR, ""+recipeId,
+                    getUserOrEmail(userOrEmail), userOrEmail,
+                    PASSWORD_HASH_STR, passwordHash
+            };
+            return sendRequest("GET", params);
+        }catch (IOException e){
+            return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
+                    "Error sending createAccount request: " + e.getMessage());
         }
     }
 
@@ -97,7 +116,7 @@ public class LambdaRequests {
      * Gets the url encoded args string as a byte[]
      */
     private static String buildGetUrl(String[] params) throws UnsupportedEncodingException {
-        StringBuilder ret = new StringBuilder();
+        StringBuilder ret = new StringBuilder(API_URL + "?");
         for(int i = 0; i < params.length; i+=2)
             ret.append(URLEncoder.encode(params[i], "UTF-8")).append("=").append(URLEncoder.encode(params[i+1], "UTF-8")).append("&");
         return ret.toString();
@@ -112,5 +131,12 @@ public class LambdaRequests {
             requestBody = requestBody.addFormDataPart(params[i], params[i+1]);
         }
         return requestBody.build();
+    }
+
+    /**
+     * Returns either USERNAME_STR or EMAIL_STR depending on if userOrEmail.contains("@");
+     */
+    private static String getUserOrEmail(String userOrEmail){
+        return userOrEmail.contains("@") ? EMAIL_STR : USERNAME_STR;
     }
 }

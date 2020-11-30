@@ -20,11 +20,13 @@ from tests.LambdaTestUtils import random_str
 import argparse
 import os, shutil
 import sys
+import pickle
 
 _LAMBDA_CODE_DIR = 'lambda_code'
 _LAMBDA_IGNORE = [r'.*dist-info.*']
 
 _REBUILD_DB = True  # So I don't have to keep changing build args
+_single_test = None
 
 
 def build_prechecks():
@@ -42,21 +44,30 @@ def rebuild_database(conn):
     """
     # Delete the table
     cursor = conn.cursor()
-    cursor.execute(DELETE_USERS_TABLE_SQL)
-    conn.commit()
+    for table in [USERS_TABLE_NAME, RECIPES_TABLE_NAME, "INGREDIENTS", "USER_PREFERENCES"]:
+        cursor.execute(DELETE_TABLE_SQL % table)
 
-    # Recreate the table
+    # Recreate the tables
     cursor.execute(CREATE_USERS_TABLE_SQL)
-    conn.commit()
+    cursor.execute(CREATE_RECIPES_TABLE_SQL)
 
-    # Insert two elements into the table
+    # Insert two elements into the users table
     cursor.execute(*make_insert_sql(USERS_TABLE_NAME, **TEST_ACCOUNT_VERIFIED_KWARGS))
-    conn.commit()
-
     cursor.execute(*make_insert_sql(USERS_TABLE_NAME, **TEST_ACCOUNT_UNVERIFIED_KWARGS))
-    conn.commit()
 
+    # Insert into the recipes table
+    recipe1 = [-1, "recipe1", "", "", "", False, "", "dhfashfujhdasjfnajksd", False, False, 0]
+    recipe2 = [-2, "recipe2", "", "", "", True, "", "dhfashfujhdasjfnajksd", False, False, 0]
+    cursor.execute(CREATE_RECIPE_SQL, recipe1)
+    cursor.execute(CREATE_RECIPE_SQL, recipe2)
+
+    conn.commit()
     conn.close()
+
+    # Delete the s3 bucket recipe info
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(S3_BUCKET_NAME)
+    bucket.objects.filter(Prefix=RECIPE_IMAGES_DIR + "/").delete()
 
 
 def build_zip_file():
@@ -71,12 +82,6 @@ def build_zip_file():
     """
     # Make a temporary directory to work in
     temp_dir = random_str(30, all_ascii=True)
-
-    # Strings for replacing
-    _start_repl_str_1 = 'from %s.' % _LAMBDA_CODE_DIR
-    _new_repl_str_1 = 'from '
-    _start_repl_str_2 = 'import %s.' % _LAMBDA_CODE_DIR
-    _new_repl_str_2 = 'import '
 
     # Surround in a try-catch so if something goes wrong, we can at least try to delete the temp_dir
     try:
@@ -105,6 +110,7 @@ def build_zip_file():
                             for line in infile.readlines():
                                 line = line.replace('from %s.' % _LAMBDA_CODE_DIR, 'from ')
                                 line = line.replace('import %s.' % _LAMBDA_CODE_DIR, 'import ')
+                                line = line.replace('./lambda_code/stop_words.pkl', './stop_words.pkl')
                                 outfile.write(line)
 
                 # Otherwise copy it over directly
@@ -141,6 +147,41 @@ def make_java_constants():
         f.write(JAVA_CONSTANTS_FILE_DATA)
 
 
+def count_python_lines():
+    files = ['./lambda_code/%s.py' % s for s in ['actions', 'constants', 'errors', 'lambda_function', 's3_utils', 'utils']]
+    files += ['./tests/%s.py' % s for s in ['LambdaTestUtils', 'TestLambda']]
+    files += ['./%s.py' % s for s in ['BuildConstants', 'buildlambda']]
+
+    total_count = 0
+    for f in files:
+        with open(f, 'r') as infile:
+            for line in infile.readlines():
+                line = line.replace("\n", "").replace("\t", "").replace(" ", "")
+                total_count += 0 if line == '' else 1
+    return total_count
+
+
+def build_stop_words_pickle():
+    words = []
+    with open('./stop_words.txt', 'r') as f:
+        for line in f.readlines():
+            line = line.replace(" ", "").replace("\n", "").replace("\t", "")
+            if line != "":
+                words.append(line)
+
+    with open("./lambda_code/stop_words.pkl", 'wb') as f:
+        pickle.dump(set(words), f)
+
+
+def delete_testing_accounts():
+    conn = get_new_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM {0} WHERE {1} LIKE %s OR {1} LIKE %s".format(USERS_TABLE_NAME, USERNAME_STR),
+                   [TEST_ACCOUNT_VERIFIED_USERNAME, TEST_ACCOUNT_UNVERIFIED_USERNAME])
+    cursor.execute("DELETE FROM {0} WHERE {1} < 0".format(RECIPES_TABLE_NAME, RECIPE_ID_STR))
+    conn.commit()
+
+
 # Main call
 if __name__ == "__main__":
     # Do the build prechecks first
@@ -163,10 +204,22 @@ if __name__ == "__main__":
         rebuild_database(get_new_db_conn())
         print("Database rebuilt!")
 
+    # Build the stop words pickle
+    print("Building stop words...")
+    build_stop_words_pickle()
+    print("Stop words built!")
+
     # Now, do the unit tests offline to make sure everything works
     from tests.LambdaTestUtils import set_request_type_online
 
     set_request_type_online(False)
+
+    # Check and do only the one test if we need
+    if _single_test is not None and _single_test != '':
+        print("Running single test...")
+        from tests.TestLambda import TestLambda
+        TestLambda().single_test(_single_test)
+        exit(0)
 
     print("\nTesting lambda code offline...")
     from tests.TestLambda import TestLambda
@@ -181,7 +234,10 @@ if __name__ == "__main__":
     # Make the file of constants for java app
     print('Writing java constants file...')
     make_java_constants()
-    print('Constants written!\n\n')
+    print('Constants written!')
+
+    # Count the total number of lines of python written
+    print("\nTotal number of non-whitespace python lines: %d\n\n" % count_python_lines())
 
     # Wait for input to test online stuff...
     print("Would you like to test online? (y/n)")
@@ -191,3 +247,5 @@ if __name__ == "__main__":
         TestLambda().test_all()
     else:
         print("Not testing online")
+
+    delete_testing_accounts()

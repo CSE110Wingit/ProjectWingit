@@ -7,6 +7,12 @@ import smtplib
 import hashlib
 import lambda_code.pymysql as pymysql
 import string
+import pickle
+import re
+
+
+_PARAMS_BOOLEAN_NAMES = [NUT_ALLERGY_STR, GLUTEN_FREE_STR, RECIPE_PRIVATE_STR]
+_PARAMS_BOOLEAN_ERRORS = [ERROR_INVALID_NUT_ALLERGY, ERROR_INVALID_GLUTEN_FREE, ERROR_INVALID_RECIPE_PRIVATE]
 
 
 def username_valid(username):
@@ -183,7 +189,63 @@ def _check_good_param(val, val_str_name):
         if len(val) != PASSWORD_HASH_SIZE or not all(c in HASH_CHARS for c in val):
             return False, error(ERROR_INVALID_PASSWORD_HASH)
 
+    elif val_str_name in _PARAMS_BOOLEAN_NAMES:
+        val = val.lower()
+        if val not in ['true', 'false']:
+            error_name = list(zip(_PARAMS_BOOLEAN_ERRORS, _PARAMS_BOOLEAN_NAMES))[_PARAMS_BOOLEAN_NAMES.index(val_str_name)][0]
+            return False, error(error_name, val)
+        val = val == 'true'
+
+    elif val_str_name == SPICINESS_LEVEL_STR:
+        try:
+            val = int(val)
+            if not -1 <= val <= 5:
+                raise ValueError()
+        except:
+            return False, error(ERROR_INVALID_SPICINESS, val)
+
+    elif val_str_name == RECIPE_RATING_STR:
+        try:
+            val = int(val)
+            if not 0 <= val <= 5:
+                raise ValueError()
+        except:
+            return False, error(ERROR_INVALID_RATING, val)
+
+    elif val_str_name == RECIPE_ID_STR:
+        try:
+            val = int(val)
+        except:
+            return False, error(ERROR_INVALID_RECIPE_ID, val)
+
+    elif val_str_name == QUERY_STR:
+        val = val.replace("\t", " ").replace("\n", " ")
+        while "  " in val:
+            val = val.replace("  ", " ")
+        if val.startswith(" "):
+            val = val[1:]
+        if val.endswith(" "):
+            val = val[:-1]
+
     return True, val
+
+
+def get_possible_params(info, params=(), defaults=()):
+    """
+    Returns params if they exist in info, otherwise fill with defaults (or None if no defaults)
+    """
+    ret = [True]
+    for i, s in enumerate(params):
+        if s in info:
+            all_good, val = _check_good_param(info[s], s)
+            if not all_good:
+                return False, val
+            ret.append(val)
+        elif i < len(defaults):
+            ret.append(defaults[i])
+        else:
+            ret.append(None)
+    return ret
 
 
 def gen_crypt(password_hash):
@@ -216,3 +278,108 @@ def random_password_change_code():
     Returns a random code for the user to change their password
     """
     return ''.join([random.choice("0123456789") for i in range(PASSWORD_CHANGE_CODE_SIZE)])
+
+
+##################
+# Query Thingies #
+##################
+
+
+def _get_stop_words():
+    with open("./lambda_code/stop_words.pkl", 'rb') as f:
+        return pickle.load(f)
+
+
+QUERY_MIN_RETURN_VALUE = 10
+QUERY_PRIVATE_START_VAL = 3
+QUERY_SAME_NUT_ALLERGY = 8
+QUERY_SAME_GLUTEN_FREE = 4
+QUERY_SPICINESS_MULT = 1
+QUERY_START_OF_TEXT_MULT = 2
+QUERY_END_OF_TEXT_MULT = 0.5
+QUERY_TITLE_STR_MULT = 8
+QUERY_OTHER_STR_MULT = 1
+QUERY_AUTHOR_STR_VAL = 5
+
+
+def do_query(query, nut_allergy, gluten_free, spiciness, public_results, private_results, top_n=10):
+    """
+    The actual search engine bit
+    """
+    stop_words = _get_stop_words()
+
+    def _get_indices_in_str(q, _str):
+        _str = _str.lower()
+        return [m.start() for m in re.finditer(q, _str)], len(_str)
+
+    def _lerp(_idx, _size):
+        return QUERY_END_OF_TEXT_MULT + (1 - (_idx / _size)) * (QUERY_START_OF_TEXT_MULT - QUERY_END_OF_TEXT_MULT)
+
+    def _get_recipe_query_value(r, public=True):
+        val = QUERY_PRIVATE_START_VAL if not public else 0
+
+        # Nut allergy
+        if nut_allergy is not None and r[NUT_ALLERGY_STR] == (1 if nut_allergy else 0):
+            val += QUERY_SAME_NUT_ALLERGY
+
+        # Gluten free
+        if gluten_free is not None and r[GLUTEN_FREE_STR] == (1 if gluten_free else 0):
+            val += QUERY_SAME_GLUTEN_FREE
+
+        # Spiciness
+        if spiciness is not None and spiciness != -1:
+            val += (5 - abs(spiciness - r[SPICINESS_LEVEL_STR])) * QUERY_SPICINESS_MULT
+
+        # Go through each word in query
+        for word in [w for w in query.lower().split(" ") if w not in stop_words]:
+
+            # Check if the author matches the word
+            if r[RECIPE_AUTHOR_STR].lower() == word:
+                val += QUERY_AUTHOR_STR_VAL
+
+            def _check_start_and_end(_word, _str, m):
+                v = 0
+                if _str.lower().startswith(word):
+                    v += QUERY_START_OF_TEXT_MULT * m
+                if _str.lower().endswith(word):
+                    v += QUERY_END_OF_TEXT_MULT * m
+                return v
+
+            # Check the starts and ends of words
+            val += _check_start_and_end(word, r[RECIPE_TITLE_STR], QUERY_TITLE_STR_MULT)
+            for r_str in [r[RECIPE_INGREDIENTS_STR], r[RECIPE_DESCRIPTION_STR], r[RECIPE_TUTORIAL_STR]]:
+                val += _check_start_and_end(word, r_str, QUERY_OTHER_STR_MULT)
+
+            # Convert word to have spaces as delimiter for future thingies
+            word = " %s " % word
+
+            def _add_to_val(indices, _size, m=QUERY_OTHER_STR_MULT):
+                v = 0
+                for idx in indices:
+                    v += _lerp(idx, _size) * m
+                return v
+
+            # Check the title, ingredients, description, tutorial
+            val += _add_to_val(*_get_indices_in_str(word, r[RECIPE_TITLE_STR]), m=QUERY_TITLE_STR_MULT)
+            val += _add_to_val(*_get_indices_in_str(word, r[RECIPE_INGREDIENTS_STR]))
+            val += _add_to_val(*_get_indices_in_str(word, r[RECIPE_DESCRIPTION_STR]))
+            val += _add_to_val(*_get_indices_in_str(word, r[RECIPE_TUTORIAL_STR]))
+
+        return val
+
+    # Perform search value for each result
+    recipes = []
+    for result in public_results:
+        recipes.append((result[RECIPE_ID_STR], _get_recipe_query_value(result, public=True)))
+    for result in private_results:
+        recipes.append((result[RECIPE_ID_STR], _get_recipe_query_value(result, public=False)))
+
+    # Sort the recipe tuples by their value
+    recipes = list(sorted(recipes, key=lambda x: x[1], reverse=True))
+    recipes = [r for r in recipes if r[1] > QUERY_MIN_RETURN_VALUE]
+
+    # Return the top_n result ids
+    ret_recipes = recipes[:min(top_n, len(recipes))]
+    return return_message(good_message="Queried Recipes!", data={
+        QUERY_RESULTS_STR: ','.join([str(r[0]) for r in ret_recipes])
+    })
