@@ -941,8 +941,6 @@ class TestLambda:
         results = cursor.fetchall()
 
         if len(results) < 5:
-            print("AA")
-
             # Create the new recipes if they do not already exist
             recipe_info, pics = read_recipe_info()
 

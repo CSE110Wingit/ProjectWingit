@@ -5,8 +5,12 @@ import com.wingit.projectwingit.debug.WingitErrors;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.io.File; // File class to make new files
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 public class WingitUtils {
+    public static final String SAVE_FILE_PATH = "./userSaveFile.txt";
 
     /**
      * Does a SHA256 hash of the given password string and returns a string in hex

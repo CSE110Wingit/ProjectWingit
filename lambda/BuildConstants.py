@@ -111,17 +111,27 @@ def _gen_java_data(java_vars):
 public class %(classname)s {
 """ % {'package': JAVA_PACKAGE_PATH, 'classname': JAVA_CONSTANTS_CLASS_NAME}
 
-    for v in java_vars:
-        ret += "    public static final String %s = \"%s\";\n" % (v, globals()[v])
+    for s in java_vars:
+        val = globals()[s]
+        if isinstance(val, str):
+            ret += "    public static final String %s = \"%s\";\n" % (s, val)
+        elif isinstance(val, int):
+            ret += "    public static final int %s = %d;\n" % (s, val)
 
     return ret + "}"
 
 
-JAVA_CONSTANTS_FILE_DATA = _gen_java_data(["API_URL", "RETURN_INFO_STR", "RETURN_ERROR_MESSAGE_STR",
-                                           "RETURN_ERROR_CODE_STR", "EVENT_TYPE_STR", "EVENT_CREATE_ACCOUNT_STR",
-                                           "EVENT_LOGIN_STR", "PASSWORD_HASH_STR", "USERNAME_STR", "EMAIL_STR",
-                                           "NUT_ALLERGY_STR", "GLUTEN_FREE_STR", "SPICINESS_LEVEL_STR",
-                                           "EVENT_CREATE_RECIPE_STR", "EVENT_GET_RECIPE_STR", "RECIPE_ID_STR"])
+JAVA_CONSTANTS_FILE_DATA = \
+    _gen_java_data(["API_URL", "RETURN_INFO_STR", "RETURN_ERROR_MESSAGE_STR", "RETURN_ERROR_CODE_STR", "EVENT_TYPE_STR",
+                    "EVENT_CREATE_ACCOUNT_STR", "EVENT_LOGIN_STR", "PASSWORD_HASH_STR", "USERNAME_STR", "EMAIL_STR",
+                    "NUT_ALLERGY_STR", "GLUTEN_FREE_STR", "SPICINESS_LEVEL_STR", "EVENT_CREATE_RECIPE_STR",
+                    "EVENT_GET_RECIPE_STR", "RECIPE_ID_STR", "EVENT_DELETE_ACCOUNT_STR",
+                    "EVENT_GET_PASSWORD_CHANGE_CODE_STR", "NEW_PASSWORD_HASH_STR", "PASSWORD_CHANGE_CODE_SIZE",
+                    "EVENT_CHANGE_PASSWORD_STR", "PASSWORD_CHANGE_CODE_STR", "EVENT_UPDATE_USER_PROFILE_STR",
+                    "QUERY_STR", "EVENT_QUERY_RECIPES_STR", "RECIPE_TITLE_STR", "RECIPE_INGREDIENTS_STR",
+                    "RECIPE_DESCRIPTION_STR", "RECIPE_TUTORIAL_STR", "RECIPE_PRIVATE_STR",
+                    ])
+
 
 
 ###############
