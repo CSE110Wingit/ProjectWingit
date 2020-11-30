@@ -133,7 +133,6 @@ JAVA_CONSTANTS_FILE_DATA = \
                     ])
 
 
-
 ###############
 # MISC THINGS #
 ###############

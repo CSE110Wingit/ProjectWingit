@@ -97,6 +97,14 @@ public class LambdaRequests {
     }
 
     /**
+     * Logout, and delete user save file
+     */
+    public static LambdaResponse logout(){
+        LoginInfo.deleteLoginInfo();
+        return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, "");
+    }
+
+    /**
      * SR6 Delete User Account
      * @param passwordHash the password hash
      * @return
@@ -120,7 +128,7 @@ public class LambdaRequests {
      * SR7 Request a change password code to be sent to the currently active user's email.
      * @return
      */
-    public static LambdaResponse requestChangePasswordCode(){
+    public static LambdaResponse requestPasswordChangeCode(){
         try{
             String[] params = {
                     USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
@@ -129,7 +137,7 @@ public class LambdaRequests {
             return sendRequest("GET", params);
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
-                    "Error sending change password code request: " + e.getMessage());
+                    "Error sending password change code request: " + e.getMessage());
         }
     }
 
