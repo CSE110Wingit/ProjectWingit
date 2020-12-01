@@ -95,9 +95,9 @@ def make_insert_sql(table_name, **kwargs):
 ##################
 
 
-JAVA_CONSTANTS_FILE_DIR = "../app/src/main/java/com/wingit/projectwingit/utils"
+JAVA_CONSTANTS_FILE_DIR = "../app/src/main/java/com/example/projectwingit/utils"
 JAVA_CONSTANTS_CLASS_NAME = "WingitLambdaConstants"
-JAVA_CONSTANTS_FILE_PATH = "../app/src/main/java/com/wingit/projectwingit/utils/%s.java" % JAVA_CONSTANTS_CLASS_NAME
+JAVA_CONSTANTS_FILE_PATH = "../app/src/main/java/com/example/projectwingit/utils/%s.java" % JAVA_CONSTANTS_CLASS_NAME
 JAVA_PACKAGE_PATH = JAVA_CONSTANTS_FILE_DIR.replace('../app/src/main/java/', '').replace('/', '.')
 
 
