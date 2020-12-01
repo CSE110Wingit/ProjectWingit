@@ -75,7 +75,7 @@ def send_activation_email(username, email, verification_code):
         return return_message(good_message='Account Created!')
 
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "16", repr(e))
 
 
 def send_password_change_code_email(username, email, code):
@@ -98,7 +98,7 @@ def send_password_change_code_email(username, email, code):
         return return_message(good_message='Password Change Email Sent!')
 
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "17", repr(e))
 
 
 def fix_email(email):
@@ -110,6 +110,23 @@ def fix_email(email):
     # Only remove before '@', or everywhere if there is no '@'
     idx = email.index('@') if '@' in email else len(email)
     return email[:idx].replace('.', '') + email[idx:]
+
+
+def get_params_if_exist(params, *str_list):
+    """
+    Gets all of the cleaned params if they exist in params, otherwise None
+    """
+    ret = {}
+    for s in str_list:
+        if s not in params:
+            ret[s] = None
+            continue
+
+        all_good, ret_dict = get_cleaned_params(params, s)
+        if not all_good:
+            return False, ret_dict
+        ret[s] = ret_dict[s]
+    return True, ret
 
 
 def get_cleaned_params(params, *str_list):
@@ -190,11 +207,16 @@ def _check_good_param(val, val_str_name):
             return False, error(ERROR_INVALID_PASSWORD_HASH)
 
     elif val_str_name in _PARAMS_BOOLEAN_NAMES:
-        val = val.lower()
-        if val not in ['true', 'false']:
-            error_name = list(zip(_PARAMS_BOOLEAN_ERRORS, _PARAMS_BOOLEAN_NAMES))[_PARAMS_BOOLEAN_NAMES.index(val_str_name)][0]
-            return False, error(error_name, val)
-        val = val == 'true'
+        error_name = list(zip(_PARAMS_BOOLEAN_ERRORS, _PARAMS_BOOLEAN_NAMES))[_PARAMS_BOOLEAN_NAMES.index(val_str_name)][0]
+        if isinstance(val, int):
+            if val != 0 and val != 1:
+                return False, error(error_name, val)
+            val = val == 1
+        elif not isinstance(val, bool):
+            val = val.lower()
+            if val not in ['true', 'false', '1', '0']:
+                return False, error(error_name, val)
+            val = val == 'true' or val == '1'
 
     elif val_str_name == SPICINESS_LEVEL_STR:
         try:
@@ -290,11 +312,11 @@ def _get_stop_words():
         return pickle.load(f)
 
 
-QUERY_MIN_RETURN_VALUE = 10
+QUERY_MIN_RETURN_VALUE = 7
 QUERY_PRIVATE_START_VAL = 3
-QUERY_SAME_NUT_ALLERGY = 8
-QUERY_SAME_GLUTEN_FREE = 4
-QUERY_SPICINESS_MULT = 1
+QUERY_SAME_NUT_ALLERGY = 9
+QUERY_SAME_GLUTEN_FREE = 7
+QUERY_SPICINESS_MULT = 2
 QUERY_START_OF_TEXT_MULT = 2
 QUERY_END_OF_TEXT_MULT = 0.5
 QUERY_TITLE_STR_MULT = 8
@@ -332,6 +354,8 @@ def do_query(query, nut_allergy, gluten_free, spiciness, public_results, private
 
         # Go through each word in query
         for word in [w for w in query.lower().split(" ") if w not in stop_words]:
+            if len(word) == 0:
+                continue
 
             # Check if the author matches the word
             if r[RECIPE_AUTHOR_STR].lower() == word:

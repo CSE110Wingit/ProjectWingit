@@ -56,7 +56,7 @@ def create_account(body):
         conn.commit()  # Commit the changes to the database
 
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "1", repr(e))
 
     # Send the email to the user telling them to activate their account
     return send_activation_email(username, email, verification_code)
@@ -97,7 +97,7 @@ def verify_account(params):
         return return_message(good_message='Account Verified!')
 
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "2", repr(e))
 
 
 def _verify_login_credentials(params, require_verified=True):
@@ -152,7 +152,7 @@ def _verify_login_credentials(params, require_verified=True):
         return True, result[USERNAME_STR]
 
     except Exception as e:
-        return False, error(ERROR_UNKNOWN_ERROR, repr(e))
+        return False, error(ERROR_UNKNOWN_ERROR, "3", repr(e))
 
 
 def login_account(params):
@@ -173,7 +173,7 @@ def login_account(params):
 
         user_info = {s: result[s] for s in USER_PREFERENCES_FIELDS}
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "4", repr(e))
 
     return return_message(good_message='Credentials Accepted!', data=user_info)
 
@@ -195,7 +195,7 @@ def delete_account(body):
 
         return return_message(good_message="Account Deleted!")
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "5", repr(e))
 
 
 def get_s3_permissions(params):
@@ -259,7 +259,7 @@ def change_password(body):
 
         return return_message(good_message="Password changed!")
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "6", repr(e))
 
 
 def get_password_change_code(params):
@@ -269,6 +269,7 @@ def get_password_change_code(params):
     all_good, ret_dict = get_cleaned_params(params, (USERNAME_STR, EMAIL_STR))
     if not all_good:
         return ret_dict
+
     username = ret_dict[USERNAME_STR] if USERNAME_STR in ret_dict else None
     email = ret_dict[EMAIL_STR] if EMAIL_STR in ret_dict else None
 
@@ -294,7 +295,7 @@ def get_password_change_code(params):
 
         return send_password_change_code_email(username, result[EMAIL_STR], code)
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "7", repr(e))
 
 
 def create_recipe(body):
@@ -338,7 +339,7 @@ def create_recipe(body):
 
         conn.commit()
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "8", repr(e))
 
     return return_message(good_message="Recipe Created!")
 
@@ -375,7 +376,7 @@ def get_recipe(params):
 
         return error(ERROR_UNKNOWN_RECIPE, recipe_id)
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "9", repr(e))
 
 
 def delete_recipe(body):
@@ -414,7 +415,7 @@ def delete_recipe(body):
 
         return return_message(good_message="Recipe Deleted!")
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "10", repr(e))
 
 
 def _make_recipe_return(result):
@@ -448,7 +449,10 @@ def update_recipe(body):
 
     recipe_params = [RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR, RECIPE_TUTORIAL_STR,
                      RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR, SPICINESS_LEVEL_STR, RECIPE_PICTURE_STR]
-    new_recipe_params = [(body[s] if s in body else None) for s in recipe_params]
+    all_good, ret_dict = get_params_if_exist(body, *recipe_params)
+    if not all_good:
+        return ret_dict
+    new_recipe_params = [ret_dict[s] for s in recipe_params]
 
     try:
         conn = get_new_db_conn()
@@ -470,7 +474,7 @@ def update_recipe(body):
 
         return return_message(good_message="Recipe Updated!")
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "11", repr(e))
 
 
 def update_user_profile(body):
@@ -511,7 +515,7 @@ def update_user_profile(body):
 
         return return_message(good_message="Profile Updated!")
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "12", repr(e))
 
 
 def update_user_favorites(body):
@@ -548,10 +552,10 @@ def update_user_favorites(body):
 
         cursor.execute(UPDATE_FAVORITED_RECIEPS_SQL, [','.join(ids), username])
         conn.commit()
-        return return_message(good_message="User Favorites Update!")
+        return return_message(good_message="User Favorites Updated!")
 
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "13", repr(e))
 
 
 def rate_recipe(body):
@@ -604,36 +608,36 @@ def rate_recipe(body):
 
         return return_message(good_message="Recipe Ratings Updated!")
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "14", repr(e))
 
 
 def query_recipes(params):
     """
     Queries the database for recipes based on input
     """
-    all_good, username = _verify_login_credentials(params)
-    if not all_good:
-        return username
+    all_good_login, username = _verify_login_credentials(params)
 
     all_good, ret_dict = get_cleaned_params(params, QUERY_STR)
     if not all_good:
         return ret_dict
     query = ret_dict[QUERY_STR]
-    nut_allergy = params[NUT_ALLERGY_STR] if NUT_ALLERGY_STR in params else None
-    gluten_free = params[GLUTEN_FREE_STR] if GLUTEN_FREE_STR in params else None
-    spiciness = params[SPICINESS_LEVEL_STR] if SPICINESS_LEVEL_STR in params else None
 
-    if query == '':
-        return return_message(good_message="Empty Query!", data={QUERY_RESULTS_STR: ""})
+    all_good, ret_dict = get_params_if_exist(params, NUT_ALLERGY_STR, GLUTEN_FREE_STR, SPICINESS_LEVEL_STR)
+    if not all_good:
+        return ret_dict
+    nut_allergy, gluten_free, spiciness = ret_dict[NUT_ALLERGY_STR], ret_dict[GLUTEN_FREE_STR], ret_dict[SPICINESS_LEVEL_STR]
 
     try:
         conn = get_new_db_conn()
         cursor = conn.cursor()
         cursor.execute(GET_ALL_PUBLIC_RECIPES_SQL)
         public_results = cursor.fetchall()
-        cursor.execute(GET_ALL_PRIVATE_RECIPES_SQL, [username])
-        private_results = cursor.fetchall()
+        if all_good_login:
+            cursor.execute(GET_ALL_PRIVATE_RECIPES_SQL, [username])
+            private_results = cursor.fetchall()
+        else:
+            private_results = []
 
         return do_query(query, nut_allergy, gluten_free, spiciness, public_results, private_results)
     except Exception as e:
-        return error(ERROR_UNKNOWN_ERROR, repr(e))
+        return error(ERROR_UNKNOWN_ERROR, "15", repr(e))

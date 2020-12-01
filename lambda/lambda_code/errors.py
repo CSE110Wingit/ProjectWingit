@@ -13,7 +13,7 @@ ERROR_IMPOSSIBLE_ERROR = (-1, "It should be impossible to get this error, what o
 
 # Error codes 1-99: errors that can happen anywhere
 ERROR_MISSING_PARAMS = (1, "Missing param '%s'", True)
-ERROR_UNKNOWN_ERROR = (2, "Unknown error occurred: %s", True)
+ERROR_UNKNOWN_ERROR = (2, "Unknown error occurred at position %s: %s", True)
 ERROR_UNIMPLEMENTED_HTTP_REQUEST = (3, 'Unimplemented http request type: %s', True)
 ERROR_INTERNAL_SERVER_ERROR = (4, "Unknown internal server error: %s", True)
 

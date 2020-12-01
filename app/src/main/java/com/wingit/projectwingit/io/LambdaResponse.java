@@ -3,6 +3,7 @@ package com.wingit.projectwingit.io;
 import com.wingit.projectwingit.debug.WingitLogging;
 import com.wingit.projectwingit.utils.WingitLambdaConstants;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
@@ -23,6 +24,8 @@ import static com.wingit.projectwingit.utils.WingitLambdaConstants.*;
 public class LambdaResponse extends Thread{
     private static final long SLEEP_MILLIS = 10;
     private static final long TIMEOUT_MILLIS = 30 * 1000;  // Timeout after 30 seconds of nothing
+
+    private static final String[] _LIST_NAMES = {QUERY_RESULTS_STR, CREATED_RECIPES_STR, RATED_RECIPES_STR, FAVORITED_RECIPES_STR};
 
     public enum ErrorState{
         NO_ERROR, SERVER_ERROR, CLIENT_ERROR, AWAITING_RESPONSE
@@ -111,6 +114,18 @@ public class LambdaResponse extends Thread{
                 String str = json.getString(SPICINESS_LEVEL_STR);
                 json.remove(SPICINESS_LEVEL_STR);
                 json.put(SPICINESS_LEVEL_STR, Integer.parseInt(str));
+            }
+
+            for (String s : _LIST_NAMES) {
+                if (!json.isNull(s)) {
+                    String str = json.getString(s);
+                    json.remove(SPICINESS_LEVEL_STR);
+                    if (str.isEmpty()){
+                        json.put(s, new JSONArray());
+                    }else{
+                        json.put(s, new JSONArray(str.split(",")));
+                    }
+                }
             }
         }catch (JSONException e){
             this.errorState = ErrorState.CLIENT_ERROR;

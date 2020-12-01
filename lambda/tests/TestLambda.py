@@ -254,11 +254,11 @@ class TestLambda:
         self.assert_server_error(ERROR_INVALID_SPICINESS, **params)
 
         params[SPICINESS_LEVEL_STR] = 5
-        params[NUT_ALLERGY_STR] = 0
+        params[NUT_ALLERGY_STR] = -1
         self.assert_server_error(ERROR_INVALID_NUT_ALLERGY, **params)
 
         params[NUT_ALLERGY_STR] = True
-        params[GLUTEN_FREE_STR] = 0
+        params[GLUTEN_FREE_STR] = -1
         self.assert_server_error(ERROR_INVALID_GLUTEN_FREE, **params)
 
     def test_account_login(self):
@@ -922,17 +922,10 @@ class TestLambda:
     def testverylast_search_engine(self):
         params = {
             EVENT_TYPE_STR: EVENT_QUERY_RECIPES_STR,
-            USERNAME_STR: TEST_ACCOUNT_VERIFIED_USERNAME,
-            PASSWORD_HASH_STR: TEST_ACCOUNT_PASSWORD_HASH,
             HTTP_METHOD_STR: GET_REQUEST_STR,
             QUERY_STR: "",
         }
         self.assert_server_handles_invalid_inputs(**params)
-
-        # Sent empty query should return empty string
-        self.assert_equal(self.assert_no_server_error(**params)[QUERY_RESULTS_STR], "")
-        params[QUERY_STR] = "  \n\n\t  "
-        self.assert_equal(self.assert_no_server_error(**params)[QUERY_RESULTS_STR], "")
 
         # Do all of the creating of the recipes if we are offline only so it doesn't happen twice
         conn = get_new_db_conn()
@@ -996,12 +989,26 @@ class TestLambda:
         params = {
             EVENT_TYPE_STR: EVENT_QUERY_RECIPES_STR,
             HTTP_METHOD_STR: GET_REQUEST_STR,
-            USERNAME_STR: JUST_WINGIT_USERNAME,
-            PASSWORD_HASH_STR: JUST_WINGIT_PASSWORD_HASH,
-            QUERY_STR: "Crispy Chicken Wings"
+            QUERY_STR: ""
         }
 
-        print(request(**params))
+        # Sent empty query should return empty string
+        self.assert_equal(self.assert_no_server_error(**params)[QUERY_RESULTS_STR], "")
+        params[QUERY_STR] = "  \n\n\t  "
+        self.assert_equal(self.assert_no_server_error(**params)[QUERY_RESULTS_STR], "")
+
+        params[NUT_ALLERGY_STR] = True
+        self.assert_true(len(self.assert_no_server_error(**params)[QUERY_RESULTS_STR]) > 0)
+        print("Only nut:", request(**params))
+
+        del params[NUT_ALLERGY_STR]
+        params[SPICINESS_LEVEL_STR] = 3
+        self.assert_true(len(self.assert_no_server_error(**params)[QUERY_RESULTS_STR]) > 0)
+        print("Only spic, val (%d):" % params[SPICINESS_LEVEL_STR], request(**params))
+
+        del params[SPICINESS_LEVEL_STR]
+        params[QUERY_STR] = "Crispy Chicken Wings"
+        print("Full:", request(**params))
 
     def test_s3_presigned_url(self):
         """
