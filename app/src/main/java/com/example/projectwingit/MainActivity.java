@@ -124,8 +124,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 toolbar.setTitle(R.string.create_recipe_title_toolbar);
                 break;
             case R.id.hamburger_local_venues:
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, new LocalVenues()).commit();
-                toolbar.setTitle(R.string.local_venues_title_toolbar);
+			    String url = "https://www.google.com/maps/search/?api=1&query=wings";
+                Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(webIntent);
                 break;
             case R.id.hamburger_account_options:
                 Intent intent = new Intent(this, UserAccount.class);
