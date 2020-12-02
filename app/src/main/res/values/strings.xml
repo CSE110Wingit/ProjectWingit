@@ -13,7 +13,10 @@
 
 
     <!--Strings for the card on home page -->
-    <string name="first_card_title">Recipe name</string>
+    <string name="recipe_category1">Spicy Recipes</string>
+    <string name="recipe_category2">Vegetarian Wings</string>
+    <string name="recipe_category3">Dry Seasoning</string>
+
     <string name="first_card_category">Recipe category</string>
     <string name="first_card_description">Recipe description goes here</string>
     <string name="save_to_favorites">Save to favorites</string>
@@ -34,6 +37,8 @@
     <string name="enter_recipe_name">Enter Recipe Name</string>
     <string name="search_recipe_ingredients">Search Recipe Ingredients</string>
     <string name="search_recipe_title">Search Recipe Title</string>
+    <string name="search_for_wings">Search for Wings</string>
+    <string name="hungry_type_here">Hungry? Type Here!</string>
 
 
 </resources>

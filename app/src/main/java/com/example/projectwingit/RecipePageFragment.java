@@ -9,18 +9,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.app.Dialog;
+import android.widget.TextView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link Settings#newInstance} factory method to
- * create an instance of this fragment.
- */
+ // TODO what does this do?
+ //A simple {@link Fragment} subclass.
+ //Use the {@link Settings#newInstance} factory method to
+ //create an instance of this fragment.
+
 public class RecipePageFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    private String recipeTitle;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -31,6 +34,13 @@ public class RecipePageFragment extends Fragment {
 
     public RecipePageFragment() {
         // Required empty public constructor
+        recipeTitle = "Recipe Title";
+    }
+
+    // recipe page fragment that passes in recipe info
+    // TODO obviously have more than just the title being passed in
+    public RecipePageFragment(String title) {
+        recipeTitle = title;
     }
 
     /**
@@ -95,6 +105,9 @@ public class RecipePageFragment extends Fragment {
                 rateDialog.show();
             }
         });
+
+        TextView titleText = v.findViewById(R.id.titleText);
+        titleText.setText(recipeTitle);
 
 
         // Inflate the layout for this fragment

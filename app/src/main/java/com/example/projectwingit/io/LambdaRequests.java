@@ -269,7 +269,7 @@ public class LambdaRequests {
     /**
      * S23 Create a recipe DONE BY LOUIS
      * @param title The title of the recipe.
-     * @param ingredients The list of strings for ingredients
+     * @param ingredients The ingredients of the recipe.
      * @param description The description of the recipe.
      * @param tutorial The tutorial of the recipe.
      * @param isNutAllergy Whether or not there are nuts in the recipe
@@ -279,7 +279,7 @@ public class LambdaRequests {
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return
      */
-    public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
+    public static LambdaResponse createRecipe(String title, String ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                               int spicinessLevel, boolean isPrivate, String imageURL){
         try{
@@ -287,7 +287,7 @@ public class LambdaRequests {
                     USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
                     PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
                     RECIPE_TITLE_STR, title,
-                    RECIPE_INGREDIENTS_STR, joinStr(ingredients),
+                    RECIPE_INGREDIENTS_STR, ingredients,
                     RECIPE_DESCRIPTION_STR, description,
                     RECIPE_TUTORIAL_STR, tutorial,
                     RECIPE_PRIVATE_STR, ""+isPrivate,
@@ -327,7 +327,7 @@ public class LambdaRequests {
     /**
      * Sends a edit recipe request to the API
      * @param title The title of the recipe.
-     * @param ingredients The list of strings for ingredients
+     * @param ingredients The ingredients of the recipe.
      * @param description The description of the recipe.
      * @param tutorial The tutorial of the recipe.
      * @param isNutAllergy Whether or not there are nuts in the recipe
@@ -337,7 +337,7 @@ public class LambdaRequests {
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return A LambdaResponse of the response
      */
-    public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
+    public static LambdaResponse editRecipe(String title, String ingredients, String description,
                                             String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                             int spicinessLevel, boolean isPrivate, String imageURL){
         try{
@@ -345,7 +345,7 @@ public class LambdaRequests {
                     USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
                     PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
                     RECIPE_TITLE_STR, title,
-                    RECIPE_INGREDIENTS_STR, joinStr(ingredients),
+                    RECIPE_INGREDIENTS_STR, ingredients,
                     RECIPE_DESCRIPTION_STR, description,
                     RECIPE_TUTORIAL_STR, tutorial,
                     RECIPE_PRIVATE_STR, ""+isPrivate,
@@ -479,14 +479,5 @@ public class LambdaRequests {
      */
     private static String getUserOrEmail(String userOrEmail){
         return userOrEmail.contains("@") ? EMAIL_STR : USERNAME_STR;
-    }
-
-    /**
-     * Joins the string for ingredients
-     */
-    private static String joinStr(String[] strs){
-        String ret = "";
-        for (String s : strs) ret += s + ",";
-        return ret.substring(0, ret.length() - 1);
     }
 }

@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class WingitUtils {
+
     /**
      * Does a SHA256 hash of the given password string and returns a string in hex
      */
@@ -29,13 +30,5 @@ public class WingitUtils {
             hexString.append(hex);
         }
         return hexString.toString();
-    }
-
-    /**
-     * Returns true if the user enters an acceptable password. As of now, we only check that the
-     * password is at least 8 characters long.
-     */
-    public boolean checkAcceptablePassword(String password){
-        return password.length() >= 8;
     }
 }

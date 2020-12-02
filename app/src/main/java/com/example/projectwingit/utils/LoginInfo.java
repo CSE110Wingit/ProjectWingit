@@ -31,16 +31,16 @@ public class LoginInfo {
 
     // Creates login info object holding the username & passwordhash of the user
     public LoginInfo(String username, String email, String passwordHash) {
-            this.username = username;
-            this.email = email;
-            this.passwordHash = passwordHash;
+        this.username = username;
+        this.email = email;
+        this.passwordHash = passwordHash;
     }
 
     public static String setCurrentLogin(String username, String email, String passwordHash){
         CURRENT_LOGIN = new LoginInfo(username, email, passwordHash);
         return write(false);
     }
-    
+
     // Reads and returns a loginInfo object containing username and password hash of the user
     public static String readLoginInfo() {
         String read = read();

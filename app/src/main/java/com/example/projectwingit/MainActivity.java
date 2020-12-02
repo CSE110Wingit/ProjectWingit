@@ -9,6 +9,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -54,8 +55,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
+        FragmentManager fm = getFragmentManager();
         if (dl.isDrawerOpen(GravityCompat.START)) {
             dl.closeDrawer(GravityCompat.START);
+        }
+        else if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
         }
         else {
             super.onBackPressed();
@@ -91,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             toolbar.setTitle(R.string.home_title_toolbar);
                             break;
                         case R.id.search:
-                            fragment = new SearchFragment_Ingredients();
+                            fragment = new SearchFragment();
                             toolbar.setTitle(R.string.search_title_toolbar);
                             break;
                         case R.id.favorites:
