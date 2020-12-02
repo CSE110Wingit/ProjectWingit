@@ -25,7 +25,7 @@ public class LambdaResponse extends Thread{
     private static final long SLEEP_MILLIS = 10;
     private static final long TIMEOUT_MILLIS = 30 * 1000;  // Timeout after 30 seconds of nothing
 
-    private static final String[] _LIST_NAMES = {QUERY_RESULTS_STR, CREATED_RECIPES_STR, RATED_RECIPES_STR, FAVORITED_RECIPES_STR};
+    private static final String[] _LIST_NAMES = {QUERY_RESULTS_STR, CREATED_RECIPES_STR, RATED_RECIPES_STR, FAVORITED_RECIPES_STR, RECIPE_INGREDIENTS_STR};
 
     public enum ErrorState{
         NO_ERROR, SERVER_ERROR, CLIENT_ERROR, AWAITING_RESPONSE
