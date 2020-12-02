@@ -1,9 +1,9 @@
-package com.example.projectwingit.debug;
+package com.wingit.projectwingit.debug;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static com.example.projectwingit.debug.WingitLogging.LogType;
+import static com.wingit.projectwingit.debug.WingitLogging.LogType;
 
 /**
  * Class to handle showing exceptions, and any ramifications of certain types of exceptions

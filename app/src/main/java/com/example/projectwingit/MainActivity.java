@@ -9,13 +9,13 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.example.projectwingit.utils.LoginInfo;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        LoginInfo.APP_CONTEXT = getApplicationContext();
 
         bottomNavigationView = findViewById(R.id.bottomNav);
         bottomNavigationView.setOnNavigationItemSelectedListener(bottomNavMethod);
@@ -54,8 +53,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
+        FragmentManager fm = getFragmentManager();
         if (dl.isDrawerOpen(GravityCompat.START)) {
             dl.closeDrawer(GravityCompat.START);
+        }
+        else if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
         }
         else {
             super.onBackPressed();
@@ -91,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             toolbar.setTitle(R.string.home_title_toolbar);
                             break;
                         case R.id.search:
-                            fragment = new SearchFragment_Ingredients();
+                            fragment = new SearchFragment();
                             toolbar.setTitle(R.string.search_title_toolbar);
                             break;
                         case R.id.favorites:

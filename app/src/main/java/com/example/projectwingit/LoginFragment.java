@@ -136,7 +136,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.container, new forgot_pass_Fragment());
+                ft.replace(R.id.container_user_account, new forgot_pass_Fragment());
                 ft.commit();
             }
         });
@@ -145,7 +145,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.container, new forgot_user_Fragment());
+                ft.replace(R.id.container_user_account, new forgot_user_Fragment());
                 ft.commit();
             }
         });
@@ -154,7 +154,7 @@ public class LoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.container, new RegisterFragment());
+                ft.replace(R.id.container_user_account, new RegisterFragment());
                 ft.commit();
             }
         });

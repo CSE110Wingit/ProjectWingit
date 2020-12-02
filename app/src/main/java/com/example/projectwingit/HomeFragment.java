@@ -26,7 +26,7 @@ public class HomeFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private MaterialCardView card1;
+    private MaterialCardView category1;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -75,15 +75,18 @@ public class HomeFragment extends Fragment {
 
         // set the button to switch fragments
         // TODO replace button code using recyclerView which can make a button for all cards
-        card1 = v.findViewById(R.id.card);
-        card1.setOnClickListener(new View.OnClickListener() {
+        category1 = v.findViewById(R.id.category1);
+        category1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v){
-                getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageFragment()).commit();
+                getFragmentManager().beginTransaction().replace(R.id.container, new RecipeList()).addToBackStack(null).commit();
             }
         });
 
         // Inflate the layout for this fragment
         return v;
+    }
+
+    public void typeResults(String searchRecipeText) {
     }
 }

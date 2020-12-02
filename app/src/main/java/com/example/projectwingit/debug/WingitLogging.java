@@ -1,4 +1,4 @@
-package com.example.projectwingit.debug;
+package com.wingit.projectwingit.debug;
 
 import android.util.Log;
 

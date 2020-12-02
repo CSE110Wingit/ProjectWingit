@@ -1,51 +1,37 @@
 //package com.wingit.projectwingit;
 //
+//import androidx.annotation.RequiresApi;
 //import androidx.appcompat.app.AppCompatActivity;
 //
 //import android.os.Build;
 //import android.os.Bundle;
 //import android.widget.TextView;
 //
-//import com.example.projectwingit.debug.WingitLogging;
-//import com.example.projectwingit.io.LambdaRequests;
-//import com.example.projectwingit.io.LambdaResponse;
-//import com.example.projectwingit.utils.LoginInfo;
-//import com.example.projectwingit.utils.WingitLambdaConstants;
+//import com.wingit.projectwingit.debug.WingitLogging;
 //
-//import org.json.JSONException;
-//import org.json.JSONObject;
-//
-//import static com.example.projectwingit.io.LambdaRequests.createAccount;
-//import static com.example.projectwingit.utils.WingitLambdaConstants.*;
-//import static com.example.projectwingit.utils.WingitUtils.hashPassword;
+//import static com.wingit.projectwingit.io.LambdaRequests.createAccount;
+//import static com.wingit.projectwingit.utils.WingitUtils.hashPassword;
 //
 ///**
 // * The main application class
 // */
 //public class WingitApp extends AppCompatActivity {
 //
+//    @RequiresApi(api = Build.VERSION_CODES.N)
 //    @Override
 //    protected void onCreate(Bundle savedInstanceState) {
 //        super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_main);
-//        LoginInfo.APP_CONTEXT = getApplicationContext();
 //
-//        final TextView textView = (TextView) findViewById(R.id.testText);
-//        String passwordHash = hashPassword("wingit!1");
-//        String username = "JustWingit";
-//        LambdaResponse r = LambdaRequests.login(username, passwordHash);
-//        LambdaResponse response = LambdaRequests.changePassword("cse110wingit@gmail.com", "264856", passwordHash);
-//        textView.post(new Runnable() {
-//            public void run() {
-//                try{e();}catch(Exception a){textView.setText("JSON EXCPEIONT: " + a.getMessage());}
-//            }
+//        final TextView edit =  (TextView) findViewById(R.id.testText);
+//        String passwordHash = hashPassword("testPassword");
 //
-//            public void e() throws Exception{
-//                String s = "" + response.getResponseJSON();
-//                //String s = ""+response.getResponseJSON().toString();
-//                textView.setText(s);
-//            }
-//        });
+//        Runnable runnable = () -> {
+//            edit.setText();
+//        };
+//
+//        Thread thread = new Thread(runnable);
+//        thread.start();
 //    }
 //
 //}
