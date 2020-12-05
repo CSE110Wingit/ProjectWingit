@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -35,6 +36,11 @@ public class CreateRecipe extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String tag = "CREATE RECIPE FRAGMENT";
+
+    protected ImageView wingImageView;
+    protected Button buttonUploadPhoto;
+    protected Button buttonRemovePhoto;
+    protected boolean photoUploaded;
 
     protected View rootView;
     protected RecyclerView mRecyclerView;
@@ -113,6 +119,7 @@ public class CreateRecipe extends Fragment {
         mAdapter = new IngredientListAdapter(mIngredientList);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setNestedScrollingEnabled(false);
 
         // Set up ingredient input.
         inputIngredientName = (EditText) rootView.findViewById(R.id.InputIngredientName);
@@ -172,6 +179,7 @@ public class CreateRecipe extends Fragment {
         recipeStepListAdapter = new RecipeStepListAdapter(mRecipeStepList);
         recipeStepsRecyclerView.setLayoutManager(recipeStepListLayoutManager);
         recipeStepsRecyclerView.setAdapter(recipeStepListAdapter);
+        recipeStepsRecyclerView.setNestedScrollingEnabled(false);
 
         // INPUT: recipe steps
         inputRecipeStep = (EditText) rootView.findViewById(R.id.InputRecipeStep);
@@ -281,12 +289,26 @@ public class CreateRecipe extends Fragment {
         });
     }
 
-    public void setUpPictureUpload() {
+    public void setUpPhotoUpload() {
         PackageManager pm = getActivity().getPackageManager();
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            // set up photo.
+            // set up photo upload.
+            wingImageView = (ImageView) rootView.findViewById(R.id.WingImageView);
+            buttonUploadPhoto = (Button) rootView.findViewById(R.id.ButtonUploadPhoto);
+            buttonRemovePhoto = (Button) rootView.findViewById(R.id.ButtonRemovePhoto);
+            photoUploaded = false;
+
+            buttonUploadPhoto.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
         } else {
             // tell the user that there is no camera on this device.
+            // or just dont do anything? idk.
         }
     }
 
@@ -308,7 +330,7 @@ public class CreateRecipe extends Fragment {
         setUpGlutenFreeCheckbox();
         setUpSpicinessSpinner();
         setUpSubmitButton();
-        setUpPictureUpload();
+        setUpPhotoUpload();
 
         return rootView;
     }
