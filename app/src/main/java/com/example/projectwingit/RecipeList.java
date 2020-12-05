@@ -20,7 +20,9 @@ import com.example.projectwingit.utils.WingitUtils;
 import com.google.android.material.card.MaterialCardView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import java.util.ArrayList;
 
@@ -118,19 +120,22 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
     @Override
     public void onRecipeClick(int position) {
-        WingitUtils hashTest = new WingitUtils();
-        LoginInfo testLogin = new LoginInfo("JustWingit","cse110wingit@gmail.com", hashTest.hashPassword("wingit!1"));
-        testLogin.setCurrentLogin("JustWingit","cse110wingit@gmail.com", hashTest.hashPassword("wingit!1"));
-        LambdaRequests test = new LambdaRequests();
-        LambdaResponse recipe = test.getRecipe(1);
+        LoginInfo.setCurrentLogin("JustWingit","cse110wingit@gmail.com", WingitUtils.hashPassword("wingit!1"));
+        LambdaResponse recipe = LambdaRequests.getRecipe(1);
         while(recipe.isRunning()){
-            String ok = "Do Nothing";
+            System.out.println("Running!");
         }
         JSONObject ofRecipe = recipe.getResponseJSON();
         System.out.println(ofRecipe);
+        String recipeName = "";
+        try {
+            recipeName = ofRecipe.getString("recipe_title");
+        } catch (JSONException e) {
+            recipeName = "Null";
+        }
 
         // TODO eventually we will pass in an entire recipe object here but for now it is just the title
-        Fragment recipeFragment = new RecipePageFragment(mRecipeTitles.get(position));
+        Fragment recipeFragment = new RecipePageFragment(recipeName);
         getFragmentManager().beginTransaction().replace(R.id.container, recipeFragment).commit();
     }
 }
