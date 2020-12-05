@@ -13,7 +13,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import com.example.projectwingit.io.LambdaRequests;
+import com.example.projectwingit.io.LambdaResponse;
+import com.example.projectwingit.utils.LoginInfo;
+import com.example.projectwingit.utils.WingitUtils;
 import com.google.android.material.card.MaterialCardView;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -111,6 +118,17 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
     @Override
     public void onRecipeClick(int position) {
+        WingitUtils hashTest = new WingitUtils();
+        LoginInfo testLogin = new LoginInfo("JustWingit","cse110wingit@gmail.com", hashTest.hashPassword("wingit!1"));
+        testLogin.setCurrentLogin("JustWingit","cse110wingit@gmail.com", hashTest.hashPassword("wingit!1"));
+        LambdaRequests test = new LambdaRequests();
+        LambdaResponse recipe = test.getRecipe(1);
+        while(recipe.isRunning()){
+            String ok = "Do Nothing";
+        }
+        JSONObject ofRecipe = recipe.getResponseJSON();
+        System.out.println(ofRecipe);
+
         // TODO eventually we will pass in an entire recipe object here but for now it is just the title
         Fragment recipeFragment = new RecipePageFragment(mRecipeTitles.get(position));
         getFragmentManager().beginTransaction().replace(R.id.container, recipeFragment).commit();
