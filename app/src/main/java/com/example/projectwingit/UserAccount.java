@@ -76,7 +76,12 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
                 break;
             case R.id.user_account_characteristics:
                 // only users with accounts can access TODO set to true to debug characteristics page
-                if(isLoggedIn) getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new EditCharacteristicsFragment()).commit();
+                if(isLoggedIn) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new EditCharacteristicsFragment()).commit();
+                }
+                else {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new LoginFragment()).commit();
+                }
                 break;
         }
         account_Drawer.closeDrawer(GravityCompat.START);

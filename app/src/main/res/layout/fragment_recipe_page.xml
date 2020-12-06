@@ -22,14 +22,15 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="574dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/topspace"
         android:orientation="vertical">
 
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:id="@+id/recipe_scrollview_id">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -181,9 +182,14 @@
                     android:layout_marginTop="16dp"
                     android:text="@string/first_card_instruction" />
 
-
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="55dp"/>
             </LinearLayout>
+
         </ScrollView>
+
     </LinearLayout>
 
     <!-- </LinearLayout> -->
