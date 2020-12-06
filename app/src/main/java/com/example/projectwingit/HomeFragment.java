@@ -79,7 +79,9 @@ public class HomeFragment extends Fragment {
         category1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v){
-                getFragmentManager().beginTransaction().replace(R.id.container, new RecipeList()).addToBackStack(null).commit();
+                RecipeList spicyList = new RecipeList();
+                spicyList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5);
+                getFragmentManager().beginTransaction().replace(R.id.container, spicyList).addToBackStack(null).commit();
             }
         });
 
