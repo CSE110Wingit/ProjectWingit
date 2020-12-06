@@ -1,12 +1,19 @@
 package com.example.projectwingit;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -36,11 +44,12 @@ public class CreateRecipe extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String tag = "CREATE RECIPE FRAGMENT";
+    protected static final int GET_FROM_GALLERY = 1;
 
     protected ImageView wingImageView;
     protected Button buttonUploadPhoto;
     protected Button buttonRemovePhoto;
-    protected boolean photoUploaded;
+    protected Uri imageUri;
 
     protected View rootView;
     protected RecyclerView mRecyclerView;
@@ -238,12 +247,14 @@ public class CreateRecipe extends Fragment {
         buttonSubmitRecipe = (Button) rootView.findViewById(R.id.ButtonSubmitRecipe);
         buttonSubmitRecipe.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String userRecipeName = inputRecipeName.getText().toString().trim();
+                String recipeName = inputRecipeName.getText().toString().trim();
+                String recipeDescription = inputRecipeDescription.getText().toString().trim();
+
                 CharSequence errMsg = null;
                 int duration = Toast.LENGTH_LONG;
                 Toast toast;
 
-                if (userRecipeName.length() == 0) {
+                if (recipeName.length() == 0) {
                     errMsg = "Recipe name cannot be empty.";
                 } else if (mIngredientList.size() == 0) {
                     errMsg = "The recipe needs at least one ingredient.";
@@ -259,10 +270,25 @@ public class CreateRecipe extends Fragment {
                 }
 
                 // Submission here. Need to use LambdaRequests.
-                // For now: just log output.
+                // For now: just log current recipe state.
+                Log.i(tag, "Recipe name: " + recipeName);
+                Log.i(tag, "Recipe description: " + recipeDescription);
+                if (imageUri != null) {
+                    Log.i(tag, "Image uri " + imageUri.toString());
+                } else {
+                    Log.i(tag, "No image selected");
+                }
+                for (String ingredient: mIngredientList) {
+                    Log.i(tag, "Ingredient: " + ingredient);
+                }
+                for (String recipeStep: mRecipeStepList) {
+                    Log.i(tag, "Instruction: " + recipeStep);
+                }
                 Log.i(tag, "Contains nuts " + containsNuts);
                 Log.i(tag, "Is gluten free " + isGlutenFree);
                 Log.i(tag, "Spiciness level " + spicinessLevel);
+
+                Toast.makeText(getActivity(), "Submit logs called", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -290,26 +316,51 @@ public class CreateRecipe extends Fragment {
     }
 
     public void setUpPhotoUpload() {
-        PackageManager pm = getActivity().getPackageManager();
-        if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            // set up photo upload.
-            wingImageView = (ImageView) rootView.findViewById(R.id.WingImageView);
-            buttonUploadPhoto = (Button) rootView.findViewById(R.id.ButtonUploadPhoto);
-            buttonRemovePhoto = (Button) rootView.findViewById(R.id.ButtonRemovePhoto);
-            photoUploaded = false;
+        // Only photo upload so far. Still figuring how to take photos. (delegate to camera)
 
-            buttonUploadPhoto.setOnClickListener(new View.OnClickListener() {
+        buttonUploadPhoto = rootView.findViewById(R.id.ButtonUploadPhoto);
+        buttonRemovePhoto = rootView.findViewById(R.id.ButtonRemovePhoto);
+        wingImageView = rootView.findViewById(R.id.WingImageView);
+        imageUri = null;
 
-                @Override
-                public void onClick(View v) {
+        buttonUploadPhoto.setOnClickListener(new View.OnClickListener() {
 
+            @Override
+            public void onClick(View v) {
+                Intent uploadFromGalleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+                if (uploadFromGalleryIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivityForResult(uploadFromGalleryIntent, GET_FROM_GALLERY);
+                } else {
+                    Log.i(tag, "No upload from gallery activity available.");
                 }
-            });
+            }
 
-        } else {
-            // tell the user that there is no camera on this device.
-            // or just dont do anything? idk.
+        });
+
+        buttonRemovePhoto.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                imageUri = null;
+                wingImageView.setImageResource(android.R.color.transparent);
+            }
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
+            imageUri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
+                wingImageView.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                Toast.makeText(getActivity(), "Unable to load image uri.", Toast.LENGTH_SHORT).show();
+            }
         }
+
     }
 
     @Override
