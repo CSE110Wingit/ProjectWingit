@@ -10,8 +10,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -27,108 +30,80 @@ import android.widget.Toast;
 //import com.example.projectwingit.LoginResult;
 //import com.example.projectwingit.LoginViewModel;
 //import com.example.projectwingit.LoginViewModelFactory;
-import com.example.projectwingit.forgot_user_Fragment;
 import com.example.projectwingit.R;
 import com.example.projectwingit.RegisterFragment;
-import com.example.projectwingit.forgot_pass_Fragment;
-import com.example.projectwingit.forgot_user_Fragment;
+//import com.example.projectwingit.forgot_user_Fragment;
+//import com.example.projectwingit.forgot_pass_Fragment;
+import com.example.projectwingit.io.LambdaRequests;
+import com.example.projectwingit.io.LambdaResponse;
 //import com.example.projectwingit.ui.login.LoggedInUserView;
 
 public class LoginFragment extends Fragment {
 
 //    private LoginViewModel loginViewModel;
+    Dialog errorDialog;
+    TextView errorText;
+    EditText usernameEditText;
+    EditText passwordEditText;
+    Button loginButton;
+    Button errorButton;
+    ProgressBar loadingProgressBar;
+    TextView forgot_User;
+    TextView forgot_Pass;
+    TextView create_Account;
 
+    @Override
+    public void onCreate(Bundle SavedInstanceState) {
+        super.onCreate(SavedInstanceState);
+
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_login, container, false);
+        View v = inflater.inflate(R.layout.fragment_login, container, false);
+//        usernameEditText = v.findViewById(R.id.username);
+//        passwordEditText = v.findViewById(R.id.password);
+//        loginButton = (Button)v.findViewById(R.id.login);
+//        loadingProgressBar = v.findViewById(R.id.loading);
+//        forgot_User = v.findViewById(R.id.forgot_User);
+//        forgot_Pass = v.findViewById(R.id.forgot_Pass);
+//        create_Account = v.findViewById(R.id.create_Account);
+//
+//        loginButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//            }
+//        });
+        return v;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
-//                .get(LoginViewModel.class);
 
-        final EditText usernameEditText = view.findViewById(R.id.username);
-        final EditText passwordEditText = view.findViewById(R.id.password);
-        final Button loginButton = view.findViewById(R.id.login);
-        final ProgressBar loadingProgressBar = view.findViewById(R.id.loading);
-        final TextView forgot_User = view.findViewById(R.id.forgot_User);
-        final TextView forgot_Pass = view.findViewById(R.id.forgot_Pass);
-        final TextView create_Account = view.findViewById(R.id.create_Account);
 
-//        loginViewModel.getLoginFormState().observe(getViewLifecycleOwner(), new Observer<LoginFormState>() {
-//            @Override
-//            public void onChanged(@Nullable LoginFormState loginFormState) {
-//                if (loginFormState == null) {
-//                    return;
-//                }
-//                loginButton.setEnabled(loginFormState.isDataValid());
-//                if (loginFormState.getUsernameError() != null) {
-//                    usernameEditText.setError(getString(loginFormState.getUsernameError()));
-//                }
-//                if (loginFormState.getPasswordError() != null) {
-//                    passwordEditText.setError(getString(loginFormState.getPasswordError()));
-//                }
-//            }
-//        });
+        usernameEditText = view.findViewById(R.id.username);
+        passwordEditText = view.findViewById(R.id.password);
+        loginButton = view.findViewById(R.id.login);
+        loadingProgressBar = view.findViewById(R.id.loading);
+        forgot_User = view.findViewById(R.id.forgot_User);
+        forgot_Pass = view.findViewById(R.id.forgot_Pass);
+        create_Account = view.findViewById(R.id.create_Account);
 
-//        loginViewModel.getLoginResult().observe(getViewLifecycleOwner(), new Observer<LoginResult>() {
-//            @Override
-//            public void onChanged(@Nullable LoginResult loginResult) {
-//                if (loginResult == null) {
-//                    return;
-//                }
-//                loadingProgressBar.setVisibility(View.GONE);
-//                if (loginResult.getError() != null) {
-//                    showLoginFailed(loginResult.getError());
-//                }
-//                if (loginResult.getSuccess() != null) {
-//                    updateUiWithUser(loginResult.getSuccess());
-//                }
-//            }
-//        });
-
-        TextWatcher afterTextChangedListener = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // ignore
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // ignore
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-//                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
-//                        passwordEditText.getText().toString());
-            }
-        };
-        usernameEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                    loginViewModel.login(usernameEditText.getText().toString(),
-//                            passwordEditText.getText().toString());
-                }
-                return false;
-            }
-        });
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadingProgressBar.setVisibility(View.VISIBLE);
-//                loginViewModel.login(usernameEditText.getText().toString(),
-//                        passwordEditText.getText().toString());
+//                loadingProgressBar.setVisibility(View.VISIBLE);
+//                Toast.makeText(getActivity(), "Enter username", Toast.LENGTH_LONG).show();
+//
+//                Toast.makeText(getActivity().getApplicationContext(), "Enter password", Toast.LENGTH_LONG).show();
+
+                userLogin(v);
+
             }
         });
 
@@ -160,6 +135,40 @@ public class LoginFragment extends Fragment {
         });
 
     }
+    private void userLogin(View v) {
+        String username, password;
+        username = usernameEditText.getText().toString();
+        password = passwordEditText.getText().toString();
+        String hashPass = com.example.projectwingit.utils.WingitUtils.hashPassword(password);
+
+        LambdaResponse userLog = LambdaRequests.login(username, hashPass);
+
+        if (TextUtils.isEmpty(username)) {
+            Toast.makeText(getActivity().getApplicationContext(), "Enter username", Toast.LENGTH_LONG).show();
+        }
+        if (TextUtils.isEmpty(password)) {
+            Toast.makeText(getActivity().getApplicationContext(), "Enter password", Toast.LENGTH_LONG).show();
+        }
+
+        loginButton.post(new Runnable() {
+            @Override
+            public void run() {
+                errorDialog = new Dialog(getActivity());
+                errorDialog.setContentView(R.layout.error_dialog);
+                errorText = (TextView)errorDialog.findViewById(R.id.error_dialog_text1);
+                errorText.setText(userLog.getResponseInfo());
+                errorDialog.show();
+                errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
+                errorButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        errorDialog.cancel();
+                    }
+                });
+            }
+        });
+
+    }
 
 //    private void updateUiWithUser(LoggedInUserView model) {
 //        String welcome = getString(R.string.welcome) + model.getDisplayName();
@@ -169,12 +178,12 @@ public class LoginFragment extends Fragment {
 //        }
 //    }
 
-    private void showLoginFailed(@StringRes Integer errorString) {
-        if (getContext() != null && getContext().getApplicationContext() != null) {
-            Toast.makeText(
-                    getContext().getApplicationContext(),
-                    errorString,
-                    Toast.LENGTH_LONG).show();
-        }
-    }
+//    private void showLoginFailed(@StringRes Integer errorString) {
+//        if (getContext() != null && getContext().getApplicationContext() != null) {
+//            Toast.makeText(
+//                    getContext().getApplicationContext(),
+//                    errorString,
+//                    Toast.LENGTH_LONG).show();
+//        }
+//    }
 }
