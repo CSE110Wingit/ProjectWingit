@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.projectwingit.io.LambdaResponse;
+import com.example.projectwingit.utils.LoginInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -103,6 +104,7 @@ public class RecipePageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_recipe_page, container, false);
+        System.out.println(LoginInfo.CURRENT_LOGIN.username);
         LambdaResponse recipeLambdaResponse = getRecipe(recipeID);
         while (recipeLambdaResponse.isRunning()) {}
 
@@ -118,7 +120,7 @@ public class RecipePageFragment extends Fragment {
 
         try {
 
-            titleText.setText(recipeObject.getString(RECIPE_TITLE_STR) + " by " + recipeObject.getString(USERNAME_STR));
+            titleText.setText(recipeObject.getString(RECIPE_TITLE_STR));
             descriptionText.setText(recipeObject.getString(RECIPE_DESCRIPTION_STR));
             Glide.with(this).load(recipeObject.getString(RECIPE_PICTURE_STR)).into(recipeImage);
             ingredientsText.setText(recipeObject.getString(RECIPE_INGREDIENTS_STR));
