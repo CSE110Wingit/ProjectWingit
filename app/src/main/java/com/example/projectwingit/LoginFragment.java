@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -26,6 +27,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.example.projectwingit.utils.LoginInfo;
+
 
 //import com.example.projectwingit.LoginResult;
 //import com.example.projectwingit.LoginViewModel;
@@ -142,7 +145,6 @@ public class LoginFragment extends Fragment {
         String hashPass = com.example.projectwingit.utils.WingitUtils.hashPassword(password);
 
         LambdaResponse userLog = LambdaRequests.login(username, hashPass);
-
         if (TextUtils.isEmpty(username)) {
             Toast.makeText(getActivity().getApplicationContext(), "Enter username", Toast.LENGTH_LONG).show();
         }
@@ -159,6 +161,11 @@ public class LoginFragment extends Fragment {
                 errorText.setText(userLog.getResponseInfo());
                 errorDialog.show();
                 errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
+                if (!userLog.isError()) {
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(intent);
+                }
+                Toast.makeText(getActivity().getApplicationContext(), LoginInfo.CURRENT_LOGIN.username, Toast.LENGTH_LONG).show();
                 errorButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
