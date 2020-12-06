@@ -74,9 +74,9 @@ public class SearchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 searchRecipeText = searchText.getText().toString();
-                HomeFragment fg = new HomeFragment();
-                fg.typeResults(searchRecipeText);
-                getFragmentManager().beginTransaction().replace(R.id.container, fg).commit();
+                RecipeList rl = new RecipeList();
+                rl.typeResults(searchRecipeText, Boolean.TRUE, Boolean.FALSE, 2);
+                getFragmentManager().beginTransaction().replace(R.id.container, rl).addToBackStack(null).commit();
             }
         });
 

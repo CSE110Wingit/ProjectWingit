@@ -1,37 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/Cooking_Tutorial_Button"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".HomeFragment"
-    android:orientation="vertical"
+    android:background="@color/white"
     android:gravity="center_horizontal"
-    android:background="@color/white">
-
+    android:orientation="vertical"
+    tools:context=".HomeFragment">
 
 
     <Space
+        android:id="@+id/topspace"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/toolbar"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:minHeight="55dp"
-        android:id="@+id/topspace">
-    </Space>
+        android:layout_alignParentLeft="true"
+        android:minHeight="55dp"></Space>
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="574dp"
+        android:layout_below="@id/topspace"
+        android:orientation="vertical">
+
+
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="630dp"
-            android:layout_below="@id/topspace"
-            android:orientation="vertical">
-
-
-
-            <ScrollView
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent">
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -41,6 +39,7 @@
 
                 <!-- Media -->
                 <ImageView
+                    android:id="@+id/Recipe_ImageView"
                     android:layout_width="match_parent"
                     android:layout_height="194dp"
                     android:scaleType="centerCrop"
@@ -48,48 +47,32 @@
 
                 <!-- Title, secondary and supporting text -->
                 <TextView
+                    android:id="@+id/titleText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Recipe name"
-                    android:textAppearance="?attr/textAppearanceHeadline6"
-                    android:id="@+id/titleText"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/first_card_category"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="?android:attr/textColorSecondary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/first_card_description"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:text="@string/search_recipe_title"
+                    android:textAppearance="?attr/textAppearanceHeadline6" />
 
                 <LinearLayout
+                    android:id="@+id/topbuttons"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="left"
 
-                    android:layout_marginBottom="-20dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_gravity="left"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginRight="8dp"
-                    android:orientation="horizontal"
-                    android:id="@+id/topbuttons">
+                    android:layout_marginBottom="-20dp"
+                    android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/ratebutton"
                         style="?attr/borderlessButtonStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="left"
-                        android:id="@+id/ratebutton"
                         android:text="@string/rate_recipe"
-                        app:icon="@drawable/ic_rate"/>
+                        app:icon="@drawable/ic_rate" />
 
                     <!--  spaces the two buttons apart          -->
                     <View
@@ -113,10 +96,10 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/topbuttons"
                     android:layout_gravity="left"
                     android:layout_margin="8dp"
-                    android:orientation="horizontal"
-                    android:layout_below="@id/topbuttons">
+                    android:orientation="horizontal">
 
 
                     <!--  spaces the two buttons apart          -->
@@ -131,13 +114,30 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
+                        android:text="Share to Social Media"
                         app:icon="@drawable/ic_share"
-                        app:iconGravity="textStart"
-                        android:text="Share to Social Media" />
+                        app:iconGravity="textStart" />
 
 
                 </LinearLayout>
 
+                <TextView
+                    android:id="@+id/Description_TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Recipe Description"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+                <TextView
+                    android:id="@+id/Ingredients_TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Recipe Ingredients"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="?android:attr/textColorSecondary" />
 
 
                 <TextView
@@ -146,7 +146,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="Allergy information goes here" />
-
 
 
                 <TextView
@@ -164,66 +163,28 @@
                     android:layout_marginTop="16dp"
                     android:text="Food pairings go here" />
 
-                <com.google.android.material.card.MaterialCardView
+                <Button
+                    android:id="@+id/Tutorial_Button"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="156dp"
+                    android:layout_height="51dp"
+                    android:background="#FFFFFF"
+                    android:shadowColor="#FFFFFF"
+                    android:text="Cooking Tutorial"
+                    android:textColor="#2196F3"
+                    app:rippleColor="#FFFFFF" />
+
+                <TextView
+                    android:id="@+id/textViewInstructions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp"
-                    android:clickable="false"
-                    android:focusable="true"
-                    app:cardElevation="8dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="left"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Instructions:"
-                            android:textAppearance="?attr/textAppearanceHeadline6"
-                            android:padding="16dp"/>
-
-                        <!--  spaces the two buttons apart          -->
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="0dp"
-                            android:layout_weight="1" />
-
-                        <com.google.android.material.button.MaterialButton
-                            style="?attr/borderlessButtonStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:layout_gravity="right"
-                            android:text="1" />
-
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="left"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Placeholder"
-                            android:padding="16dp"
-                            android:layout_marginTop="32dp"/>
-
-
-                    </LinearLayout>
-
-                </com.google.android.material.card.MaterialCardView>
+                    android:layout_marginTop="16dp"
+                    android:text="@string/first_card_instruction" />
 
 
             </LinearLayout>
-            </ScrollView>
-         </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 
-     <!-- </LinearLayout> -->
- </RelativeLayout>
+    <!-- </LinearLayout> -->
+</RelativeLayout>

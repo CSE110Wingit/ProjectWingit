@@ -9,12 +9,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.app.Dialog;
+import android.widget.ImageView;
 import android.widget.TextView;
 
- // TODO what does this do?
- //A simple {@link Fragment} subclass.
- //Use the {@link Settings#newInstance} factory method to
- //create an instance of this fragment.
+import com.bumptech.glide.Glide;
+import com.example.projectwingit.io.LambdaResponse;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import static com.example.projectwingit.io.LambdaRequests.getRecipe;
+import static com.example.projectwingit.utils.WingitLambdaConstants.GLUTEN_FREE_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.NUT_ALLERGY_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_DESCRIPTION_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_INGREDIENTS_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_PICTURE_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_TITLE_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_TUTORIAL_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.USERNAME_STR;
+
+// TODO what does this do?
+//A simple {@link Fragment} subclass.
+//Use the {@link Settings#newInstance} factory method to
+//create an instance of this fragment.
 
 public class RecipePageFragment extends Fragment {
 
@@ -23,7 +41,6 @@ public class RecipePageFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private String recipeTitle;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -31,16 +48,28 @@ public class RecipePageFragment extends Fragment {
 
     private Button rateButton;
     Dialog rateDialog;
+    private int recipeID;
+    /**
+     * TODO: We will fill the following TextView widgets with recipe fields
+     *
+     * TODO: private ImageView recipe_Image_View;          <- recipe_id.API_LAMBDA_GET_RECIPE_IMG()
+     * TODO: private TextView recipe_Title_View;           <- recipe_id.API_LAMBDA_GET_RECIPE_TITLE()
+     * TODO: private TextView recipe_Description_View;     <- recipe_id.API_LAMBDA_GET_RECIPE_DESCRIPTION()
+     * TODO: private TextView recipe_Ingredients_View;     <- recipe_id.API_LAMBDA_GET_RECIPE_INGREDIENTS()
+     * TODO: private TextView recipe_Instructions_View;    <- recipe_id.API_LAMBDA_GET_RECIPE_INSTRUCTIONS()
+     * TODO: private TextView recipe_Spiciness_View;       <- recipe_id.API_LAMBDA_GET_RECIPE_SPICINESS()
+     * TODO: private TextView recipe_Nut_Allergy_View;     <- recipe_id.API_LAMBDA_GET_RECIPE_NUT_ALLERGY()
+     * TODO: private TextView recipe_Gluten_Free_View;     <- recipe_id.API_LAMBDA_GET_RECIPE_GLUTEN_FREE()
+     */
 
     public RecipePageFragment() {
         // Required empty public constructor
-        recipeTitle = "Recipe Title";
     }
 
     // recipe page fragment that passes in recipe info
     // TODO obviously have more than just the title being passed in
-    public RecipePageFragment(String title) {
-        recipeTitle = title;
+    public RecipePageFragment(int recipeID) {
+        this.recipeID = recipeID;
     }
 
     /**
@@ -74,6 +103,50 @@ public class RecipePageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_recipe_page, container, false);
+        LambdaResponse recipeLambdaResponse = getRecipe(recipeID);
+        while (recipeLambdaResponse.isRunning()) {}
+
+        JSONObject recipeObject = recipeLambdaResponse.getResponseJSON();
+        while (recipeLambdaResponse.isRunning()) {}
+
+        ImageView recipeImage = v.findViewById(R.id.Recipe_ImageView);
+        TextView titleText = v.findViewById(R.id.titleText);
+        TextView descriptionText = v.findViewById(R.id.Description_TextView); //TODO: USE CORRECT ID
+        TextView ingredientsText = v.findViewById(R.id.Ingredients_TextView);
+        TextView instructionsText = v.findViewById(R.id.textViewInstructions);
+        TextView nutAllergyText = v.findViewById(R.id.textViewAllergy);
+
+        try {
+
+            titleText.setText(recipeObject.getString(RECIPE_TITLE_STR) + " by " + recipeObject.getString(USERNAME_STR));
+            descriptionText.setText(recipeObject.getString(RECIPE_DESCRIPTION_STR));
+            Glide.with(this).load(recipeObject.getString(RECIPE_PICTURE_STR)).into(recipeImage);
+            ingredientsText.setText(recipeObject.getString(RECIPE_INGREDIENTS_STR));
+            instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
+
+            String allergyString = "";
+            if(recipeObject.getBoolean(NUT_ALLERGY_STR)) allergyString += "This recipe contains nuts. ";
+            else allergyString += "This recipe does not contain nuts. ";
+            if(recipeObject.getBoolean(GLUTEN_FREE_STR)) allergyString += "This recipe is gluten-free.";
+            else allergyString += "This recipe contains gluten.";
+            nutAllergyText.setText(allergyString);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+
+
+
+
+        /**
+         * TODO: 1. Implement a loading graphic for 1 second
+         * TODO: 2. Fill widgets with recipe fields
+         * TODO      a. while( index(ingredient_arrayList) != last ) ->  recipe_Ingredients_View.setText(ingredient_arrayList[i] + "\n");
+         * TODO:     b. while( index(instruction_arrayList) != last ) -> dynamically (recipe_Instructions_View.setText(instructions_arrayList[i] + " ");)
+         */
 
         // rating dialog characteristics TODO maybe make the rating dialog its own method
         rateDialog = new Dialog(getActivity());
@@ -82,6 +155,7 @@ public class RecipePageFragment extends Fragment {
 
         Button cancel = rateDialog.findViewById(R.id.cancel_dialog_button);
         Button okay = rateDialog.findViewById(R.id.ok_dialog_button);
+        Button cookingTutorialButton = v.findViewById(R.id.Tutorial_Button);
 
         cancel.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -106,8 +180,16 @@ public class RecipePageFragment extends Fragment {
             }
         });
 
-        TextView titleText = v.findViewById(R.id.titleText);
-        titleText.setText(recipeTitle);
+        cookingTutorialButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                HomeFragment h = new HomeFragment();
+                getFragmentManager().beginTransaction().replace(R.id.container, h).addToBackStack(null).commit();
+            }
+        });
+
+
+
 
 
         // Inflate the layout for this fragment

@@ -22,9 +22,16 @@ import com.google.android.material.card.MaterialCardView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 
 import java.util.ArrayList;
+
+import static com.example.projectwingit.io.LambdaRequests.getRecipe;
+import static com.example.projectwingit.io.LambdaRequests.searchRecipes;
+import static com.example.projectwingit.utils.WingitLambdaConstants.QUERY_RESULTS_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_DESCRIPTION_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_ID_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_PICTURE_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_TITLE_STR;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,10 +49,22 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
     private String mParam1;
     private String mParam2;
 
+    /**
+     * TODO: private ArrayList<recipe_id> recipe_arrayList = new ArrayList<>();
+     */
     private ArrayList<String> mRecipeImageUrls = new ArrayList<>();
     private ArrayList<String> mRecipeTitles = new ArrayList<>();
     private ArrayList<String> mRecipeCategories = new ArrayList<>();
     private ArrayList<String> mRecipeDescriptions = new ArrayList<>();
+    private ArrayList<Integer> mRecipeID = new ArrayList<>();
+
+    private String recipeSearchText;
+    private int spiciness;
+    private Boolean nutAllergy;
+    private Boolean glutenFree;
+
+    private Boolean initializedCards = Boolean.FALSE;
+    private JSONObject recipeCardInfo;
 
     public RecipeList() {
         // Required empty public constructor
@@ -84,31 +103,61 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_recipe_list, container, false);
 
+
         initImageBitmaps(v);
+
+
 
         // Inflate the layout for this fragment
         return v;
     }
 
 
-    private void initImageBitmaps(View v){
-        mRecipeImageUrls.add("https://preview.redd.it/vs72r3qmvw161.jpg?width=960&crop=smart&auto=webp&s=069b95767b62037912016943bf95c635fd31e108");
-        mRecipeImageUrls.add("https://external-preview.redd.it/TlyTd28U32ciIa4jdWBNCVsVxIbvKtdzlTVrSkp9Qb8.jpg?width=960&crop=smart&auto=webp&s=24f30acc7b93f4b459f03227727d7b536c679e1c");
-        mRecipeImageUrls.add("https://preview.redd.it/0l8f7bh0dt061.jpg?width=960&crop=smart&auto=webp&s=3a9503b91f7f3862cecddebcdd60a6dd583d184b");
+    private void initImageBitmaps(View v) {
+        LoginInfo.setCurrentLogin("JustWingit","cse110wingit@gmail.com", WingitUtils.hashPassword("wingit!1"));
+        if(initializedCards) initRecyclerView(v);
+        else {
+            initializedCards = Boolean.TRUE;
+            LambdaResponse lr = searchRecipes(recipeSearchText, nutAllergy, glutenFree, spiciness);
+            while (lr.isRunning()) {
+            }
+            JSONObject joe = lr.getResponseJSON();
 
-        mRecipeTitles.add("Recipe 1");
-        mRecipeTitles.add("Recipe 2");
-        mRecipeTitles.add("Recipe 3");
+            JSONArray ja = new JSONArray();
+            try {
+                ja = joe.getJSONArray(QUERY_RESULTS_STR);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-        mRecipeCategories.add("Category 1");
-        mRecipeCategories.add("Category 2");
-        mRecipeCategories.add("Category 3");
+            JSONObject recipeID = new JSONObject();
+            LambdaResponse recipeObject;
+            String recipeIDString = "";
+            JSONObject recipeJSONObject;
 
-        mRecipeDescriptions.add("Description 1");
-        mRecipeDescriptions.add("Description 2");
-        mRecipeDescriptions.add("Description 3");
+            try {
+                for (int i = 0; i < ja.length(); i++) {
+                    recipeIDString = ja.getString(i);
+                    int id = Integer.parseInt(recipeIDString);
+                    recipeObject = getRecipe(id);
+                    while (recipeObject.isRunning()) {}
 
-        initRecyclerView(v);
+                    recipeJSONObject = recipeObject.getResponseJSON();
+                    while (recipeObject.isRunning()) {}
+
+                    mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
+                    mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
+                    mRecipeCategories.add("Category " + i);
+                    mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
+                    mRecipeID.add(id);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            initRecyclerView(v);
+        }
+
     }
 
     private void initRecyclerView(View v) {
@@ -120,22 +169,27 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
     @Override
     public void onRecipeClick(int position) {
-        LoginInfo.setCurrentLogin("JustWingit","cse110wingit@gmail.com", WingitUtils.hashPassword("wingit!1"));
-        LambdaResponse recipe = LambdaRequests.getRecipe(1);
-        while(recipe.isRunning()){
-            System.out.println("Running!");
-        }
-        JSONObject ofRecipe = recipe.getResponseJSON();
-        System.out.println(ofRecipe);
-        String recipeName = "";
-        try {
-            recipeName = ofRecipe.getString("recipe_title");
-        } catch (JSONException e) {
-            recipeName = "Null";
-        }
+        /**
+         * TODO: 1. Pass recipe_id from (int position) <- which is the recipe card, i presume
+         * TODO: 2. Debug recipe list duplication upon pressing the back button
+         * TODO:      a. we could delete all current recipe cards (int positions) upon entering this method
+         */
 
         // TODO eventually we will pass in an entire recipe object here but for now it is just the title
-        Fragment recipeFragment = new RecipePageFragment(recipeName);
-        getFragmentManager().beginTransaction().replace(R.id.container, recipeFragment).commit();
+        Fragment recipeFragment = new RecipePageFragment(mRecipeID.get(position));
+        getFragmentManager().beginTransaction().replace(R.id.container, recipeFragment).addToBackStack(null).commit();
+    }
+
+    /**
+     * @param recipeSearchText
+     *      1. This is the String that the user enters in SearchFragment
+     *      2. This String represents the recipe that the user would like to search in the WingIt Database
+     *      3. We will make a request to the Lambda API using this string in the onCreateView method above.
+     */
+    public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness) {
+        this.recipeSearchText = recipeSearchText;
+        this.spiciness = spiciness;
+        this.nutAllergy = nutAllergy;
+        this.glutenFree = glutenFree;
     }
 }
