@@ -15,10 +15,9 @@
         android:id="@+id/topspace"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:minHeight="55dp"></Space>
+        android:minHeight="55dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -121,7 +120,14 @@
 
 
                 </LinearLayout>
-
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Tutorial_Button"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="51dp"
+                    android:text="Cooking Tutorial"
+                    android:layout_gravity="center_horizontal"
+                    android:clickable="true" />
                 <TextView
                     android:id="@+id/Description_TextView"
                     android:layout_width="wrap_content"
@@ -163,17 +169,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="Food pairings go here" />
-
-                <Button
-                    android:id="@+id/Tutorial_Button"
-                    style="@style/Widget.AppCompat.Button.Colored"
-                    android:layout_width="156dp"
-                    android:layout_height="51dp"
-                    android:background="#FFFFFF"
-                    android:shadowColor="#FFFFFF"
-                    android:text="Cooking Tutorial"
-                    android:textColor="#2196F3"
-                    app:rippleColor="#FFFFFF" />
 
                 <TextView
                     android:id="@+id/textViewInstructions"
