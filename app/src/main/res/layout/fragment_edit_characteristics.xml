@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Recipe Preferences"
+            android:layout_marginTop="20sp"
+            android:layout_marginBottom="20sp"
+            android:layout_gravity="center"
+            android:textSize="28sp"/>
+
+        <CheckBox android:id="@+id/checkbox_nut_allergy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nut Allergy"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:onClick="onCheckboxClicked"
+            android:textSize="16sp"
+            android:buttonTint="@color/primary"/>
+
+        <CheckBox android:id="@+id/checkbox_gluten_free"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gluten Free"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:onClick="onCheckboxClicked"
+            android:textSize="16sp"
+            android:buttonTint="@color/primary"/>
+
+        <CheckBox android:id="@+id/checkbox_vegetarian"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vegetarian"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:onClick="onCheckboxClicked"
+            android:textSize="16sp"
+            android:buttonTint="@color/primary"/>
+
+        <CheckBox android:id="@+id/checkbox_vegan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vegan"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
+            android:onClick="onCheckboxClicked"
+            android:textSize="16sp"
+            android:buttonTint="@color/primary"/>
+
+        <TextView
+            android:id="@+id/spice_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spice Level Preference: None"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"/>
+
+        <SeekBar
+            android:id="@+id/spice_seekbar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:max="5"
+            android:progress="0"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:progressTint="@color/primary"
+            android:thumbTint="@color/primary"
+            android:layout_marginBottom="20dp" />
+
+        <TextView
+            android:id="@+id/sweetness_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sweetness Level Preference: None"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"/>
+
+        <SeekBar
+            android:id="@+id/sweet_seekbar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:max="5"
+            android:progress="0"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
+            android:progressTint="@color/primary"
+            android:thumbTint="@color/primary"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/prefResetButton"
+                android:text="Reset"
+                android:layout_marginRight="30dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="onResetClicked"/>
+
+            <Button
+                android:id="@+id/prefConfirmButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:text="Confirm"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="onConfirmClicked"/>
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
