@@ -145,8 +145,6 @@ public class CreateRecipe extends Fragment {
                 String userIngredientUnit = inputIngredientUnit.getText().toString().trim();
 
                 CharSequence errMsg = null;
-                int duration = Toast.LENGTH_LONG;
-                Toast toast;
 
                 StringBuilder newIngredient = new StringBuilder();
 
@@ -161,14 +159,15 @@ public class CreateRecipe extends Fragment {
                 }
 
                 if (errMsg != null) {
-                    toast = Toast.makeText(getActivity(), errMsg, duration);
-                    toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0,0);
-                    toast.show();
+                    showToast(errMsg);
                     return;
                 }
 
-                newIngredient.append(userIngredientQuantity + " ");
-                newIngredient.append(userIngredientUnit + " ");
+                if (userIngredientQuantity.length() > 0) {
+                    newIngredient.append(userIngredientQuantity + " ");
+                    if (userIngredientUnit.length() > 0) newIngredient.append(userIngredientUnit + " ");
+                }
+
                 newIngredient.append(userIngredientName);
 
                 mIngredientList.add(newIngredient.toString());
@@ -200,15 +199,11 @@ public class CreateRecipe extends Fragment {
                 String userRecipeStep = inputRecipeStep.getText().toString().trim();
 
                 CharSequence errMsg = null;
-                int duration = Toast.LENGTH_LONG;
-                Toast toast;
 
                 // Cannot be empty.
                 if (userRecipeStep.length() == 0) {
                     errMsg = "New recipe instruction cannot be empty.";
-                    toast = Toast.makeText(getActivity(), errMsg, duration);
-                    toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0,0);
-                    toast.show();
+                    showToast(errMsg);
                     return;
                 }
 
@@ -251,8 +246,6 @@ public class CreateRecipe extends Fragment {
                 String recipeDescription = inputRecipeDescription.getText().toString().trim();
 
                 CharSequence errMsg = null;
-                int duration = Toast.LENGTH_LONG;
-                Toast toast;
 
                 if (recipeName.length() == 0) {
                     errMsg = "Recipe name cannot be empty.";
@@ -263,9 +256,7 @@ public class CreateRecipe extends Fragment {
                 }
 
                 if (errMsg != null) {
-                    toast = Toast.makeText(getActivity(), errMsg, duration);
-                    toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0,0);
-                    toast.show();
+                    showToast(errMsg);
                     return;
                 }
 
@@ -287,8 +278,6 @@ public class CreateRecipe extends Fragment {
                 Log.i(tag, "Contains nuts " + containsNuts);
                 Log.i(tag, "Is gluten free " + isGlutenFree);
                 Log.i(tag, "Spiciness level " + spicinessLevel);
-
-                Toast.makeText(getActivity(), "Submit logs called", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -347,6 +336,13 @@ public class CreateRecipe extends Fragment {
         });
     }
 
+    private void showToast(CharSequence msg) {
+        Toast toast;
+        toast = Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP, 0, 0);
+        toast.show();
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -357,7 +353,7 @@ public class CreateRecipe extends Fragment {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
                 wingImageView.setImageBitmap(bitmap);
             } catch (IOException e) {
-                Toast.makeText(getActivity(), "Unable to load image uri.", Toast.LENGTH_SHORT).show();
+                showToast("Unable to load image uri.");
             }
         }
 
