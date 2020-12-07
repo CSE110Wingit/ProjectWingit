@@ -1,19 +1,37 @@
 package com.example.projectwingit;
 
+import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.example.projectwingit.io.LambdaRequests;
+import com.example.projectwingit.io.LambdaResponse;
+import com.example.projectwingit.utils.LoginInfo;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link DeleteAccountFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DeleteAccountFragment extends Fragment {
+public class DeleteAccountFragment extends Fragment implements View.OnClickListener {
+
+    Button deleteButton;
+    Button errorButton;
+    EditText passwordText;
+    Dialog errorDialog;
+    TextView errorText;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -59,6 +77,60 @@ public class DeleteAccountFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_delete_account, container, false);
+        View v = inflater.inflate(R.layout.fragment_delete_account, container, false);
+
+        return v;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        deleteButton = view.findViewById(R.id.deleteAccButton);
+        passwordText = view.findViewById(R.id.passwordResponse);
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteAccount();
+            }
+        });
+
+    }
+
+    private void deleteAccount() {
+        String password, hashPass;
+        password = passwordText.getText().toString();
+        hashPass = com.example.projectwingit.utils.WingitUtils.hashPassword(password);
+
+        LambdaResponse passForDelete = LambdaRequests.deleteAccount(hashPass);
+
+        deleteButton.post(new Runnable() {
+            @Override
+            public void run() {
+                errorDialog = new Dialog(getActivity());
+                errorDialog.setContentView(R.layout.error_dialog);
+                errorText = (TextView)errorDialog.findViewById(R.id.error_dialog_text1);
+                errorText.setText(passForDelete.getResponseInfo());
+                errorDialog.show();
+                errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
+                if (!passForDelete.isError()) {
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(intent);
+                }
+                errorButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        errorDialog.cancel();
+                    }
+                });
+            }
+        });
+
+
+    }
+    @Override
+    public void onClick(View v) {
+
     }
 }

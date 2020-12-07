@@ -7,6 +7,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 
 import android.app.FragmentTransaction;
+import android.content.ClipData;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -63,7 +64,13 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
         if(isLoggedIn){
             TextView greeting = accountView.getHeaderView(0).findViewById(R.id.AO_title);
             greeting.setText("Hi, " + loginUsername + "!");
-            accountView.getMenu().getItem(0).getSubMenu().getItem(1).setTitle("Logout");
+            accountView.getMenu().getItem(0).getSubMenu().getItem(1).setVisible(true);
+            accountView.getMenu().getItem(0).getSubMenu().getItem(2).setVisible(true);
+            accountView.getMenu().getItem(0).getSubMenu().getItem(3).setVisible(true);
+        }
+        else {
+            accountView.getMenu().getItem(0).getSubMenu().getItem(0).setVisible(true);
+            accountView.getMenu().getItem(0).getSubMenu().getItem(4).setVisible(true);
         }
 
     }
@@ -73,15 +80,16 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
 
         switch (item.getItemId()) {
             case R.id.user_account_login:
-                if(isLoggedIn){
-                    LoginInfo.CURRENT_LOGIN = null;
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-                else{
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new LoginFragment()).commit();
-                }
+                getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new LoginFragment()).commit();
+                break;
+            case R.id.change_password:
+                getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new passwordChangeFragment()).commit();
+                break;
+            case R.id.delete_account:
+                getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new DeleteAccountFragment()).commit();
+                break;
+            case R.id.logout_account:
+                getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new logOffFragment()).commit();
                 break;
             case R.id.user_account_create:
                 getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new RegisterFragment()).commit();
@@ -95,6 +103,7 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
                     getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new LoginFragment()).commit();
                 }
                 break;
+
         }
         account_Drawer.closeDrawer(GravityCompat.START);
 

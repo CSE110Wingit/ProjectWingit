@@ -1,20 +1,30 @@
 package com.example.projectwingit;
 
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+
+import com.example.projectwingit.io.LambdaRequests;
+import com.example.projectwingit.io.LambdaResponse;
+import com.example.projectwingit.utils.LoginInfo;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link logOffFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class logOffFragment extends Fragment {
+public class logOffFragment extends Fragment implements View.OnClickListener {
 
+
+    Button logout_button;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -46,6 +56,12 @@ public class logOffFragment extends Fragment {
         return fragment;
     }
 
+    //For onClick
+//    LoginInfo.CURRENT_LOGIN = null;
+//    Intent intent = new Intent(this, MainActivity.class);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//    startActivity(intent);
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,5 +76,36 @@ public class logOffFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_log_off, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        logout_button = view.findViewById(R.id.button_Logout);
+
+        logout_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginInfo.CURRENT_LOGIN = null;
+                LambdaResponse logout_User = LambdaRequests.logout();
+                logout_button.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    }
+                });
+
+            }
+        });
+    }
+
+
+
+    @Override
+    public void onClick(View v) {
+
     }
 }
