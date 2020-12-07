@@ -25,6 +25,7 @@
     <!--Strings for the recipe page -->
     <string name="first_card_instruction">Instructions go here.</string>
     <string name="rate_recipe">Rate Recipe</string>
+    <string name="recipe_instruction"><u>Recipe Instructions</u></string>
 
     <!--Strings for bottom navigation and toolbar title change -->
     <string name="home_title_toolbar">WingIt</string>

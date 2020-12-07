@@ -30,6 +30,7 @@ import static com.example.projectwingit.utils.WingitLambdaConstants.NUT_ALLERGY_
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_DESCRIPTION_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_INGREDIENTS_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_PICTURE_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_RATING_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_TITLE_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_TUTORIAL_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.USERNAME_STR;
@@ -119,8 +120,9 @@ public class RecipePageFragment extends Fragment {
         TextView titleText = v.findViewById(R.id.titleText);
         TextView descriptionText = v.findViewById(R.id.Description_TextView); //TODO: USE CORRECT ID
         TextView ingredientsText = v.findViewById(R.id.Ingredients_TextView);
-        TextView instructionsText = v.findViewById(R.id.textViewInstructions);
+        //TextView instructionsText = v.findViewById(R.id.textViewInstructions);
         TextView nutAllergyText = v.findViewById(R.id.textViewAllergy);
+        TextView ratingText = v.findViewById(R.id.textViewNutritional);
 
         try {
 
@@ -128,7 +130,12 @@ public class RecipePageFragment extends Fragment {
             descriptionText.setText(recipeObject.getString(RECIPE_DESCRIPTION_STR));
             Glide.with(this).load(recipeObject.getString(RECIPE_PICTURE_STR)).into(recipeImage);
             ingredientsText.setText(recipeObject.getString(RECIPE_INGREDIENTS_STR));
-            instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
+
+            String recipeRating = "Rating: ";
+            recipeRating += recipeObject.getDouble(RECIPE_RATING_STR);
+            recipeRating += " Stars";
+            ratingText.setText(recipeRating);
+            //instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
 
             String allergyString = "";
             if(recipeObject.getBoolean(NUT_ALLERGY_STR)) allergyString += "This recipe contains nuts. ";
@@ -220,13 +227,21 @@ public class RecipePageFragment extends Fragment {
             }
         });
 
+        // tutorial button
         cookingTutorialButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageInstructionFragment(recipeID)).addToBackStack(null).commit();
+            }
+        });
+
+        /*cookingTutorialButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 HomeFragment h = new HomeFragment();
                 getFragmentManager().beginTransaction().replace(R.id.container, h).addToBackStack(null).commit();
             }
-        });
+        });*/
 
 
 
