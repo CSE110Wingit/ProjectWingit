@@ -15,7 +15,8 @@
         android:layout_marginTop="200sp"
         android:layout_centerHorizontal="true"
         android:hint="@string/hungry_type_here"
-        android:inputType="textPersonName|text|textAutoComplete" />
+        android:inputType="textPersonName|text|textAutoComplete"
+        android:imeOptions="actionDone"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/search_wing_recipe"
