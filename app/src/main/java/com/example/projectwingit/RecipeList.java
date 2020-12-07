@@ -172,7 +172,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                         mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
                         mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
 
-                        recipeRating += recipeJSONObject.getDouble(RECIPE_RATING_STR);
+                        //recipeRating += recipeJSONObject.getDouble(RECIPE_RATING_STR);
                         recipeRating += " Stars";
                         mRecipeCategories.add(recipeRating);
 
