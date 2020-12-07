@@ -127,7 +127,9 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
 
     private void initImageBitmaps(View v) {
-        LoginInfo.setCurrentLogin("JustWingit","cse110wingit@gmail.com", WingitUtils.hashPassword("wingit!1"));
+//        LoginInfo.setCurrentLogin("JustWingit","cse110wingit@gmail.com", WingitUtils.hashPassword("wingit!1"));
+        LambdaResponse login = login();
+
         if(initializedCards) initRecyclerView(v);
         else {
             initializedCards = Boolean.TRUE;

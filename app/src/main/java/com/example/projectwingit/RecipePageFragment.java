@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import static com.example.projectwingit.io.LambdaRequests.deleteRecipe;
 import static com.example.projectwingit.io.LambdaRequests.favoriteRecipe;
 import static com.example.projectwingit.io.LambdaRequests.getRecipe;
+import static com.example.projectwingit.io.LambdaRequests.unfavoriteRecipe;
 import static com.example.projectwingit.utils.WingitLambdaConstants.FAVORITED_RECIPES_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.GLUTEN_FREE_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.NUT_ALLERGY_STR;
@@ -202,6 +203,8 @@ public class RecipePageFragment extends Fragment {
 
 
                     LambdaResponse favreq = favoriteRecipe("" + recipeID);
+                    //LambdaResponse favreq = unfavoriteRecipe("" + recipeID);
+
                     favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
                     favoriteButton.setText("In Favorites");
                 }
