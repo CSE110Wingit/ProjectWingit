@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
 
 import android.app.FragmentTransaction;
 import android.content.Intent;
@@ -59,8 +60,11 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
         accountView.setNavigationItemSelectedListener(this);
 //        getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new LoginFragment()).commit();
 
-
-
+        if(isLoggedIn){
+            TextView greeting = accountView.getHeaderView(0).findViewById(R.id.AO_title);
+            greeting.setText("Hi, " + loginUsername + "!");
+            accountView.getMenu().getItem(0).getSubMenu().getItem(1).setTitle("Logout");
+        }
 
     }
 
@@ -69,7 +73,15 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
 
         switch (item.getItemId()) {
             case R.id.user_account_login:
-                getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new LoginFragment()).commit();
+                if(isLoggedIn){
+                    LoginInfo.CURRENT_LOGIN = null;
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                }
+                else{
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new LoginFragment()).commit();
+                }
                 break;
             case R.id.user_account_create:
                 getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new RegisterFragment()).commit();
