@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ActionBarDrawerToggle toggle;
     private NavigationView navigationView;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,9 +100,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             toolbar.setTitle(R.string.search_title_toolbar);
                             break;
                         case R.id.favorites:
-                            fragment = new FavoritesFragment();
-                            toolbar.setTitle(R.string.favorites_title_toolbar);
+                            // checks if user is logged in
+                            if (LoginInfo.CURRENT_LOGIN != null) {
+                                fragment = new FavoritesFragment();
+                                toolbar.setTitle(R.string.favorites_title_toolbar);
+                            }
+                            else {
+                                //TODO transition to login page
+                            }
                             break;
+
                     }
                     getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment).addToBackStack(null).commit();
 

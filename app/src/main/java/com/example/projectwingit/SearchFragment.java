@@ -75,7 +75,7 @@ public class SearchFragment extends Fragment {
             public void onClick(View v) {
                 searchRecipeText = searchText.getText().toString();
                 RecipeList rl = new RecipeList();
-                rl.typeResults(searchRecipeText, Boolean.TRUE, Boolean.FALSE, 2);
+                rl.typeResults(searchRecipeText, Boolean.TRUE, Boolean.FALSE, 2, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, rl).addToBackStack(null).commit();
             }
         });

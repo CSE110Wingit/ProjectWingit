@@ -26,7 +26,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import static com.example.projectwingit.io.LambdaRequests.getRecipe;
+import static com.example.projectwingit.io.LambdaRequests.login;
 import static com.example.projectwingit.io.LambdaRequests.searchRecipes;
+import static com.example.projectwingit.utils.WingitLambdaConstants.FAVORITED_RECIPES_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.QUERY_RESULTS_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_DESCRIPTION_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_ID_STR;
@@ -58,10 +60,14 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
     private ArrayList<String> mRecipeDescriptions = new ArrayList<>();
     private ArrayList<Integer> mRecipeID = new ArrayList<>();
 
+    private String loginUsername = "JustWingit";
+    private String loginEmail = "cse110wingit@gmail.com";
+
     private String recipeSearchText;
     private int spiciness;
     private Boolean nutAllergy;
     private Boolean glutenFree;
+    private Boolean isFavorites;
 
     private Boolean initializedCards = Boolean.FALSE;
     private JSONObject recipeCardInfo;
@@ -103,8 +109,13 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_recipe_list, container, false);
 
+        if (isFavorites) {
+            initFavorites(v);
+        }
+        else {
+            initImageBitmaps(v);
+        }
 
-        initImageBitmaps(v);
 
 
 
@@ -186,10 +197,59 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
      *      2. This String represents the recipe that the user would like to search in the WingIt Database
      *      3. We will make a request to the Lambda API using this string in the onCreateView method above.
      */
-    public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness) {
+    public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness, Boolean isFavorites) {
         this.recipeSearchText = recipeSearchText;
         this.spiciness = spiciness;
         this.nutAllergy = nutAllergy;
         this.glutenFree = glutenFree;
+        this.isFavorites = isFavorites;
     }
+
+    private void initFavorites(View v) {
+        if(initializedCards) initRecyclerView(v);
+        else {
+            initializedCards = Boolean.TRUE;
+            LambdaResponse lr = login();
+            while (lr.isRunning()) {
+            }
+            JSONObject joe = lr.getResponseJSON();
+
+            JSONArray ja = new JSONArray();
+            try {
+                ja = joe.getJSONArray(FAVORITED_RECIPES_STR);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            JSONObject recipeID = new JSONObject();
+            LambdaResponse recipeObject;
+            String recipeIDString = "";
+            JSONObject recipeJSONObject;
+
+            try {
+                for (int i = 0; i < ja.length(); i++) {
+                    recipeIDString = ja.getString(i);
+                    int id = Integer.parseInt(recipeIDString);
+                    recipeObject = getRecipe(id);
+                    while (recipeObject.isRunning()) {}
+
+                    recipeJSONObject = recipeObject.getResponseJSON();
+                    while (recipeObject.isRunning()) {}
+
+                    mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
+                    mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
+                    mRecipeCategories.add("Category " + i);
+                    mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
+                    mRecipeID.add(id);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            initRecyclerView(v);
+        }
+
+    }
+
+
 }

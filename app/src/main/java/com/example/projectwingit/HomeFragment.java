@@ -80,7 +80,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList spicyList = new RecipeList();
-                spicyList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5);
+                spicyList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, spicyList).addToBackStack(null).commit();
             }
         });
