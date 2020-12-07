@@ -26,6 +26,7 @@ import static com.example.projectwingit.utils.WingitLambdaConstants.NUT_ALLERGY_
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_DESCRIPTION_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_INGREDIENTS_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_PICTURE_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_RATING_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_TITLE_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_TUTORIAL_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.USERNAME_STR;
@@ -117,6 +118,7 @@ public class RecipePageFragment extends Fragment {
         TextView ingredientsText = v.findViewById(R.id.Ingredients_TextView);
         //TextView instructionsText = v.findViewById(R.id.textViewInstructions);
         TextView nutAllergyText = v.findViewById(R.id.textViewAllergy);
+        TextView ratingText = v.findViewById(R.id.textViewNutritional);
 
         try {
 
@@ -124,6 +126,11 @@ public class RecipePageFragment extends Fragment {
             descriptionText.setText(recipeObject.getString(RECIPE_DESCRIPTION_STR));
             Glide.with(this).load(recipeObject.getString(RECIPE_PICTURE_STR)).into(recipeImage);
             ingredientsText.setText(recipeObject.getString(RECIPE_INGREDIENTS_STR));
+
+            String recipeRating = "Rating: ";
+            recipeRating += recipeObject.getDouble(RECIPE_RATING_STR);
+            recipeRating += " Stars";
+            ratingText.setText(recipeRating);
             //instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
 
             String allergyString = "";
