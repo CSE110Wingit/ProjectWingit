@@ -59,6 +59,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
     private ArrayList<String> mRecipeCategories = new ArrayList<>();
     private ArrayList<String> mRecipeDescriptions = new ArrayList<>();
     private ArrayList<Integer> mRecipeID = new ArrayList<>();
+    private ArrayList<Boolean> mIsFavorites = new ArrayList<>();
 
     private String loginUsername = "JustWingit";
     private String loginEmail = "cse110wingit@gmail.com";
@@ -67,7 +68,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
     private int spiciness;
     private Boolean nutAllergy;
     private Boolean glutenFree;
-    private Boolean isFavorites;
+    private Boolean isFavoritesPage;
 
     private Boolean initializedCards = Boolean.FALSE;
     private JSONObject recipeCardInfo;
@@ -109,7 +110,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_recipe_list, container, false);
 
-        if (isFavorites) {
+        if (isFavoritesPage) {
             initFavorites(v);
         }
         else {
@@ -141,6 +142,13 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                 e.printStackTrace();
             }
 
+            JSONArray favs = new JSONArray();
+            try {
+                favs = joe.getJSONArray(FAVORITED_RECIPES_STR);
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+
             JSONObject recipeID = new JSONObject();
             LambdaResponse recipeObject;
             String recipeIDString = "";
@@ -161,6 +169,14 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                     mRecipeCategories.add("Category " + i);
                     mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
                     mRecipeID.add(id);
+
+                    boolean favVal = false;
+
+                    for (int z = 0; z < favs.length(); z++) {
+                        if (favs.getString(i).equals(recipeIDString)) favVal = true;
+                    }
+
+                    mIsFavorites.add(favVal);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -173,7 +189,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
     private void initRecyclerView(View v) {
         RecyclerView recyclerView = (RecyclerView)  v.findViewById(R.id.recycler_view_container);
-        RecipeListRecyclerViewAdapter adapter = new RecipeListRecyclerViewAdapter(mRecipeImageUrls, mRecipeTitles, mRecipeCategories,mRecipeDescriptions, getContext(), this);
+        RecipeListRecyclerViewAdapter adapter = new RecipeListRecyclerViewAdapter(mRecipeImageUrls, mRecipeTitles, mRecipeCategories,mRecipeDescriptions, getContext(), this, mIsFavorites);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
@@ -197,12 +213,12 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
      *      2. This String represents the recipe that the user would like to search in the WingIt Database
      *      3. We will make a request to the Lambda API using this string in the onCreateView method above.
      */
-    public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness, Boolean isFavorites) {
+    public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness, Boolean isFavoritesPage) {
         this.recipeSearchText = recipeSearchText;
         this.spiciness = spiciness;
         this.nutAllergy = nutAllergy;
         this.glutenFree = glutenFree;
-        this.isFavorites = isFavorites;
+        this.isFavoritesPage = isFavoritesPage;
     }
 
     private void initFavorites(View v) {
@@ -241,6 +257,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                     mRecipeCategories.add("Category " + i);
                     mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
                     mRecipeID.add(id);
+                    mIsFavorites.add(Boolean.TRUE);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

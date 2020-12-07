@@ -15,12 +15,16 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.utils.LoginInfo;
+import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.example.projectwingit.io.LambdaRequests.deleteRecipe;
+import static com.example.projectwingit.io.LambdaRequests.favoriteRecipe;
 import static com.example.projectwingit.io.LambdaRequests.getRecipe;
+import static com.example.projectwingit.utils.WingitLambdaConstants.FAVORITED_RECIPES_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.GLUTEN_FREE_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.NUT_ALLERGY_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_DESCRIPTION_STR;
@@ -158,11 +162,45 @@ public class RecipePageFragment extends Fragment {
         Button cancel = rateDialog.findViewById(R.id.cancel_dialog_button);
         Button okay = rateDialog.findViewById(R.id.ok_dialog_button);
         Button cookingTutorialButton = v.findViewById(R.id.Tutorial_Button);
+        MaterialButton favoriteButton = v.findViewById(R.id.recipe_page_fav_button);
 
         cancel.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 rateDialog.dismiss();
+            }
+        });
+
+        favoriteButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+
+                LambdaResponse lr = getRecipe(recipeID);
+
+                JSONObject joe = lr.getResponseJSON();
+                while (lr.isRunning()) {}
+
+                JSONArray favs = new JSONArray();
+                try {
+                    favs = joe.getJSONArray(FAVORITED_RECIPES_STR);
+                } catch (JSONException e){
+                    e.printStackTrace();
+                }
+
+                try {
+                    boolean favVal = false;
+                    for (int i = 0; i < favs.length(); i++) {
+                        if (favs.getString(i).equals("" + recipeID)) favVal = true;
+                    }
+
+
+                    LambdaResponse favreq = favoriteRecipe("" + recipeID);
+                    favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
+                    favoriteButton.setText("In Favorites");
+                }
+                catch (JSONException e){
+                    e.printStackTrace();
+                }
             }
         });
 

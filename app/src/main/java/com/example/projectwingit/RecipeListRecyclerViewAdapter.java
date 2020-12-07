@@ -1,6 +1,7 @@
 package com.example.projectwingit;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
@@ -28,18 +30,20 @@ public class RecipeListRecyclerViewAdapter extends RecyclerView.Adapter<RecipeLi
     private ArrayList<String> mRecipeTitles = new ArrayList<>();
     private ArrayList<String> mRecipeCategories = new ArrayList<>();
     private ArrayList<String> mRecipeDescriptions = new ArrayList<>();
+    private ArrayList<Boolean> mIsFavorited = new ArrayList<>();
     private Context mContext;
     private OnRecipeListener monRecipeListener;
 
     public RecipeListRecyclerViewAdapter(ArrayList<String> mRecipeImages, ArrayList<String> mRecipeTitles,
                                          ArrayList<String> mRecipeCategories, ArrayList<String> mRecipeDescriptions,
-                                         Context mContext, OnRecipeListener onRecipeListener) {
+                                         Context mContext, OnRecipeListener onRecipeListener, ArrayList<Boolean> mIsFavorited) {
         this.mRecipeImages = mRecipeImages;
         this.mRecipeTitles = mRecipeTitles;
         this.mRecipeCategories = mRecipeCategories;
         this.mRecipeDescriptions = mRecipeDescriptions;
         this.mContext = mContext;
         this.monRecipeListener = onRecipeListener;
+        this.mIsFavorited = mIsFavorited;
 
     }
 
@@ -59,6 +63,12 @@ public class RecipeListRecyclerViewAdapter extends RecyclerView.Adapter<RecipeLi
         holder.recipeTitle.setText(mRecipeTitles.get(position));
         holder.recipeCategory.setText(mRecipeCategories.get(position));
         holder.recipeDescription.setText(mRecipeDescriptions.get(position));
+
+        if(mIsFavorited.get(position)) {
+            holder.favoriteButton.setText("In Favorites");
+            holder.favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
+        }
+
         holder.recipeCard.setOnClickListener(holder);
         };
 
@@ -75,6 +85,7 @@ public class RecipeListRecyclerViewAdapter extends RecyclerView.Adapter<RecipeLi
         TextView recipeDescription;
         OnRecipeListener onRecipeListener;
         MaterialCardView recipeCard;
+        MaterialButton favoriteButton;
 
         public ViewHolder(@NonNull View itemView, OnRecipeListener onRecipeListener) {
             super(itemView);
@@ -82,6 +93,7 @@ public class RecipeListRecyclerViewAdapter extends RecyclerView.Adapter<RecipeLi
             recipeTitle = itemView.findViewById(R.id.recipe_title);
             recipeCategory = itemView.findViewById(R.id.recipe_category);
             recipeDescription = itemView.findViewById(R.id.recipe_description);
+            favoriteButton = itemView.findViewById(R.id.favoite_button);
             this.recipeCard = itemView.findViewById(R.id.recipe_card_id);
             this.onRecipeListener = onRecipeListener;
             
