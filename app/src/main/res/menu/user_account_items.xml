@@ -8,12 +8,33 @@
             <item
                 android:id="@+id/user_account_create"
                 android:icon="@drawable/ic_create_account"
-                android:title="@string/create_account" />
+                android:title="@string/create_account"
+                android:visible="false"/>
+
+            <item
+                android:id="@+id/change_password"
+                android:icon="@drawable/ic_change_pass"
+                android:title="Change Password"
+                android:visible="false"/>
+
+            <item
+                android:id="@+id/delete_account"
+                android:icon="@drawable/ic_delete_acc"
+                android:title="Delete Account"
+                android:visible="false"/>
+
+            <item
+                android:id="@+id/logout_account"
+                android:icon="@drawable/ic_logout"
+                android:title="Logout"
+                android:visible="false"/>
 
             <item
                 android:id="@+id/user_account_login"
                 android:icon="@drawable/ic_login"
-                android:title="@string/login" />
+                android:title="@string/login"
+                android:visible="false"/>
+
 
         </menu>
     </item>
