@@ -17,6 +17,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.utils.LoginInfo;
@@ -46,6 +48,15 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_account);
+
+        // Show toast if guest user tried to create a recipe.
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            String msg = extras.getString("protected_destination");
+            if (msg != null) {
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            }
+        }
 
         // checks if user is logged in
         if (LoginInfo.CURRENT_LOGIN != null) {
