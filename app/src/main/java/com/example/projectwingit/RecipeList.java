@@ -157,7 +157,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                     while (recipeObject.isRunning()) {}
 
                     String testRecipeName = recipeJSONObject.getString(RECIPE_TITLE_STR);
-                    if(testRecipeName != "recipe1" && testRecipeName != " recipe1" && testRecipeName != "recipe1 " && testRecipeName != " recipe1 ") {
+                    if(!(testRecipeName.contains("recipe1"))) {
                         mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
                         mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
                         mRecipeCategories.add("Category " + i);
