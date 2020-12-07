@@ -279,7 +279,7 @@ public class LambdaRequests {
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return
      */
-    public static LambdaResponse createRecipe(String title, String ingredients, String description,
+    public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                               int spicinessLevel, boolean isPrivate, String imageURL){
         try{
@@ -287,7 +287,7 @@ public class LambdaRequests {
                     USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
                     PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
                     RECIPE_TITLE_STR, title,
-                    RECIPE_INGREDIENTS_STR, ingredients,
+                    RECIPE_INGREDIENTS_STR, mergeArray(ingredients),
                     RECIPE_DESCRIPTION_STR, description,
                     RECIPE_TUTORIAL_STR, tutorial,
                     RECIPE_PRIVATE_STR, ""+isPrivate,
@@ -337,7 +337,7 @@ public class LambdaRequests {
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return A LambdaResponse of the response
      */
-    public static LambdaResponse editRecipe(String title, String ingredients, String description,
+    public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
                                             String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                             int spicinessLevel, boolean isPrivate, String imageURL){
         try{
@@ -345,7 +345,7 @@ public class LambdaRequests {
                     USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
                     PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
                     RECIPE_TITLE_STR, title,
-                    RECIPE_INGREDIENTS_STR, ingredients,
+                    RECIPE_INGREDIENTS_STR, mergeArray(ingredients),
                     RECIPE_DESCRIPTION_STR, description,
                     RECIPE_TUTORIAL_STR, tutorial,
                     RECIPE_PRIVATE_STR, ""+isPrivate,
@@ -479,5 +479,14 @@ public class LambdaRequests {
      */
     private static String getUserOrEmail(String userOrEmail){
         return userOrEmail.contains("@") ? EMAIL_STR : USERNAME_STR;
+    }
+
+    /**
+     * ','.join(args)
+     */
+    private static String mergeArray(String[] args){
+        StringBuilder ret = new StringBuilder();
+        for (String s : args){ ret.append(s).append(","); }
+        return ret.substring(0, ret.length() - 1);
     }
 }
