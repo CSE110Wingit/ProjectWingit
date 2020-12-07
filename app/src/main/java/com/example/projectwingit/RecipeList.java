@@ -156,11 +156,14 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                     recipeJSONObject = recipeObject.getResponseJSON();
                     while (recipeObject.isRunning()) {}
 
-                    mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
-                    mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
-                    mRecipeCategories.add("Category " + i);
-                    mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
-                    mRecipeID.add(id);
+                    String testRecipeName = recipeJSONObject.getString(RECIPE_TITLE_STR);
+                    if(testRecipeName != "recipe1" && testRecipeName != " recipe1" && testRecipeName != "recipe1 " && testRecipeName != " recipe1 ") {
+                        mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
+                        mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
+                        mRecipeCategories.add("Category " + i);
+                        mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
+                        mRecipeID.add(id);
+                    }
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
