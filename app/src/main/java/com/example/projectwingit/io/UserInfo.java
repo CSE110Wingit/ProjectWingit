@@ -30,7 +30,7 @@ public class UserInfo {
      * @return true if the user is logged in and not a guest
      */
     public boolean isLoggedIn(){
-        return username == null;
+        return username != null;
     }
 
     public String getUsername(){ return username; }
