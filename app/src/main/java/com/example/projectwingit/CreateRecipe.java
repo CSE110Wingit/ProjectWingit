@@ -1,6 +1,7 @@
 package com.example.projectwingit;
 
 import android.app.Activity;
+import android.app.AsyncNotedAppOp;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.loader.content.AsyncTaskLoader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
 
 import java.io.IOException;
@@ -241,6 +244,24 @@ public class CreateRecipe extends Fragment {
                 ;
             }
         });
+    }
+
+    private class ProcessCreateRecipeResponseThread extends Thread {
+        LambdaResponse response;
+        public ProcessCreateRecipeResponseThread(LambdaResponse presponse) {
+            response = presponse;
+        }
+
+        public void run() {
+            // Wait until a response comes back from the lambda api.
+            while (response.isRunning());
+
+            if (response.isClientError() || response.isServerError()) {
+                Log.i(tag, "LambdaResponse error: " + response.getErrorMessage());
+            } else {
+
+            }
+        }
     }
 
     public void setUpSubmitButton() {
