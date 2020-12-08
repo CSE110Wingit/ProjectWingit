@@ -29,6 +29,8 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.projectwingit.io.UserInfo;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -289,6 +291,7 @@ public class CreateRecipe extends Fragment {
                 Log.i(tag, "Recipe description: " + recipeDescription);
                 if (imageUri != null) {
                     Log.i(tag, "Image uri " + imageUri.toString());
+                    Log.i(tag, "Image path " + imageUri.getPath());
                 } else {
                     Log.i(tag, "No image selected");
                 }
@@ -300,6 +303,7 @@ public class CreateRecipe extends Fragment {
                 Log.i(tag, "Is gluten free " + isGlutenFree);
                 Log.i(tag, "Spiciness level " + spicinessLevel);
                 Log.i(tag, "Is private " + isPrivate);
+                Log.i(tag, "Current user " + UserInfo.CURRENT_USER.getUsername());
             }
         });
     }
@@ -349,9 +353,12 @@ public class CreateRecipe extends Fragment {
 
             @Override
             public void onClick(View v) {
-                Intent uploadFromGalleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-                if (uploadFromGalleryIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    startActivityForResult(uploadFromGalleryIntent, GET_FROM_GALLERY);
+                Intent uploadPhotoIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                String [] mimeTypes = {"image/png", "image/jpg","image/jpeg"};
+                uploadPhotoIntent.setType("*/*");
+                uploadPhotoIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+                if (uploadPhotoIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivityForResult(uploadPhotoIntent, GET_FROM_GALLERY);
                 } else {
                     Log.i(tag, "No upload from gallery activity available.");
                 }
@@ -410,6 +417,7 @@ public class CreateRecipe extends Fragment {
         setUpGlutenFreeCheckbox();
         setUpSpicinessSpinner();
         setUpSubmitButton();
+        setUpIsPrivateCheckbox();
         setUpPhotoUpload();
 
         return rootView;

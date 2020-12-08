@@ -13,6 +13,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -127,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 toolbar.setTitle(R.string.home_title_toolbar);
                 break;
             case R.id.hamburger_create_recipe:
-                if (LoginInfo.CURRENT_LOGIN != null) {
+                if (UserInfo.CURRENT_USER.isLoggedIn()) {
                     getSupportFragmentManager().beginTransaction().replace(R.id.container, new CreateRecipe()).commit();
                     toolbar.setTitle(R.string.create_recipe_title_toolbar);
                 } else {
