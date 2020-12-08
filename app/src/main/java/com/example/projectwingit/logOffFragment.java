@@ -14,7 +14,7 @@ import android.widget.Button;
 
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
-import com.example.projectwingit.utils.LoginInfo;
+import com.example.projectwingit.io.UserInfo;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -87,7 +87,6 @@ public class logOffFragment extends Fragment implements View.OnClickListener {
         logout_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LoginInfo.CURRENT_LOGIN = null;
                 LambdaResponse logout_User = LambdaRequests.logout();
                 logout_button.post(new Runnable() {
                     @Override

@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.projectwingit.io.LambdaResponse;
-import com.example.projectwingit.utils.LoginInfo;
+import com.example.projectwingit.io.UserInfo;
 import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONArray;

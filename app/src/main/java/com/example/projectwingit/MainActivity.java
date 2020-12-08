@@ -17,7 +17,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.example.projectwingit.utils.LoginInfo;
+import com.example.projectwingit.io.UserInfo;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        LoginInfo.APP_CONTEXT = getApplicationContext();
+        UserInfo.APP_CONTEXT = getApplicationContext();
 
         bottomNavigationView = findViewById(R.id.bottomNav);
         bottomNavigationView.setOnNavigationItemSelectedListener(bottomNavMethod);
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             break;
                         case R.id.favorites:
                             // checks if user is logged in
-                            if (LoginInfo.CURRENT_LOGIN != null) {
+                            if (UserInfo.CURRENT_USER.isLoggedIn()) {
                                 fragment = new FavoritesFragment();
                                 toolbar.setTitle(R.string.favorites_title_toolbar);
                             }

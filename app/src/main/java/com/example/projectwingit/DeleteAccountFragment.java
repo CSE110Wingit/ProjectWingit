@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
-import com.example.projectwingit.utils.LoginInfo;
+import com.example.projectwingit.io.UserInfo;
 
 /**
  * A simple {@link Fragment} subclass.

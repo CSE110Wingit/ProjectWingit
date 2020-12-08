@@ -15,7 +15,7 @@ import android.widget.RelativeLayout;
 
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
-import com.example.projectwingit.utils.LoginInfo;
+import com.example.projectwingit.io.UserInfo;
 import com.example.projectwingit.utils.WingitUtils;
 import com.google.android.material.card.MaterialCardView;
 
