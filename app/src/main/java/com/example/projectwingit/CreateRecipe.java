@@ -81,6 +81,9 @@ public class CreateRecipe extends Fragment {
     protected Spinner spicinessLevelSpinner;
     protected long spicinessLevel;
 
+    protected CheckBox checkBoxIsPrivate;
+    protected boolean isPrivate;
+
     protected Button buttonSubmitRecipe;
 
     // TODO: Rename and change types of parameters
@@ -242,12 +245,14 @@ public class CreateRecipe extends Fragment {
         buttonSubmitRecipe = (Button) rootView.findViewById(R.id.ButtonSubmitRecipe);
         buttonSubmitRecipe.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String recipeName = inputRecipeName.getText().toString().trim();
-                String recipeDescription = inputRecipeDescription.getText().toString().trim();
+
+                // Get the inputted recipe title.
+                String recipeTitle = inputRecipeName.getText().toString().trim();
 
                 CharSequence errMsg = null;
 
-                if (recipeName.length() == 0) {
+                // Check for required fields.
+                if (recipeTitle.length() == 0) {
                     errMsg = "Recipe name cannot be empty.";
                 } else if (mIngredientList.size() == 0) {
                     errMsg = "The recipe needs at least one ingredient.";
@@ -260,24 +265,41 @@ public class CreateRecipe extends Fragment {
                     return;
                 }
 
+                // Ingredient array to post.
+                String[] recipeIngredients = mIngredientList.toArray(new String[0]);
+
+                // Recipe description to post. Optional.
+                String recipeDescription = inputRecipeDescription.getText().toString().trim();
+                if (recipeDescription.length() == 0) {
+                    recipeDescription = "No description available";
+                }
+
+                // Tutorial. One big string separated by newlines.
+                String recipeTutorial;
+                StringBuilder recipeTutorialBuilder = new StringBuilder();
+                for (String step : mRecipeStepList) {
+                    recipeTutorialBuilder.append(step + "\n");
+                }
+                recipeTutorial = recipeTutorialBuilder.toString().trim();
+
+
                 // Submission here. Need to use LambdaRequests.
                 // For now: just log current recipe state.
-                Log.i(tag, "Recipe name: " + recipeName);
+                Log.i(tag, "Recipe name: " + recipeTitle);
                 Log.i(tag, "Recipe description: " + recipeDescription);
                 if (imageUri != null) {
                     Log.i(tag, "Image uri " + imageUri.toString());
                 } else {
                     Log.i(tag, "No image selected");
                 }
-                for (String ingredient: mIngredientList) {
+                for (String ingredient: recipeIngredients) {
                     Log.i(tag, "Ingredient: " + ingredient);
                 }
-                for (String recipeStep: mRecipeStepList) {
-                    Log.i(tag, "Instruction: " + recipeStep);
-                }
+                Log.i(tag, "Tutorial: " + recipeTutorial);
                 Log.i(tag, "Contains nuts " + containsNuts);
                 Log.i(tag, "Is gluten free " + isGlutenFree);
                 Log.i(tag, "Spiciness level " + spicinessLevel);
+                Log.i(tag, "Is private " + isPrivate);
             }
         });
     }
@@ -300,6 +322,17 @@ public class CreateRecipe extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 isGlutenFree = isChecked;
+            }
+        });
+    }
+
+    private void setUpIsPrivateCheckbox() {
+        checkBoxIsPrivate = (CheckBox) rootView.findViewById(R.id.IsPrivateCheckbox);
+        isPrivate = false;
+        checkBoxIsPrivate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isPrivate = isChecked;
             }
         });
     }
