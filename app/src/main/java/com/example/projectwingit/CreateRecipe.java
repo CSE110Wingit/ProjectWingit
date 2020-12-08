@@ -1,19 +1,16 @@
 package com.example.projectwingit;
 
 import android.app.Activity;
-import android.app.AsyncNotedAppOp;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.loader.content.AsyncTaskLoader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,7 +30,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
 
@@ -57,7 +53,8 @@ public class CreateRecipe extends Fragment {
     protected ImageView wingImageView;
     protected Button buttonUploadImage;
     protected Button buttonRemoveImage;
-    protected Uri imageUri;
+    protected Uri imageURI;
+    protected String imageURL;
 
     protected View rootView;
     protected RecyclerView mRecyclerView;
@@ -335,9 +332,9 @@ public class CreateRecipe extends Fragment {
                 // For now: just log current recipe state.
                 Log.i(tag, "Recipe name: " + recipeTitle);
                 Log.i(tag, "Recipe description: " + recipeDescription);
-                if (imageUri != null) {
-                    Log.i(tag, "Image uri " + imageUri.toString());
-                    Log.i(tag, "Image path " + imageUri.getPath());
+                if (imageURI != null) {
+                    Log.i(tag, "Image uri " + imageURI.toString());
+                    Log.i(tag, "Image path " + imageURI.getPath());
                 } else {
                     Log.i(tag, "No image selected");
                 }
@@ -399,7 +396,8 @@ public class CreateRecipe extends Fragment {
         buttonUploadImage = rootView.findViewById(R.id.ButtonUploadImage);
         buttonRemoveImage = rootView.findViewById(R.id.ButtonRemoveImage);
         wingImageView = rootView.findViewById(R.id.WingImageView);
-        imageUri = null;
+        imageURI = null;
+        imageURL = null;
 
         buttonUploadImage.setOnClickListener(new View.OnClickListener() {
 
@@ -427,7 +425,7 @@ public class CreateRecipe extends Fragment {
 
             @Override
             public void onClick(View v) {
-                imageUri = null;
+                imageURI = null;
                 wingImageView.setImageResource(android.R.color.transparent);
             }
         });
@@ -438,13 +436,13 @@ public class CreateRecipe extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == UPLOAD_IMAGE && resultCode == Activity.RESULT_OK) {
-            imageUri = data.getData();
+            imageURI = data.getData();
             try {
                 if (Build.VERSION.SDK_INT < 28) {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageURI);
                     wingImageView.setImageBitmap(bitmap);
                 } else {
-                    ImageDecoder.Source source = ImageDecoder.createSource(getActivity().getContentResolver(), imageUri);
+                    ImageDecoder.Source source = ImageDecoder.createSource(getActivity().getContentResolver(), imageURI);
                     Bitmap bitmap = ImageDecoder.decodeBitmap(source);
                     wingImageView.setImageBitmap(bitmap);
                 }
