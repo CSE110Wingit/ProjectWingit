@@ -110,7 +110,6 @@ public class RecipePageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_recipe_page, container, false);
-        System.out.println(LoginInfo.CURRENT_LOGIN.username);
         LambdaResponse recipeLambdaResponse = getRecipe(recipeID);
         while (recipeLambdaResponse.isRunning()) {}
 
