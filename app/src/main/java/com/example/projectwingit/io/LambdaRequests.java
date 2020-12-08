@@ -1,17 +1,22 @@
 package com.example.projectwingit.io;
 
+import com.example.projectwingit.debug.WingitLogging;
+
 import org.json.JSONObject;
 
 import static com.example.projectwingit.utils.WingitLambdaConstants.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 
 /**
  * Provides easy access to calling the Lambda API
@@ -75,6 +80,7 @@ public class LambdaRequests extends UserInfo{
             JSONObject json = ret.getResponseJSON();
 
             if (!ret.isError()) {
+                WingitLogging.log(json.toString());
                 String log = UserInfo.CURRENT_USER.setCurrentLogin(json, passwordHash);
                 if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
             }
@@ -461,6 +467,22 @@ public class LambdaRequests extends UserInfo{
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending search recipe request: " + e.getMessage());
+        }
+    }
+
+    public static LambdaResponse uploadImage(String s3URL, String androidURI) {
+        try {
+            OkHttpClient client = new OkHttpClient();
+            File file = new File(androidURI);
+            RequestBody formBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("file", file.getName(),
+                            RequestBody.create(MediaType.parse("text/plain"), file))
+                    .build();
+            Request request = new Request.Builder().url(s3URL).post(formBody).build();
+            return new LambdaResponse(client.newCall(request));
+        }catch(Exception e){
+            return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, "Error uploading image: " + e.getMessage());
         }
     }
 
