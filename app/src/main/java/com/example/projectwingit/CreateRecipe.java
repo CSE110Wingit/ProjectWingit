@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
 
@@ -251,8 +252,9 @@ public class CreateRecipe extends Fragment {
             r = new Runnable() {
                 @Override
                 public void run() {
-                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
+//                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+//                    transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
+                    showToast("Recipe successfully created! " + errMsg);
                 }
             };
         } else {
@@ -277,10 +279,13 @@ public class CreateRecipe extends Fragment {
             while (response.isRunning());
 
             if (response.isClientError() || response.isServerError()) {
-                Log.i(tag, "LambdaResponse error: " + response.getErrorMessage());
+                Log.e(tag, "LambdaResponse error: " + response.getErrorMessage());
                 navigateToRecipePage(-1, response.getErrorMessage());
             } else {
                 // Call navigateToRecipePage here with the correct recipe id.
+                // FIXME: replace -1 with the recipe's id.
+                Log.e(tag, "Success: " + response.getErrorMessage());
+                navigateToRecipePage(-1, response.getErrorMessage());
             }
         }
     }
@@ -349,9 +354,11 @@ public class CreateRecipe extends Fragment {
                 Log.i(tag, "Current user " + UserInfo.CURRENT_USER.getUsername());
 
 
-//                LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
-//                        recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
-//                        isGlutenFree, (int) spicinessLevel, isPrivate, null);
+                LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
+                        recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
+                        isGlutenFree, (int) spicinessLevel, isPrivate, null);
+
+                new ProcessCreateRecipeResponseThread(createRecipeResponse).run();
 
             }
         });
