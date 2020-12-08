@@ -44,7 +44,7 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ButtonUploadPhoto" />
+                app:layout_constraintTop_toBottomOf="@+id/ButtonUploadImage" />
 
             <EditText
                 android:id="@+id/InputRecipeDescription"
@@ -265,12 +265,12 @@
                 app:layout_constraintTop_toBottomOf="@+id/SpicinessLevelSpinner" />
 
             <TextView
-                android:id="@+id/UploadPhotoHeader"
+                android:id="@+id/UploadImageHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="40dp"
-                android:text="Upload a Photo (Optional)"
+                android:text="Upload an Image (Optional)"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -282,9 +282,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
-                android:text="Show off a photo of your completed dish!"
+                android:text="Show off an image of your completed dish!"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/UploadPhotoHeader" />
+                app:layout_constraintTop_toBottomOf="@+id/UploadImageHeader" />
 
             <ImageView
                 android:id="@+id/WingImageView"
@@ -300,25 +300,25 @@
                 app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
             <Button
-                android:id="@+id/ButtonUploadPhoto"
+                android:id="@+id/ButtonUploadImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:text="UPLOAD"
-                app:layout_constraintEnd_toStartOf="@+id/ButtonRemovePhoto"
+                app:layout_constraintEnd_toStartOf="@+id/ButtonRemoveImage"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/WingImageView" />
 
             <Button
-                android:id="@+id/ButtonRemovePhoto"
+                android:id="@+id/ButtonRemoveImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="REMOVE"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/ButtonUploadPhoto"
+                app:layout_constraintStart_toEndOf="@+id/ButtonUploadImage"
                 app:layout_constraintTop_toBottomOf="@+id/WingImageView" />
 
             <CheckBox

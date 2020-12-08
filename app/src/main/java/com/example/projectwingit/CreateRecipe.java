@@ -2,10 +2,11 @@ package com.example.projectwingit;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -46,11 +47,11 @@ public class CreateRecipe extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String tag = "CREATE RECIPE FRAGMENT";
-    protected static final int GET_FROM_GALLERY = 1;
+    protected static final int UPLOAD_IMAGE = 1;
 
     protected ImageView wingImageView;
-    protected Button buttonUploadPhoto;
-    protected Button buttonRemovePhoto;
+    protected Button buttonUploadImage;
+    protected Button buttonRemoveImage;
     protected Uri imageUri;
 
     protected View rootView;
@@ -273,7 +274,7 @@ public class CreateRecipe extends Fragment {
                 // Recipe description to post. Optional.
                 String recipeDescription = inputRecipeDescription.getText().toString().trim();
                 if (recipeDescription.length() == 0) {
-                    recipeDescription = "No description available";
+                    recipeDescription = "No description available.";
                 }
 
                 // Tutorial. One big string separated by newlines.
@@ -341,32 +342,37 @@ public class CreateRecipe extends Fragment {
         });
     }
 
-    public void setUpPhotoUpload() {
-        // Only photo upload so far. Still figuring how to take photos. (delegate to camera)
+    public void setUpImageUpload() {
+        // Only existing image upload so far. Still figuring how to take photos. (delegate to camera)
 
-        buttonUploadPhoto = rootView.findViewById(R.id.ButtonUploadPhoto);
-        buttonRemovePhoto = rootView.findViewById(R.id.ButtonRemovePhoto);
+        buttonUploadImage = rootView.findViewById(R.id.ButtonUploadImage);
+        buttonRemoveImage = rootView.findViewById(R.id.ButtonRemoveImage);
         wingImageView = rootView.findViewById(R.id.WingImageView);
         imageUri = null;
 
-        buttonUploadPhoto.setOnClickListener(new View.OnClickListener() {
+        buttonUploadImage.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                Intent uploadPhotoIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                String [] mimeTypes = {"image/png", "image/jpg","image/jpeg"};
-                uploadPhotoIntent.setType("*/*");
-                uploadPhotoIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
-                if (uploadPhotoIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    startActivityForResult(uploadPhotoIntent, GET_FROM_GALLERY);
+                Intent uploadImageIntent = new Intent(Intent.ACTION_GET_CONTENT);
+
+                // Only alow jpg and png types.
+                String[] imageMimeTypes = {"image/jpeg", "image/jpg", "image/png"};
+                uploadImageIntent.setType(imageMimeTypes.length == 1 ? imageMimeTypes[0] : "*/*");
+
+                if (imageMimeTypes.length > 0) {
+                    uploadImageIntent.putExtra(Intent.EXTRA_MIME_TYPES, imageMimeTypes);
+                }
+                if (uploadImageIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivityForResult(uploadImageIntent, UPLOAD_IMAGE);
                 } else {
-                    Log.i(tag, "No upload from gallery activity available.");
+                    Log.i(tag, "No activity for image upload found on this device.");
                 }
             }
 
         });
 
-        buttonRemovePhoto.setOnClickListener(new View.OnClickListener() {
+        buttonRemoveImage.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -380,11 +386,17 @@ public class CreateRecipe extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
+        if (requestCode == UPLOAD_IMAGE && resultCode == Activity.RESULT_OK) {
             imageUri = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
-                wingImageView.setImageBitmap(bitmap);
+                if (Build.VERSION.SDK_INT < 28) {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
+                    wingImageView.setImageBitmap(bitmap);
+                } else {
+                    ImageDecoder.Source source = ImageDecoder.createSource(getActivity().getContentResolver(), imageUri);
+                    Bitmap bitmap = ImageDecoder.decodeBitmap(source);
+                    wingImageView.setImageBitmap(bitmap);
+                }
             } catch (IOException e) {
                 showToast("Unable to load image uri.");
             }
@@ -418,7 +430,7 @@ public class CreateRecipe extends Fragment {
         setUpSpicinessSpinner();
         setUpSubmitButton();
         setUpIsPrivateCheckbox();
-        setUpPhotoUpload();
+        setUpImageUpload();
 
         return rootView;
     }
