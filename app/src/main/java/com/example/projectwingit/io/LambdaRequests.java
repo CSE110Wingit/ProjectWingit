@@ -1,7 +1,5 @@
 package com.example.projectwingit.io;
 
-import com.example.projectwingit.utils.LoginInfo;
-
 import org.json.JSONObject;
 
 import static com.example.projectwingit.utils.WingitLambdaConstants.*;
@@ -18,7 +16,7 @@ import okhttp3.Request;
 /**
  * Provides easy access to calling the Lambda API
  */
-public class LambdaRequests {
+public class LambdaRequests extends UserInfo{
 
     /**
      * Sends a create_account request to the API
@@ -49,7 +47,8 @@ public class LambdaRequests {
 
             LambdaResponse ret = sendRequest("POST", params);
             if (!ret.isError()) {
-                String log = LoginInfo.setCurrentLogin(username, email, passwordHash);
+                String log = UserInfo.CURRENT_USER.setCurrentLogin(username, email, passwordHash, nutAllergy,
+                        glutenFree, preferredSpiciness, null, null, null);
                 if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
             }
 
@@ -76,7 +75,7 @@ public class LambdaRequests {
             JSONObject json = ret.getResponseJSON();
 
             if (!ret.isError()) {
-                String log = LoginInfo.setCurrentLogin(json.getString(USERNAME_STR), json.getString(EMAIL_STR), passwordHash);
+                String log = UserInfo.CURRENT_USER.setCurrentLogin(json, passwordHash);
                 if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
             }
 
@@ -91,16 +90,16 @@ public class LambdaRequests {
      * Login to an account from the save file
      */
     public static LambdaResponse login(){
-        String log = LoginInfo.readLoginInfo();
+        String log = UserInfo.CURRENT_USER.readLoginInfo();
         if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
-        return login(LoginInfo.CURRENT_LOGIN.username, LoginInfo.CURRENT_LOGIN.passwordHash);
+        return login(UserInfo.CURRENT_USER.getUsername(), UserInfo.CURRENT_USER.getPasswordHash());
     }
 
     /**
      * Logout, and delete user save file
      */
     public static LambdaResponse logout(){
-        LoginInfo.deleteLoginInfo();
+        UserInfo.CURRENT_USER.deleteLoginInfo();
         return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, "");
     }
 
@@ -112,11 +111,11 @@ public class LambdaRequests {
     public static LambdaResponse deleteAccount(String passwordHash){
         try{
             String[] params = {
-                    USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
                     PASSWORD_HASH_STR, passwordHash,
                     EVENT_TYPE_STR, EVENT_DELETE_ACCOUNT_STR,
             };
-            LoginInfo.deleteLoginInfo();
+            UserInfo.CURRENT_USER.deleteLoginInfo();
             return sendRequest("DELETE", params);
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
@@ -131,7 +130,7 @@ public class LambdaRequests {
     public static LambdaResponse requestPasswordChangeCode(){
         try{
             String[] params = {
-                    USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
                     EVENT_TYPE_STR, EVENT_GET_PASSWORD_CHANGE_CODE_STR,
             };
             return sendRequest("GET", params);
@@ -158,21 +157,30 @@ public class LambdaRequests {
                         NEW_PASSWORD_HASH_STR, newPasswordHash,
                         EVENT_TYPE_STR, EVENT_CHANGE_PASSWORD_STR,
                 };
-                return sendRequest("POST", params);
+                LambdaResponse response = sendRequest("POST", params);
+                if (!response.isError()){
+                    String log = UserInfo.CURRENT_USER.changePassword(newPasswordHash);
+                    if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
+                }
+
+                return response;
+
             } else{
+                if (!UserInfo.CURRENT_USER.correctPassword(oldPasswordHashOrCode))
+                    return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, "Incorrect Password");
                 String[] params = {
                         EMAIL_STR, email,
                         PASSWORD_HASH_STR, oldPasswordHashOrCode,
                         NEW_PASSWORD_HASH_STR, newPasswordHash,
                         EVENT_TYPE_STR, EVENT_CHANGE_PASSWORD_STR,
                 };
-                String log = LoginInfo.setCurrentLogin(
-                        LoginInfo.CURRENT_LOGIN.username,
-                        LoginInfo.CURRENT_LOGIN.email,
-                        newPasswordHash
-                );
-                if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
-                return sendRequest("POST", params);
+                LambdaResponse response = sendRequest("POST", params);
+                if (!response.isError()){
+                    String log = UserInfo.CURRENT_USER.changePassword(newPasswordHash);
+                    if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
+                }
+
+                return response;
             }
 
         }catch (IOException e){
@@ -199,14 +207,20 @@ public class LambdaRequests {
             String[] params = {
                     USERNAME_STR, newUsername,
                     EMAIL_STR, newEmail,
-                    PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
+                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
                     NUT_ALLERGY_STR, ""+nutAllergy,
                     GLUTEN_FREE_STR, ""+glutenFree,
                     SPICINESS_LEVEL_STR, ""+spicinessLevel,
                     EVENT_TYPE_STR, EVENT_UPDATE_USER_PROFILE_STR,
             };
 
-            return sendRequest("POST", params);
+            LambdaResponse response = sendRequest("POST", params);
+            if (!response.isError()){
+                String log = UserInfo.CURRENT_USER.epc(newUsername, newEmail, nutAllergy, glutenFree, spicinessLevel);
+                if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
+            }
+
+            return response;
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending edit personal characteristics request: " + e.getMessage());
@@ -222,14 +236,17 @@ public class LambdaRequests {
     public static LambdaResponse rateRecipe(String recipeID, int recipeStarRating){
         try{
             String[] params = {
-                    USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
-                    PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
                     RECIPE_ID_STR, recipeID,
                     RECIPE_RATING_STR, ""+recipeStarRating,
                     EVENT_TYPE_STR, EVENT_RATE_RECIPE_STR,
             };
 
-            return sendRequest("POST", params);
+            LambdaResponse response = sendRequest("POST", params);
+            if (!response.isError()) UserInfo.CURRENT_USER.addRated(recipeID);
+
+            return response;
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending rateRecipe request: " + e.getMessage());
@@ -244,13 +261,22 @@ public class LambdaRequests {
     public static LambdaResponse favoriteRecipe(String recipeID){
         try{
             String[] params = {
-                    USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
-                    PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
                     RECIPE_ID_STR, recipeID,
                     EVENT_TYPE_STR, EVENT_UPDATE_USER_FAVORITES_STR,
             };
 
-            return sendRequest("POST", params);
+            LambdaResponse response = sendRequest("POST", params);
+            if (!response.isError()){
+                if (recipeID.contains("-")){
+                    UserInfo.CURRENT_USER.removeFavorite(recipeID);
+                }else{
+                    UserInfo.CURRENT_USER.addFavorite(recipeID);
+                }
+            }
+
+            return response;
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending favoriteRecipe request: " + e.getMessage());
@@ -279,15 +305,15 @@ public class LambdaRequests {
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return
      */
-    public static LambdaResponse createRecipe(String title, String ingredients, String description,
+    public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                               int spicinessLevel, boolean isPrivate, String imageURL){
         try{
             String[] params = {
-                    USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
-                    PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
                     RECIPE_TITLE_STR, title,
-                    RECIPE_INGREDIENTS_STR, ingredients,
+                    RECIPE_INGREDIENTS_STR, mergeArray(ingredients),
                     RECIPE_DESCRIPTION_STR, description,
                     RECIPE_TUTORIAL_STR, tutorial,
                     RECIPE_PRIVATE_STR, ""+isPrivate,
@@ -298,8 +324,13 @@ public class LambdaRequests {
                     EVENT_TYPE_STR, EVENT_CREATE_RECIPE_STR,
             };
 
-            return sendRequest("POST", params);
-        }catch (IOException e){
+            LambdaResponse response = sendRequest("POST", params);
+            if (!response.isError()){
+                UserInfo.CURRENT_USER.addCreated(response.getResponseJSON().getString(RECIPE_ID_STR));
+            }
+
+            return response;
+        }catch (Exception e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending create recipe request: " + e.getMessage());
         }
@@ -314,8 +345,8 @@ public class LambdaRequests {
             String[] params = {
                     EVENT_TYPE_STR, EVENT_GET_RECIPE_STR,
                     RECIPE_ID_STR, ""+recipeId,
-                    USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
-                    PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
             };
             return sendRequest("GET", params);
         }catch (IOException e){
@@ -337,15 +368,15 @@ public class LambdaRequests {
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return A LambdaResponse of the response
      */
-    public static LambdaResponse editRecipe(String title, String ingredients, String description,
+    public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
                                             String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                             int spicinessLevel, boolean isPrivate, String imageURL){
         try{
             String[] params = {
-                    USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
-                    PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
                     RECIPE_TITLE_STR, title,
-                    RECIPE_INGREDIENTS_STR, ingredients,
+                    RECIPE_INGREDIENTS_STR, mergeArray(ingredients),
                     RECIPE_DESCRIPTION_STR, description,
                     RECIPE_TUTORIAL_STR, tutorial,
                     RECIPE_PRIVATE_STR, ""+isPrivate,
@@ -371,14 +402,19 @@ public class LambdaRequests {
     public static LambdaResponse deleteRecipe(String recipeID){
         try{
             String[] params = {
-                    USERNAME_STR, LoginInfo.CURRENT_LOGIN.username,
-                    PASSWORD_HASH_STR, LoginInfo.CURRENT_LOGIN.passwordHash,
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
                     RECIPE_ID_STR, recipeID,
                     EVENT_TYPE_STR, EVENT_DELETE_RECIPE_STR,
             };
 
-            return sendRequest("POST", params);
-        }catch (IOException e){
+            LambdaResponse response = sendRequest("DELETE", params);
+            if (!response.isError()){
+                UserInfo.CURRENT_USER.removeCreated(response.getResponseJSON().getString(RECIPE_ID_STR));
+            }
+
+            return response;
+        }catch (Exception e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending deleteSavedRecipe request: " + e.getMessage());
         }
@@ -479,5 +515,14 @@ public class LambdaRequests {
      */
     private static String getUserOrEmail(String userOrEmail){
         return userOrEmail.contains("@") ? EMAIL_STR : USERNAME_STR;
+    }
+
+    /**
+     * ','.join(args)
+     */
+    private static String mergeArray(String[] args){
+        StringBuilder ret = new StringBuilder();
+        for (String s : args){ ret.append(s).append(","); }
+        return ret.substring(0, ret.length() - 1);
     }
 }

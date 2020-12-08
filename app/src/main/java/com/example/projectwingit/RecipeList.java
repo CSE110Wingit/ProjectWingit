@@ -15,7 +15,7 @@ import android.widget.RelativeLayout;
 
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
-import com.example.projectwingit.utils.LoginInfo;
+import com.example.projectwingit.io.UserInfo;
 import com.example.projectwingit.utils.WingitUtils;
 import com.google.android.material.card.MaterialCardView;
 
@@ -127,7 +127,9 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
 
     private void initImageBitmaps(View v) {
-        LoginInfo.setCurrentLogin("JustWingit","cse110wingit@gmail.com", WingitUtils.hashPassword("wingit!1"));
+//        LoginInfo.setCurrentLogin("JustWingit","cse110wingit@gmail.com", WingitUtils.hashPassword("wingit!1"));
+        LambdaResponse login = login();
+
         if(initializedCards) initRecyclerView(v);
         else {
             initializedCards = Boolean.TRUE;

@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.projectwingit.io.LambdaResponse;
-import com.example.projectwingit.utils.LoginInfo;
+import com.example.projectwingit.io.UserInfo;
 import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONArray;
@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import static com.example.projectwingit.io.LambdaRequests.deleteRecipe;
 import static com.example.projectwingit.io.LambdaRequests.favoriteRecipe;
 import static com.example.projectwingit.io.LambdaRequests.getRecipe;
+import static com.example.projectwingit.io.LambdaRequests.unfavoriteRecipe;
 import static com.example.projectwingit.utils.WingitLambdaConstants.FAVORITED_RECIPES_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.GLUTEN_FREE_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.NUT_ALLERGY_STR;
@@ -109,7 +110,6 @@ public class RecipePageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_recipe_page, container, false);
-        System.out.println(LoginInfo.CURRENT_LOGIN.username);
         LambdaResponse recipeLambdaResponse = getRecipe(recipeID);
         while (recipeLambdaResponse.isRunning()) {}
 
@@ -202,6 +202,8 @@ public class RecipePageFragment extends Fragment {
 
 
                     LambdaResponse favreq = favoriteRecipe("" + recipeID);
+                    //LambdaResponse favreq = unfavoriteRecipe("" + recipeID);
+
                     favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
                     favoriteButton.setText("In Favorites");
                 }

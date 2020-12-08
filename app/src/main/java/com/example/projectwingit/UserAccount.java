@@ -21,7 +21,7 @@ import android.widget.Toast;
 
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
-import com.example.projectwingit.utils.LoginInfo;
+import com.example.projectwingit.io.UserInfo;
 import com.google.android.material.navigation.NavigationView;
 
 
@@ -59,9 +59,9 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
         }
 
         // checks if user is logged in
-        if (LoginInfo.CURRENT_LOGIN != null) {
-            loginUsername = LoginInfo.CURRENT_LOGIN.username;
-            loginEmail = LoginInfo.CURRENT_LOGIN.email;
+        if (UserInfo.CURRENT_USER.isLoggedIn()) {
+            loginUsername = UserInfo.CURRENT_USER.getUsername();
+            loginEmail = UserInfo.CURRENT_USER.getEmail();
             isLoggedIn = true;
         }
 
