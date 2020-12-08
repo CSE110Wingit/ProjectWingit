@@ -336,13 +336,6 @@ public class CreateRecipe extends Fragment {
         });
     }
 
-    private void showToast(CharSequence msg) {
-        Toast toast;
-        toast = Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP, 0, 0);
-        toast.show();
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -357,6 +350,13 @@ public class CreateRecipe extends Fragment {
             }
         }
 
+    }
+
+    private void showToast(CharSequence msg) {
+        Toast toast;
+        toast = Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP, 0, 0);
+        toast.show();
     }
 
     @Override
