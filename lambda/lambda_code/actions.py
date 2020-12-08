@@ -341,7 +341,7 @@ def create_recipe(body):
     except Exception as e:
         return error(ERROR_UNKNOWN_ERROR, "8", repr(e))
 
-    return return_message(good_message="Recipe Created!")
+    return return_message(good_message="Recipe Created!", data={RECIPE_ID_STR: recipe_id})
 
 
 def get_recipe(params):

@@ -111,6 +111,7 @@ public class LambdaResponse extends Thread{
             }
 
             if (!json.isNull(SPICINESS_LEVEL_STR)) {
+                WingitLogging.log("GOT HERE");
                 String str = json.getString(SPICINESS_LEVEL_STR);
                 json.remove(SPICINESS_LEVEL_STR);
                 json.put(SPICINESS_LEVEL_STR, Integer.parseInt(str));
@@ -119,7 +120,7 @@ public class LambdaResponse extends Thread{
             for (String s : _LIST_NAMES) {
                 if (!json.isNull(s)) {
                     String str = json.getString(s);
-                    json.remove(SPICINESS_LEVEL_STR);
+                    json.remove(s);
                     if (str.isEmpty()){
                         json.put(s, new JSONArray());
                     }else{
