@@ -278,8 +278,11 @@ public class CreateRecipe extends Fragment {
             // Wait until a response comes back from the lambda api.
             while (response.isRunning());
 
-            if (response.isClientError() || response.isServerError()) {
-                Log.e(tag, "LambdaResponse error: " + response.getErrorMessage());
+            if (response.isClientError()) {
+                Log.e(tag, "Client error: " + response.getErrorMessage());
+                navigateToRecipePage(-1, response.getErrorMessage());
+            } else if (response.isServerError()) {
+                Log.e(tag, "Server error: " + response.getErrorMessage());
                 navigateToRecipePage(-1, response.getErrorMessage());
             } else {
                 // Call navigateToRecipePage here with the correct recipe id.
@@ -337,15 +340,7 @@ public class CreateRecipe extends Fragment {
                 // For now: just log current recipe state.
                 Log.i(tag, "Recipe name: " + recipeTitle);
                 Log.i(tag, "Recipe description: " + recipeDescription);
-                if (imageURI != null) {
-                    Log.i(tag, "Image uri " + imageURI.toString());
-                    Log.i(tag, "Image path " + imageURI.getPath());
-                } else {
-                    Log.i(tag, "No image selected");
-                }
-                for (String ingredient: recipeIngredients) {
-                    Log.i(tag, "Ingredient: " + ingredient);
-                }
+                Log.i(tag, "Recipe ingredients: " + recipeIngredients.toString());
                 Log.i(tag, "Tutorial: " + recipeTutorial);
                 Log.i(tag, "Contains nuts " + containsNuts);
                 Log.i(tag, "Is gluten free " + isGlutenFree);
