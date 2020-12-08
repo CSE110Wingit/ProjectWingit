@@ -12,6 +12,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
 
@@ -246,6 +248,27 @@ public class CreateRecipe extends Fragment {
         });
     }
 
+    private void navigateToRecipePage(int recipeId, String errMsg) {
+        Runnable r;
+        if (errMsg.equals("No Error")) {
+            r = new Runnable() {
+                @Override
+                public void run() {
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
+                }
+            };
+        } else {
+            r = new Runnable() {
+                @Override
+                public void run() {
+                    showToast("Lambda API error: " + errMsg);
+                }
+            };
+        }
+        getActivity().runOnUiThread(r);
+    }
+
     private class ProcessCreateRecipeResponseThread extends Thread {
         LambdaResponse response;
         public ProcessCreateRecipeResponseThread(LambdaResponse presponse) {
@@ -258,8 +281,9 @@ public class CreateRecipe extends Fragment {
 
             if (response.isClientError() || response.isServerError()) {
                 Log.i(tag, "LambdaResponse error: " + response.getErrorMessage());
+                navigateToRecipePage(-1, response.getErrorMessage());
             } else {
-
+                // Call navigateToRecipePage here with the correct recipe id.
             }
         }
     }
@@ -326,6 +350,12 @@ public class CreateRecipe extends Fragment {
                 Log.i(tag, "Spiciness level " + spicinessLevel);
                 Log.i(tag, "Is private " + isPrivate);
                 Log.i(tag, "Current user " + UserInfo.CURRENT_USER.getUsername());
+
+
+//                LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
+//                        recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
+//                        isGlutenFree, (int) spicinessLevel, isPrivate, null);
+
             }
         });
     }
