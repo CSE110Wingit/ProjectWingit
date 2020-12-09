@@ -56,6 +56,7 @@ public class CreateRecipe extends Fragment {
     protected Button buttonRemoveImage;
     protected Uri imageURI;
     protected String imageURL;
+    protected Bitmap imageBitmap;
 
     protected View rootView;
     protected RecyclerView mRecyclerView;
@@ -246,25 +247,35 @@ public class CreateRecipe extends Fragment {
         });
     }
 
-    private void navigateToRecipePage(int recipeId, String errMsg) {
+    // methods with runOnUiThread: navigateToRecipePage
+    private void navigateToRecipePage(int recipeId) {
         Runnable r;
-        if (errMsg.equals("No Error")) {
-            r = new Runnable() {
-                @Override
-                public void run() {
+        r = new Runnable() {
+            @Override
+            public void run() {
 //                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
 //                    transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
-                    showToast("Recipe successfully created! " + errMsg);
-                }
-            };
+                showToast("Recipe successfully created! Recipe ID " + recipeId);
+            }
+        };
+        getActivity().runOnUiThread(r);
+    }
+
+    private void notifyCreateRecipeError(boolean isServerError, String errMsg) {
+        Runnable r;
+        StringBuilder toastMsg = new StringBuilder();
+        if (isServerError) {
+            toastMsg.append("Server error: ");
         } else {
-            r = new Runnable() {
-                @Override
-                public void run() {
-                    showToast("Lambda API error: " + errMsg);
-                }
-            };
+            toastMsg.append("Client error: ");
         }
+        toastMsg.append(errMsg + " Please contact app developers to resolve this issue.");
+        r = new Runnable() {
+            @Override
+            public void run() {
+                showToast(toastMsg.toString());
+            }
+        };
         getActivity().runOnUiThread(r);
     }
 
@@ -278,17 +289,21 @@ public class CreateRecipe extends Fragment {
             // Wait until a response comes back from the lambda api.
             while (response.isRunning());
 
+            // Check for errors
             if (response.isClientError()) {
                 Log.e(tag, "Client error: " + response.getErrorMessage());
-                navigateToRecipePage(-1, response.getErrorMessage());
+                Log.i(tag, response.getResponseInfo());
+                notifyCreateRecipeError(false, response.getErrorMessage());
             } else if (response.isServerError()) {
                 Log.e(tag, "Server error: " + response.getErrorMessage());
-                navigateToRecipePage(-1, response.getErrorMessage());
+                Log.i(tag, response.getResponseInfo());
+                notifyCreateRecipeError(true, response.getErrorMessage());
             } else {
                 // Call navigateToRecipePage here with the correct recipe id.
                 // FIXME: replace -1 with the recipe's id.
-                Log.e(tag, "Success: " + response.getErrorMessage());
-                navigateToRecipePage(-1, response.getErrorMessage());
+                Log.i(tag, "Success: " + response.getErrorMessage());
+                Log.i(tag, response.getResponseInfo());
+                navigateToRecipePage(-1);
             }
         }
     }
@@ -400,6 +415,7 @@ public class CreateRecipe extends Fragment {
         wingImageView = rootView.findViewById(R.id.WingImageView);
         imageURI = null;
         imageURL = null;
+        imageBitmap = null;
 
         buttonUploadImage.setOnClickListener(new View.OnClickListener() {
 
@@ -428,6 +444,7 @@ public class CreateRecipe extends Fragment {
             @Override
             public void onClick(View v) {
                 imageURI = null;
+                imageBitmap = null;
                 wingImageView.setImageResource(android.R.color.transparent);
             }
         });
@@ -441,12 +458,12 @@ public class CreateRecipe extends Fragment {
             imageURI = data.getData();
             try {
                 if (Build.VERSION.SDK_INT < 28) {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageURI);
-                    wingImageView.setImageBitmap(bitmap);
+                    imageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageURI);
+                    wingImageView.setImageBitmap(imageBitmap);
                 } else {
                     ImageDecoder.Source source = ImageDecoder.createSource(getActivity().getContentResolver(), imageURI);
-                    Bitmap bitmap = ImageDecoder.decodeBitmap(source);
-                    wingImageView.setImageBitmap(bitmap);
+                    imageBitmap = ImageDecoder.decodeBitmap(source);
+                    wingImageView.setImageBitmap(imageBitmap);
                 }
             } catch (IOException e) {
                 showToast("Unable to load image uri.");
