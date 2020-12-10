@@ -2,14 +2,15 @@ package com.example.projectwingit;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,6 +30,10 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.projectwingit.io.LambdaRequests;
+import com.example.projectwingit.io.LambdaResponse;
+import com.example.projectwingit.io.UserInfo;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -44,12 +49,14 @@ public class CreateRecipe extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String tag = "CREATE RECIPE FRAGMENT";
-    protected static final int GET_FROM_GALLERY = 1;
+    protected static final int UPLOAD_IMAGE = 1;
 
     protected ImageView wingImageView;
-    protected Button buttonUploadPhoto;
-    protected Button buttonRemovePhoto;
-    protected Uri imageUri;
+    protected Button buttonUploadImage;
+    protected Button buttonRemoveImage;
+    protected Uri imageURI;
+    protected String imageURL;
+    protected Bitmap imageBitmap;
 
     protected View rootView;
     protected RecyclerView mRecyclerView;
@@ -80,6 +87,9 @@ public class CreateRecipe extends Fragment {
 
     protected Spinner spicinessLevelSpinner;
     protected long spicinessLevel;
+
+    protected CheckBox checkBoxIsPrivate;
+    protected boolean isPrivate;
 
     protected Button buttonSubmitRecipe;
 
@@ -237,17 +247,80 @@ public class CreateRecipe extends Fragment {
         });
     }
 
+    // methods with runOnUiThread: navigateToRecipePage
+    private void navigateToRecipePage(int recipeId) {
+        Runnable r;
+        r = new Runnable() {
+            @Override
+            public void run() {
+//                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+//                    transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
+                showToast("Recipe successfully created! Recipe ID " + recipeId);
+            }
+        };
+        getActivity().runOnUiThread(r);
+    }
+
+    private void notifyCreateRecipeError(boolean isServerError, String errMsg) {
+        Runnable r;
+        StringBuilder toastMsg = new StringBuilder();
+        if (isServerError) {
+            toastMsg.append("Server error: ");
+        } else {
+            toastMsg.append("Client error: ");
+        }
+        toastMsg.append(errMsg + " Please contact app developers to resolve this issue.");
+        r = new Runnable() {
+            @Override
+            public void run() {
+                showToast(toastMsg.toString());
+            }
+        };
+        getActivity().runOnUiThread(r);
+    }
+
+    private class ProcessCreateRecipeResponseThread extends Thread {
+        LambdaResponse response;
+        public ProcessCreateRecipeResponseThread(LambdaResponse presponse) {
+            response = presponse;
+        }
+
+        public void run() {
+            // Wait until a response comes back from the lambda api.
+            while (response.isRunning());
+
+            // Check for errors
+            if (response.isClientError()) {
+                Log.e(tag, "Client error: " + response.getErrorMessage());
+                Log.i(tag, response.getResponseInfo());
+                notifyCreateRecipeError(false, response.getErrorMessage());
+            } else if (response.isServerError()) {
+                Log.e(tag, "Server error: " + response.getErrorMessage());
+                Log.i(tag, response.getResponseInfo());
+                notifyCreateRecipeError(true, response.getErrorMessage());
+            } else {
+                // Call navigateToRecipePage here with the correct recipe id.
+                // FIXME: replace -1 with the recipe's id.
+                Log.i(tag, "Success: " + response.getErrorMessage());
+                Log.i(tag, response.getResponseInfo());
+                navigateToRecipePage(-1);
+            }
+        }
+    }
+
     public void setUpSubmitButton() {
         // Submit button
         buttonSubmitRecipe = (Button) rootView.findViewById(R.id.ButtonSubmitRecipe);
         buttonSubmitRecipe.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String recipeName = inputRecipeName.getText().toString().trim();
-                String recipeDescription = inputRecipeDescription.getText().toString().trim();
+
+                // Get the inputted recipe title.
+                String recipeTitle = inputRecipeName.getText().toString().trim();
 
                 CharSequence errMsg = null;
 
-                if (recipeName.length() == 0) {
+                // Check for required fields.
+                if (recipeTitle.length() == 0) {
                     errMsg = "Recipe name cannot be empty.";
                 } else if (mIngredientList.size() == 0) {
                     errMsg = "The recipe needs at least one ingredient.";
@@ -260,24 +333,40 @@ public class CreateRecipe extends Fragment {
                     return;
                 }
 
-                // Submission here. Need to use LambdaRequests.
-                // For now: just log current recipe state.
-                Log.i(tag, "Recipe name: " + recipeName);
-                Log.i(tag, "Recipe description: " + recipeDescription);
-                if (imageUri != null) {
-                    Log.i(tag, "Image uri " + imageUri.toString());
-                } else {
-                    Log.i(tag, "No image selected");
+                // Ingredient array to post.
+                String[] recipeIngredients = mIngredientList.toArray(new String[0]);
+
+                // Recipe description to post. Optional.
+                String recipeDescription = inputRecipeDescription.getText().toString().trim();
+                if (recipeDescription.length() == 0) {
+                    recipeDescription = "No description available.";
                 }
-                for (String ingredient: mIngredientList) {
-                    Log.i(tag, "Ingredient: " + ingredient);
+
+                // Tutorial. One big string separated by newlines.
+                String recipeTutorial;
+                StringBuilder recipeTutorialBuilder = new StringBuilder();
+                for (String step : mRecipeStepList) {
+                    recipeTutorialBuilder.append(step + "\n");
                 }
-                for (String recipeStep: mRecipeStepList) {
-                    Log.i(tag, "Instruction: " + recipeStep);
-                }
-                Log.i(tag, "Contains nuts " + containsNuts);
-                Log.i(tag, "Is gluten free " + isGlutenFree);
-                Log.i(tag, "Spiciness level " + spicinessLevel);
+                recipeTutorial = recipeTutorialBuilder.toString().trim();
+
+//                Log.i(tag, "Recipe name: " + recipeTitle);
+//                Log.i(tag, "Recipe description: " + recipeDescription);
+//                Log.i(tag, "Recipe ingredients: " + recipeIngredients.toString());
+//                Log.i(tag, "Tutorial: " + recipeTutorial);
+//                Log.i(tag, "Contains nuts " + containsNuts);
+//                Log.i(tag, "Is gluten free " + isGlutenFree);
+//                Log.i(tag, "Spiciness level " + spicinessLevel);
+//                Log.i(tag, "Is private " + isPrivate);
+//                Log.i(tag, "Current user " + UserInfo.CURRENT_USER.getUsername());
+
+
+                LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
+                        recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
+                        isGlutenFree, (int) spicinessLevel, isPrivate, null);
+
+                new ProcessCreateRecipeResponseThread(createRecipeResponse).run();
+
             }
         });
     }
@@ -304,36 +393,80 @@ public class CreateRecipe extends Fragment {
         });
     }
 
-    public void setUpPhotoUpload() {
-        // Only photo upload so far. Still figuring how to take photos. (delegate to camera)
+    private void setUpIsPrivateCheckbox() {
+        checkBoxIsPrivate = (CheckBox) rootView.findViewById(R.id.IsPrivateCheckbox);
+        isPrivate = false;
+        checkBoxIsPrivate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isPrivate = isChecked;
+            }
+        });
+    }
 
-        buttonUploadPhoto = rootView.findViewById(R.id.ButtonUploadPhoto);
-        buttonRemovePhoto = rootView.findViewById(R.id.ButtonRemovePhoto);
+    public void setUpImageUpload() {
+        // Only existing image upload so far. Still figuring how to take photos. (delegate to camera)
+
+        buttonUploadImage = rootView.findViewById(R.id.ButtonUploadImage);
+        buttonRemoveImage = rootView.findViewById(R.id.ButtonRemoveImage);
         wingImageView = rootView.findViewById(R.id.WingImageView);
-        imageUri = null;
+        imageURI = null;
+        imageURL = null;
+        imageBitmap = null;
 
-        buttonUploadPhoto.setOnClickListener(new View.OnClickListener() {
+        buttonUploadImage.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                Intent uploadFromGalleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-                if (uploadFromGalleryIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    startActivityForResult(uploadFromGalleryIntent, GET_FROM_GALLERY);
+                Intent uploadImageIntent = new Intent(Intent.ACTION_GET_CONTENT);
+
+                // Only alow jpg and png types.
+                String[] imageMimeTypes = {"image/jpeg", "image/jpg", "image/png"};
+                uploadImageIntent.setType(imageMimeTypes.length == 1 ? imageMimeTypes[0] : "*/*");
+
+                if (imageMimeTypes.length > 0) {
+                    uploadImageIntent.putExtra(Intent.EXTRA_MIME_TYPES, imageMimeTypes);
+                }
+                if (uploadImageIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivityForResult(uploadImageIntent, UPLOAD_IMAGE);
                 } else {
-                    Log.i(tag, "No upload from gallery activity available.");
+                    Log.i(tag, "No activity for image upload found on this device.");
                 }
             }
 
         });
 
-        buttonRemovePhoto.setOnClickListener(new View.OnClickListener() {
+        buttonRemoveImage.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                imageUri = null;
+                imageURI = null;
+                imageBitmap = null;
                 wingImageView.setImageResource(android.R.color.transparent);
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == UPLOAD_IMAGE && resultCode == Activity.RESULT_OK) {
+            imageURI = data.getData();
+            try {
+                if (Build.VERSION.SDK_INT < 28) {
+                    imageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageURI);
+                    wingImageView.setImageBitmap(imageBitmap);
+                } else {
+                    ImageDecoder.Source source = ImageDecoder.createSource(getActivity().getContentResolver(), imageURI);
+                    imageBitmap = ImageDecoder.decodeBitmap(source);
+                    wingImageView.setImageBitmap(imageBitmap);
+                }
+            } catch (IOException e) {
+                showToast("Unable to load image uri.");
+            }
+        }
+
     }
 
     private void showToast(CharSequence msg) {
@@ -341,22 +474,6 @@ public class CreateRecipe extends Fragment {
         toast = Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG);
         toast.setGravity(Gravity.TOP, 0, 0);
         toast.show();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
-            imageUri = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
-                wingImageView.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                showToast("Unable to load image uri.");
-            }
-        }
-
     }
 
     @Override
@@ -377,7 +494,8 @@ public class CreateRecipe extends Fragment {
         setUpGlutenFreeCheckbox();
         setUpSpicinessSpinner();
         setUpSubmitButton();
-        setUpPhotoUpload();
+        setUpIsPrivateCheckbox();
+        setUpImageUpload();
 
         return rootView;
     }
