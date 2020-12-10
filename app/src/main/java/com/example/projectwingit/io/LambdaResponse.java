@@ -174,7 +174,7 @@ public class LambdaResponse extends Thread{
      * Returns true if the error was on the server side (IE: bad parameters were sent to the server,
      * there was an error with the server, etc.)
      */
-    public boolean isServerError() { return !isClientError(); }
+    public boolean isServerError() { return errorState == ErrorState.SERVER_ERROR; }
 
     /**
      * Returns true if there was an error

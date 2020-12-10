@@ -80,7 +80,6 @@ public class LambdaRequests extends UserInfo{
             JSONObject json = ret.getResponseJSON();
 
             if (!ret.isError()) {
-                WingitLogging.log(json.toString());
                 String log = UserInfo.CURRENT_USER.setCurrentLogin(json, passwordHash);
                 if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
             }

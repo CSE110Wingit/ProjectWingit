@@ -176,8 +176,8 @@ def build_stop_words_pickle():
 def delete_testing_accounts():
     conn = get_new_db_conn()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM {0} WHERE {1} LIKE %s OR {1} LIKE %s".format(USERS_TABLE_NAME, USERNAME_STR),
-                   [TEST_ACCOUNT_VERIFIED_USERNAME, TEST_ACCOUNT_UNVERIFIED_USERNAME])
+    #cursor.execute("DELETE FROM {0} WHERE {1} LIKE %s OR {1} LIKE %s".format(USERS_TABLE_NAME, USERNAME_STR),
+    #               [TEST_ACCOUNT_VERIFIED_USERNAME, TEST_ACCOUNT_UNVERIFIED_USERNAME])
     cursor.execute("DELETE FROM {0} WHERE {1} < 0".format(RECIPES_TABLE_NAME, RECIPE_ID_STR))
     conn.commit()
 
