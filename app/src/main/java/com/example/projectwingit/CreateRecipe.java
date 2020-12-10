@@ -350,18 +350,15 @@ public class CreateRecipe extends Fragment {
                 }
                 recipeTutorial = recipeTutorialBuilder.toString().trim();
 
-
-                // Submission here. Need to use LambdaRequests.
-                // For now: just log current recipe state.
-                Log.i(tag, "Recipe name: " + recipeTitle);
-                Log.i(tag, "Recipe description: " + recipeDescription);
-                Log.i(tag, "Recipe ingredients: " + recipeIngredients.toString());
-                Log.i(tag, "Tutorial: " + recipeTutorial);
-                Log.i(tag, "Contains nuts " + containsNuts);
-                Log.i(tag, "Is gluten free " + isGlutenFree);
-                Log.i(tag, "Spiciness level " + spicinessLevel);
-                Log.i(tag, "Is private " + isPrivate);
-                Log.i(tag, "Current user " + UserInfo.CURRENT_USER.getUsername());
+//                Log.i(tag, "Recipe name: " + recipeTitle);
+//                Log.i(tag, "Recipe description: " + recipeDescription);
+//                Log.i(tag, "Recipe ingredients: " + recipeIngredients.toString());
+//                Log.i(tag, "Tutorial: " + recipeTutorial);
+//                Log.i(tag, "Contains nuts " + containsNuts);
+//                Log.i(tag, "Is gluten free " + isGlutenFree);
+//                Log.i(tag, "Spiciness level " + spicinessLevel);
+//                Log.i(tag, "Is private " + isPrivate);
+//                Log.i(tag, "Current user " + UserInfo.CURRENT_USER.getUsername());
 
 
                 LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
