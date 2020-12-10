@@ -1,5 +1,8 @@
 package com.example.projectwingit.io;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+
 import com.example.projectwingit.debug.WingitLogging;
 
 import org.json.JSONObject;
@@ -7,6 +10,7 @@ import org.json.JSONObject;
 import static com.example.projectwingit.utils.WingitLambdaConstants.*;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -22,6 +26,8 @@ import okhttp3.RequestBody;
  * Provides easy access to calling the Lambda API
  */
 public class LambdaRequests extends UserInfo{
+
+    public static final String TEMP_FILE_PATH = "tempimage.png";
 
     /**
      * Sends a create_account request to the API
@@ -469,17 +475,34 @@ public class LambdaRequests extends UserInfo{
         }
     }
 
-    public static LambdaResponse uploadImage(String s3URL, String androidURI) {
+    public static LambdaResponse uploadImage(String s3URL, Bitmap image) {
         try {
-            OkHttpClient client = new OkHttpClient();
-            File file = new File(androidURI);
-            RequestBody formBody = new MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart("file", file.getName(),
-                            RequestBody.create(MediaType.parse("text/plain"), file))
-                    .build();
-            Request request = new Request.Builder().url(s3URL).post(formBody).build();
-            return new LambdaResponse(client.newCall(request));
+            String[] params = {
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
+                    EVENT_TYPE_STR, EVENT_GET_S3_URL_STR,
+                    S3_REASON_STR, S3_REASON_UPLOAD_RECIPE_IMAGE,
+                    IMAGE_FILE_EXTENSION_STR, "png"
+            };
+
+            LambdaResponse response = sendRequest("GET", params);
+
+            if (!response.isError()) {
+                File tmpFile = new File(TEMP_FILE_PATH);
+                image.compress(Bitmap.CompressFormat.PNG, 100, APP_CONTEXT.openFileOutput(TEMP_FILE_PATH, Context.MODE_PRIVATE));
+
+                OkHttpClient client = new OkHttpClient();
+                RequestBody formBody = new MultipartBody.Builder()
+                        .setType(MultipartBody.FORM)
+                        .addFormDataPart("file", tmpFile.getName(),
+                                RequestBody.create(MediaType.parse("text/plain"), tmpFile))
+                        .build();
+                Request request = new Request.Builder().url(s3URL).post(formBody).build();
+                return new LambdaResponse(client.newCall(request));
+            }
+
+            WingitLogging.log("AAAAAAAAAAAAAAAAAAAAAA " + response.getResponseInfo());
+            return response;
         }catch(Exception e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, "Error uploading image: " + e.getMessage());
         }
