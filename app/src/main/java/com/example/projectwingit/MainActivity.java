@@ -108,13 +108,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             break;
                         case R.id.favorites:
                             // checks if user is logged in
-                            if (UserInfo.CURRENT_USER.isLoggedIn()) {
+                            Boolean isLoggedIn = UserInfo.CURRENT_USER.isLoggedIn();
+
+                            if (isLoggedIn) {
                                 fragment = new FavoritesFragment();
-                                toolbar.setTitle(R.string.favorites_title_toolbar);
                             }
                             else {
-                                //TODO transition to login page
+                                fragment = new FavoritesFragment(isLoggedIn);
                             }
+                            toolbar.setTitle(R.string.favorites_title_toolbar);
                             break;
 
                     }

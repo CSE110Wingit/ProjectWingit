@@ -170,17 +170,23 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
                         String[] recipeIDList;
                         recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
+                        if (recipeIDList != null) {
+                            boolean favVal = false;
 
-                        boolean favVal = false;
-
-                        for (int z = 0; z < recipeIDList.length; z++) {
-                            if (recipeIDList[z] != null) {
-                                if (recipeIDList[z].equals(recipeIDString)) favVal = true;
+                            for (int z = 0; z < recipeIDList.length; z++) {
+                                if (recipeIDList[z] != null) {
+                                    if (recipeIDList[z].equals(recipeIDString)) favVal = true;
+                                }
                             }
+
+                            mIsFavorites.add(favVal);
+                            mRecipeID.add(id);
+                        }
+                        else {
+                            mIsFavorites.add(false);
+                            mRecipeID.add(id);
                         }
 
-                        mIsFavorites.add(favVal);
-                        mRecipeID.add(id);
                     }
                 }
             } catch (JSONException e) {

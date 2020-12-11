@@ -1,5 +1,8 @@
 package com.example.projectwingit;
 
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -12,6 +15,7 @@ import android.widget.Button;
 import android.app.Dialog;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.projectwingit.io.LambdaResponse;
@@ -140,7 +144,6 @@ public class RecipePageFragment extends Fragment {
             ratingText.setText(recipeRating);
             //instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
 
-
             String allergyString = "";
             if(recipeObject.getBoolean(NUT_ALLERGY_STR)) allergyString += "This recipe contains nuts. ";
             else allergyString += "This recipe does not contain nuts. ";
@@ -148,20 +151,21 @@ public class RecipePageFragment extends Fragment {
             else allergyString += "This recipe contains gluten.";
             nutAllergyText.setText(allergyString);
 
-            String[] recipeIDList;
+            String[] recipeIDList = null;
             String recipeIDString = "";
             recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
 
             String currentRecipeID = Integer.toString(recipeID);
 
             // Set Favorites button and text
-            boolean favVal = false;
-            for (int i = 0; i < recipeIDList.length; i++) {
-                if (recipeIDList[i] != null) {
-                    recipeIDString = recipeIDList[i];
-                    if (currentRecipeID.equals(recipeIDString)) favVal = true;
+            if (UserInfo.CURRENT_USER.isLoggedIn()) {
+                boolean favVal = false;
+                for (int i = 0; i < recipeIDList.length; i++) {
+                    if (recipeIDList[i] != null) {
+                        recipeIDString = recipeIDList[i];
+                        if (currentRecipeID.equals(recipeIDString)) favVal = true;
+                    }
                 }
-            }
                 if (favVal) {
                     favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
                     favoriteButton.setText("In Favorites");
@@ -169,6 +173,12 @@ public class RecipePageFragment extends Fragment {
                     favoriteButton.setIconResource(R.drawable.ic_add_to_fav);
                     favoriteButton.setText("Save to favorites");
                 }
+            }
+            else {
+                favoriteButton.setTextColor(getResources().getColor(R.color.secondary));
+                favoriteButton.setIconTint(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
+            }
+
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -203,18 +213,19 @@ public class RecipePageFragment extends Fragment {
             @Override
             public void onClick(View v){
 
-                String[] recipeIDList;
-                String recipeIDString = "";
-                recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
-                String currentRecipeID = Integer.toString(recipeID);
+                if (UserInfo.CURRENT_USER.isLoggedIn()) {
+                    String[] recipeIDList;
+                    String recipeIDString = "";
+                    recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
+                    String currentRecipeID = Integer.toString(recipeID);
 
-                boolean favVal = false;
-                for (int i = 0; i < recipeIDList.length; i++) {
-                    if (recipeIDList[i] != null) {
-                        recipeIDString = recipeIDList[i];
-                        if (currentRecipeID.equals(recipeIDString)) favVal = true;
+                    boolean favVal = false;
+                    for (int i = 0; i < recipeIDList.length; i++) {
+                        if (recipeIDList[i] != null) {
+                            recipeIDString = recipeIDList[i];
+                            if (currentRecipeID.equals(recipeIDString)) favVal = true;
+                        }
                     }
-                }
                     if (!favVal) {
                         if (currentRecipeID != null) {
                             LambdaResponse favreq = favoriteRecipe(currentRecipeID);
@@ -228,8 +239,12 @@ public class RecipePageFragment extends Fragment {
                         favoriteButton.setIconResource(R.drawable.ic_add_to_fav);
                         favoriteButton.setText("Save to favorites");
                     }
-
                 }
+                else {
+                    Toast.makeText(getActivity().getApplicationContext(), "Please log in to add to favorites.", Toast.LENGTH_LONG).show();
+                }
+            }
+
         });
 
         okay.setOnClickListener(new View.OnClickListener(){
