@@ -3,6 +3,7 @@ package com.example.projectwingit.io;
 import android.content.Context;
 
 import com.example.projectwingit.debug.WingitErrors;
+import com.example.projectwingit.debug.WingitLogging;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 
 import static com.example.projectwingit.utils.WingitLambdaConstants.*;
 
@@ -24,7 +26,9 @@ public class UserInfo {
     private String username, email, passwordHash;
     private boolean nutAllergy, glutenFree;
     private int spicinessLevel;
-    private String[] favoritedRecipes, ratedRecipes, createdRecipes;
+    private ArrayList<String> favoritedRecipes = new ArrayList<>(),
+            ratedRecipes = new ArrayList<>(),
+            createdRecipes = new ArrayList<>();
 
     /**
      * @return true if the user is logged in and not a guest
@@ -38,58 +42,36 @@ public class UserInfo {
     public boolean getNutAllergy(){ return nutAllergy; }
     public boolean getGlutenFree(){ return glutenFree; }
     public int getSpicinessLevel(){ return spicinessLevel; }
-    public String[] getFavoritedRecipes(){ return favoritedRecipes; }
-    public String[] getRatedRecipes(){ return ratedRecipes; }
-    public String[] getCreatedRecipes(){ return createdRecipes; }
+    public String[] getFavoritedRecipes(){ return arrToStr(favoritedRecipes); }
+    public String[] getRatedRecipes(){ return arrToStr(ratedRecipes); }
+    public String[] getCreatedRecipes(){ return arrToStr(createdRecipes); }
 
     public boolean correctPassword(String passwordHash){ return this.passwordHash.equals(passwordHash); }
 
-    public boolean recipeIsFavorited(String recipeId){
-         return strMember(recipeId, favoritedRecipes);
-    }
-
+    public boolean recipeIsFavorited(String recipeId){ return favoritedRecipes.contains(recipeId); }
     public boolean recipeIsRated(String recipeId){
-        return strMember(recipeId, ratedRecipes);
+        return ratedRecipes.contains(recipeId);
     }
 
     protected void addFavorite(String recipeId){
-        this.favoritedRecipes = addStr(recipeId, favoritedRecipes);
+        WingitLogging.log("DDDDD: Adding favorite recipes: " + recipeId);
+        if (!this.favoritedRecipes.contains(recipeId)){
+            WingitLogging.log("DDDDD: definitely adding: " + recipeId);
+            this.favoritedRecipes.add(recipeId);
+        }
     }
-
-    protected void addRated(String recipeId){
-        this.ratedRecipes = addStr(recipeId, ratedRecipes);
-    }
-
-    protected void addCreated(String recipeId){
-        this.createdRecipes = addStr(recipeId, createdRecipes);
-    }
-
-    private String[] addStr(String newStr, String[] curr){
-        String[] newArr = new String[curr.length + 1];
-        System.arraycopy(curr, 0, newArr, 0, curr.length);
-        newArr[newArr.length - 1] = newStr;
-        return newArr;
-    }
-
-    private boolean strMember(String str, String[] curr){
-        for (String s : curr) if (s.equals(str)) return true;
-        return false;
-    }
+    protected void addRated(String recipeId){ if (!this.ratedRecipes.contains(recipeId)) this.ratedRecipes.add(recipeId); }
+    protected void addCreated(String recipeId){ if (!this.createdRecipes.contains(recipeId)) this.createdRecipes.add(recipeId); }
 
     protected void removeFavorite(String recipeId){
-        String[] newArr = removeStr(recipeId.replaceAll("-", ""), favoritedRecipes);
-        if (newArr != null) favoritedRecipes = newArr;
+        WingitLogging.log("DDDDD: Removing recipe: " + recipeId);
+        int size = this.favoritedRecipes.size();
+        this.favoritedRecipes.remove(recipeId);
+        if (this.favoritedRecipes.size() < size)
+            WingitLogging.log("DDDDDD: definitely removed recipe: " + recipeId);
     }
-
-    protected void removeRated(String recipeId){
-        String[] newArr = removeStr(recipeId.replaceAll("-", ""), ratedRecipes);
-        if (newArr != null) ratedRecipes = newArr;
-    }
-
-    protected void removeCreated(String recipeId){
-        String[] newArr = removeStr(recipeId.replaceAll("-", ""), createdRecipes);
-        if (newArr != null) createdRecipes = newArr;
-    }
+    protected void removeRated(String recipeId){ this.ratedRecipes.remove(recipeId); }
+    protected void removeCreated(String recipeId){ this.createdRecipes.remove(recipeId); }
 
     protected String epc(String newUsername, String newEmail, boolean nutAllergy, boolean glutenFree, int spicinessLevel){
         this.username = newUsername;
@@ -98,24 +80,6 @@ public class UserInfo {
         this.glutenFree = glutenFree;
         this.spicinessLevel = spicinessLevel;
         return write(false);
-    }
-
-    private String[] removeStr(String rStr, String[] curr){
-        if (strMember(rStr, curr)){
-            String[] newArr = new String[curr.length + 1];
-            int idx = 0;
-            for (int i = 0; i < curr.length; i++){
-                if (curr[i].equals(rStr)){
-                    idx = -1;
-                }else{
-                    newArr[i + idx] = curr[i];
-                }
-            }
-
-            return newArr;
-        }
-
-        return null;
     }
 
     protected String changePassword(String passwordHash){
@@ -134,9 +98,9 @@ public class UserInfo {
         this.nutAllergy = nutAllergy;
         this.glutenFree = glutenFree;
         this.spicinessLevel = spicinessLevel;
-        this.favoritedRecipes = favoritedRecipes != null ? favoritedRecipes : new String[0];
-        this.ratedRecipes = ratedRecipes != null ? ratedRecipes : new String[0];
-        this.createdRecipes = createdRecipes != null ? createdRecipes : new String[0];
+        this.favoritedRecipes = favoritedRecipes != null ? toStringArray(favoritedRecipes) : new ArrayList<>();
+        this.ratedRecipes = ratedRecipes != null ? toStringArray(ratedRecipes) : new ArrayList<>();
+        this.createdRecipes = createdRecipes != null ? toStringArray(createdRecipes) : new ArrayList<>();
         return write(false);
     }
 
@@ -175,15 +139,35 @@ public class UserInfo {
     protected void deleteLoginInfo() {
         write(true);
         this.username = this.email = this.passwordHash = null;
-        this.favoritedRecipes = this.ratedRecipes = null;
+        this.favoritedRecipes.clear();
+        this.ratedRecipes.clear();
+        this.createdRecipes.clear();
     }
 
-    private String[] toStringArray(JSONArray jsonArray){
-        String[] ret = new String[jsonArray.length()];
+    private ArrayList<String> toStringArray(JSONArray jsonArray){
+        ArrayList<String> ret = new ArrayList<>();
         try {
-            for (int i = 0; i < jsonArray.length(); i++) ret[i] = (String) jsonArray.get(i);
+            for (int i = 0; i < jsonArray.length(); i++) ret.add((String) jsonArray.get(i));
         }catch(Exception e){
             return null;
+        }
+        return ret;
+    }
+
+    private ArrayList<String> toStringArray(String[] strArr){
+        ArrayList<String> ret = new ArrayList<>();
+        try {
+            for (int i = 0; i < strArr.length; i++) ret.add(strArr[i]);
+        }catch(Exception e){
+            return null;
+        }
+        return ret;
+    }
+
+    private String[] arrToStr(ArrayList<String> arr){
+        String[] ret = new String[arr.size()];
+        for (int i = 0; i < arr.size(); i++){
+            ret[i] = arr.get(i);
         }
         return ret;
     }

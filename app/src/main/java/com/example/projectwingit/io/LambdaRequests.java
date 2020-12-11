@@ -281,7 +281,7 @@ public class LambdaRequests extends UserInfo{
             LambdaResponse response = sendRequest("POST", params);
             if (!response.isError()){
                 if (recipeID.contains("-")){
-                    UserInfo.CURRENT_USER.removeFavorite(recipeID);
+                    UserInfo.CURRENT_USER.removeFavorite(recipeID.replaceAll("-", ""));
                 }else{
                     UserInfo.CURRENT_USER.addFavorite(recipeID);
                 }
@@ -560,7 +560,7 @@ public class LambdaRequests extends UserInfo{
                 Request request = new Request.Builder().url(url).post(formBody).build();
                 LambdaResponse resp = new LambdaResponse(client.newCall(request));
 
-                if (!resp.isError()) return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, url + "/" + filename);
+                if (!resp.isError()) return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, url + "/recipe_images/" + filename);
                 return resp;
             }
 

@@ -93,6 +93,7 @@ public class LambdaResponse extends Thread{
             this.errorMessage = "ERROR_UNCAUGHT_SERVER_ERROR: Error was not caught by main try/catch block:\n" + json.getString("message");
         }else{
             this.errorState = ErrorState.NO_ERROR;
+            WingitLogging.log("QQQQQQQQ: " + response);
             if (this.json.isNull("url"))
                 this.errorMessage = this.json.getString(WingitLambdaConstants.RETURN_INFO_STR);
         }
