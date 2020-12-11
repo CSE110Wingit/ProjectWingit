@@ -147,13 +147,6 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                 e.printStackTrace();
             }
 
-            JSONArray favs = new JSONArray();
-            try {
-                favs = joe.getJSONArray(FAVORITED_RECIPES_STR);
-            } catch (JSONException e){
-                e.printStackTrace();
-            }
-
             JSONObject recipeID = new JSONObject();
             LambdaResponse recipeObject;
             String recipeIDString = "";
@@ -179,15 +172,18 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                         recipeRating += " Stars";
                         mRecipeCategories.add(recipeRating);
 
+                        String[] recipeIDList;
+                        recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
+
                         boolean favVal = false;
 
-                        for (int z = 0; z < favs.length(); z++) {
-                            if (favs.getString(i).equals(recipeIDString)) favVal = true;
+                        for (int z = 0; z < recipeIDList.length; z++) {
+                            if (recipeIDList[z] != null) {
+                                if (recipeIDList[z].equals(recipeIDString)) favVal = true;
+                            }
                         }
 
                         mIsFavorites.add(favVal);
-
-
                         mRecipeID.add(id);
                     }
                 }
@@ -250,12 +246,9 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
             try {
                 for (int i = 0; i < recipeIDList.length; i++) {
                     if (recipeIDList[i] != null) {
-                        Log.d("Favorite recipe********: ", recipeIDList[i]);
-
                         recipeIDString = recipeIDList[i];
                         int id = Integer.parseInt(recipeIDString);
                         recipeObject = getRecipe(id);
-                        while (recipeObject.isRunning()) {}
 
                         recipeJSONObject = recipeObject.getResponseJSON();
 
