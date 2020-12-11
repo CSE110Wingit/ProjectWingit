@@ -200,6 +200,11 @@ public class LambdaResponse extends Thread{
         return this.isError() ? this.errorMessage : "No Error";
     }
 
+    public String getExactErrorMessage() {
+        this.awaitResponse();
+        return this.errorMessage == null ? "" : this.errorMessage;
+    }
+
     /**
      * Gets the response JSON object
      */
