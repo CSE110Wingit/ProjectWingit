@@ -130,7 +130,9 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 //        LoginInfo.setCurrentLogin("JustWingit","cse110wingit@gmail.com", WingitUtils.hashPassword("wingit!1"));
         LambdaResponse login = login();
 
-        if(initializedCards) initRecyclerView(v);
+        if(initializedCards) {
+            initRecyclerView(v);
+        }
         else {
             initializedCards = Boolean.TRUE;
             LambdaResponse lr = searchRecipes(recipeSearchText, nutAllergy, glutenFree, spiciness);
@@ -161,11 +163,10 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                 for (int i = 0; i < ja.length(); i++) {
                     recipeIDString = ja.getString(i);
                     int id = Integer.parseInt(recipeIDString);
+
                     recipeObject = getRecipe(id);
-                    while (recipeObject.isRunning()) {}
 
                     recipeJSONObject = recipeObject.getResponseJSON();
-                    while (recipeObject.isRunning()) {}
 
                     String testRecipeName = recipeJSONObject.getString(RECIPE_TITLE_STR);
                     String recipeRating = "Rating: ";
@@ -248,20 +249,24 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
             try {
                 for (int i = 0; i < recipeIDList.length; i++) {
-                    recipeIDString = recipeIDList[i];
-                    int id = Integer.parseInt(recipeIDString);
-                    recipeObject = getRecipe(id);
-                    while (recipeObject.isRunning()) {}
+                    if (recipeIDList[i] != null) {
+                        Log.d("Favorite recipe********: ", recipeIDList[i]);
 
-                    recipeJSONObject = recipeObject.getResponseJSON();
-                    while (recipeObject.isRunning()) {}
+                        recipeIDString = recipeIDList[i];
+                        int id = Integer.parseInt(recipeIDString);
+                        recipeObject = getRecipe(id);
+                        while (recipeObject.isRunning()) {}
 
-                    mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
-                    mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
-                    mRecipeCategories.add("Category " + i);
-                    mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
-                    mRecipeID.add(id);
-                    mIsFavorites.add(Boolean.TRUE);
+                        recipeJSONObject = recipeObject.getResponseJSON();
+
+                        mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
+                        mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
+                        mRecipeCategories.add("Category " + i);
+                        mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
+                        mRecipeID.add(id);
+                        mIsFavorites.add(Boolean.TRUE);
+                    }
+
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
