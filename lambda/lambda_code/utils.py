@@ -324,7 +324,7 @@ QUERY_OTHER_STR_MULT = 1
 QUERY_AUTHOR_STR_VAL = 5
 
 
-def do_query(query, nut_allergy, gluten_free, spiciness, public_results, private_results, top_n=10):
+def do_query(query, nut_allergy, gluten_free, spiciness, public_results, private_results, top_n=100):
     """
     The actual search engine bit
     """
