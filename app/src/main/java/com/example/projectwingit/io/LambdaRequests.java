@@ -316,7 +316,7 @@ public class LambdaRequests extends UserInfo{
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return
      */
-    public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
+    private static LambdaResponse _createRecipe(String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                               int spicinessLevel, boolean isPrivate, String imageURL){
         try{
@@ -345,6 +345,24 @@ public class LambdaRequests extends UserInfo{
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending create recipe request: " + e.getMessage());
         }
+    }
+
+    public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
+                                              String tutorial, boolean isNutAllergy, boolean isGlutenFree,
+                                              int spicinessLevel, boolean isPrivate){
+        return _createRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+                spicinessLevel, isPrivate, null);
+    }
+
+    public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
+                                              String tutorial, boolean isNutAllergy, boolean isGlutenFree,
+                                              int spicinessLevel, boolean isPrivate, Bitmap recipeImage){
+        LambdaResponse response = uploadImage(recipeImage);
+        if (!response.isError()){
+            return _createRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+                    spicinessLevel, isPrivate, response.getErrorMessage());
+        }
+        return response;
     }
 
     /**
@@ -483,7 +501,7 @@ public class LambdaRequests extends UserInfo{
         }
     }
 
-    public static LambdaResponse uploadImage(Bitmap image) {
+    private static LambdaResponse uploadImage(Bitmap image) {
         try {
             String[] params = {
                     USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
@@ -507,13 +525,17 @@ public class LambdaRequests extends UserInfo{
 
                 WingitLogging.log("DDD " + filename);
 
-                WingitLogging.log("DDD " + response.getResponseJSON().getString("url").replaceAll("\\\\/", "/"));
+                String url = response.getResponseJSON().getString("url").replaceAll("\\\\/", "/");
+                WingitLogging.log("DDD " + url);
                 WingitLogging.log("DDD " + response.getResponseJSON().getString("fields").replaceAll("\\\\/", "/"));
 
                 OkHttpClient client = new OkHttpClient();
                 RequestBody formBody = buildImgForm(filename, response.getResponseJSON().getString("fields").replaceAll("\\\\/", "/"), tmpFile);
-                Request request = new Request.Builder().url(response.getResponseJSON().getString("url").replaceAll("\\\\/", "/")).post(formBody).build();
-                return new LambdaResponse(client.newCall(request));
+                Request request = new Request.Builder().url(url).post(formBody).build();
+                LambdaResponse resp = new LambdaResponse(client.newCall(request));
+
+                if (!resp.isError()) return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, url + "/" + filename);
+                return resp;
             }
 
             return response;
