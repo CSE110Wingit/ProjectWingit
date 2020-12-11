@@ -359,6 +359,10 @@ public class CreateRecipe extends Fragment {
                     recipeTutorialBuilder.append(step + "\n");
                 }
                 recipeTutorial = recipeTutorialBuilder.toString().trim();
+                String[] logRecipeTutorial = recipeTutorial.split("\n");
+                for (String instruction: logRecipeTutorial) {
+                    Log.i(tag, instruction);
+                }
 
 //                Log.i(tag, "Recipe name: " + recipeTitle);
 //                Log.i(tag, "Recipe description: " + recipeDescription);
@@ -373,7 +377,7 @@ public class CreateRecipe extends Fragment {
 
                 LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
                         recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
-                        isGlutenFree, (int) spicinessLevel, isPrivate, null);
+                        isGlutenFree, (int) spicinessLevel, isPrivate, imageBitmap);
 
                 new ProcessCreateRecipeResponseThread(createRecipeResponse).run();
 
