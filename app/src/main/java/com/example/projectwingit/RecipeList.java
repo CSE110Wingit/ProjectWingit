@@ -118,16 +118,12 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
             initImageBitmaps(v);
         }
 
-
-
-
         // Inflate the layout for this fragment
         return v;
     }
 
 
     private void initImageBitmaps(View v) {
-//        LoginInfo.setCurrentLogin("JustWingit","cse110wingit@gmail.com", WingitUtils.hashPassword("wingit!1"));
         LambdaResponse login = login();
 
         if(initializedCards) {
