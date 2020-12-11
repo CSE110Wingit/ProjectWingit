@@ -53,6 +53,7 @@ public class RecipePageFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private String tutorialString;
 
     private Button rateButton;
     Dialog rateDialog;
@@ -131,6 +132,7 @@ public class RecipePageFragment extends Fragment {
             descriptionText.setText(recipeObject.getString(RECIPE_DESCRIPTION_STR));
             Glide.with(this).load(recipeObject.getString(RECIPE_PICTURE_STR)).into(recipeImage);
             ingredientsText.setText(recipeObject.getString(RECIPE_INGREDIENTS_STR));
+            tutorialString = recipeObject.getString(RECIPE_TUTORIAL_STR);
 
             String recipeRating = "Rating: ";
          //   recipeRating += recipeObject.getDouble(RECIPE_RATING_STR);
@@ -250,7 +252,7 @@ public class RecipePageFragment extends Fragment {
         cookingTutorialButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageInstructionFragment(recipeID)).addToBackStack(null).commit();
+                getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageInstructionFragment(tutorialString, recipeID)).addToBackStack(null).commit();
             }
         });
 
