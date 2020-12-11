@@ -17,6 +17,7 @@
         android:hint="Please log in to see your favorites."
         android:textStyle="bold"
         android:textSize="20sp"
+        android:textAlignment="center"
         android:layout_centerInParent="true"/>
 
 </RelativeLayout>
