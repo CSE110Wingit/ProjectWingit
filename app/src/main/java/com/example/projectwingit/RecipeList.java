@@ -237,17 +237,9 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
         if(initializedCards) initRecyclerView(v);
         else {
             initializedCards = Boolean.TRUE;
-            LambdaResponse lr = login();
-            while (lr.isRunning()) {
-            }
-            JSONObject joe = lr.getResponseJSON();
 
-            JSONArray ja = new JSONArray();
-            try {
-                ja = joe.getJSONArray(FAVORITED_RECIPES_STR);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            String[] recipeIDList;
+            recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
 
             JSONObject recipeID = new JSONObject();
             LambdaResponse recipeObject;
@@ -255,8 +247,8 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
             JSONObject recipeJSONObject;
 
             try {
-                for (int i = 0; i < ja.length(); i++) {
-                    recipeIDString = ja.getString(i);
+                for (int i = 0; i < recipeIDList.length; i++) {
+                    recipeIDString = recipeIDList[i];
                     int id = Integer.parseInt(recipeIDString);
                     recipeObject = getRecipe(id);
                     while (recipeObject.isRunning()) {}
