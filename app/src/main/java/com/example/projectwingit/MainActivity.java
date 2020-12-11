@@ -107,15 +107,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             toolbar.setTitle(R.string.search_title_toolbar);
                             break;
                         case R.id.favorites:
-                            // checks if user is logged in
-                            Boolean isLoggedIn = UserInfo.CURRENT_USER.isLoggedIn();
-
-                            if (isLoggedIn) {
-                                fragment = new FavoritesFragment();
-                            }
-                            else {
-                                fragment = new FavoritesFragment(isLoggedIn);
-                            }
+                            fragment = new FavoritesFragment();
                             toolbar.setTitle(R.string.favorites_title_toolbar);
                             break;
 
