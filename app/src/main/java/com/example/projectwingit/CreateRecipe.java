@@ -33,6 +33,10 @@ import android.widget.Toast;
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
+import com.example.projectwingit.utils.WingitLambdaConstants;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -253,9 +257,9 @@ public class CreateRecipe extends Fragment {
         r = new Runnable() {
             @Override
             public void run() {
-//                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//                    transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
                 showToast("Recipe successfully created! Recipe ID " + recipeId);
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
             }
         };
         getActivity().runOnUiThread(r);
@@ -303,7 +307,13 @@ public class CreateRecipe extends Fragment {
                 // FIXME: replace -1 with the recipe's id.
                 Log.i(tag, "Success: " + response.getErrorMessage());
                 Log.i(tag, response.getResponseInfo());
-                navigateToRecipePage(-1);
+                JSONObject responseJSON = response.getResponseJSON();
+                try {
+                    int recipeID = responseJSON.getInt(WingitLambdaConstants.RECIPE_ID_STR);
+                    navigateToRecipePage(recipeID);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
