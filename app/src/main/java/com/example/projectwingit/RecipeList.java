@@ -161,6 +161,9 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                     String recipeRating = "Rating: ";
                     if(!(testRecipeName.contains("recipe1"))) {
                         mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
+                        Log.d("Picture URL: ", recipeJSONObject.getString(RECIPE_PICTURE_STR));
+                        Log.d("Recipe Title: ", recipeJSONObject.getString(RECIPE_TITLE_STR));
+
                         mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
                         mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
 

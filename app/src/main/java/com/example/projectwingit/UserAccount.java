@@ -70,7 +70,6 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
         account_Drawer.openDrawer(GravityCompat.START);
         NavigationView accountView = findViewById(R.id.userAccountView);
         accountView.setNavigationItemSelectedListener(this);
-//        getSupportFragmentManager().beginTransaction().replace(R.id.container_user_account, new LoginFragment()).commit();
 
         if(isLoggedIn){
             TextView greeting = accountView.getHeaderView(0).findViewById(R.id.AO_title);
