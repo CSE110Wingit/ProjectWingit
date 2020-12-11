@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.example.projectwingit.debug.WingitLogging;
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
@@ -39,17 +40,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         UserInfo.APP_CONTEXT = getApplicationContext();
-
-        String passwordHash = WingitUtils.hashPassword("TestPassword!1");
-        LambdaResponse response = LambdaRequests.login("wingit_testing_account_verified", passwordHash);
-        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        for (int i = 0; i < 100; i++){
-            for (int j = 0; j < 100; j++){
-                bitmap.setPixel(i, j, Color.argb(1, 1, 0, 0));
-            }
-        }
-        LambdaResponse getURL = LambdaRequests.
-
 
         bottomNavigationView = findViewById(R.id.bottomNav);
         bottomNavigationView.setOnNavigationItemSelectedListener(bottomNavMethod);
