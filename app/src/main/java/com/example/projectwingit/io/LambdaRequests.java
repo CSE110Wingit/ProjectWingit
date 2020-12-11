@@ -357,10 +357,14 @@ public class LambdaRequests extends UserInfo{
     public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                               int spicinessLevel, boolean isPrivate, Bitmap recipeImage){
+        if (recipeImage == null){
+            return _createRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+                    spicinessLevel, isPrivate, null);
+        }
         LambdaResponse response = uploadImage(recipeImage);
         if (!response.isError()){
             return _createRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
-                    spicinessLevel, isPrivate, response.getErrorMessage());
+                    spicinessLevel, isPrivate, response.getExactErrorMessage());
         }
         return response;
     }
@@ -405,7 +409,7 @@ public class LambdaRequests extends UserInfo{
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return A LambdaResponse of the response
      */
-    public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
+    private static LambdaResponse _editRecipe(String title, String[] ingredients, String description,
                                             String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                             int spicinessLevel, boolean isPrivate, String imageURL){
         try{
@@ -429,6 +433,28 @@ public class LambdaRequests extends UserInfo{
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending editRecipe request: " + e.getMessage());
         }
+    }
+
+    public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
+                                              String tutorial, boolean isNutAllergy, boolean isGlutenFree,
+                                              int spicinessLevel, boolean isPrivate){
+        return _editRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+            spicinessLevel, isPrivate, null);
+    }
+
+    public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
+                                            String tutorial, boolean isNutAllergy, boolean isGlutenFree,
+                                            int spicinessLevel, boolean isPrivate, Bitmap recipeImage){
+        if (recipeImage == null){
+            return _editRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+                    spicinessLevel, isPrivate, null);
+        }
+        LambdaResponse response = uploadImage(recipeImage);
+        if (!response.isError()){
+            return _editRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+                    spicinessLevel, isPrivate, response.getExactErrorMessage());
+        }
+        return response;
     }
 
     /**
