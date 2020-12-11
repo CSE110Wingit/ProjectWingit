@@ -1,27 +1,33 @@
 package com.example.projectwingit.io;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+
 import com.example.projectwingit.debug.WingitLogging;
 
 import org.json.JSONObject;
 
 import static com.example.projectwingit.utils.WingitLambdaConstants.*;
+import static com.example.projectwingit.utils.WingitUtils.*;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.*;
 
 /**
  * Provides easy access to calling the Lambda API
  */
 public class LambdaRequests extends UserInfo{
+
+    private static final String TEMP_FILE_PATH = "tempimage.png";
 
     /**
      * Sends a create_account request to the API
@@ -310,7 +316,7 @@ public class LambdaRequests extends UserInfo{
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return
      */
-    public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
+    private static LambdaResponse _createRecipe(String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                               int spicinessLevel, boolean isPrivate, String imageURL){
         try{
@@ -341,19 +347,45 @@ public class LambdaRequests extends UserInfo{
         }
     }
 
+    public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
+                                              String tutorial, boolean isNutAllergy, boolean isGlutenFree,
+                                              int spicinessLevel, boolean isPrivate){
+        return _createRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+                spicinessLevel, isPrivate, null);
+    }
+
+    public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
+                                              String tutorial, boolean isNutAllergy, boolean isGlutenFree,
+                                              int spicinessLevel, boolean isPrivate, Bitmap recipeImage){
+        LambdaResponse response = uploadImage(recipeImage);
+        if (!response.isError()){
+            return _createRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+                    spicinessLevel, isPrivate, response.getErrorMessage());
+        }
+        return response;
+    }
+
     /**
      * Gets a recipe in the database with the given id
      * @param recipeId the recipe id
      */
     public static LambdaResponse getRecipe(int recipeId){
         try{
-            String[] params = {
-                    EVENT_TYPE_STR, EVENT_GET_RECIPE_STR,
-                    RECIPE_ID_STR, ""+recipeId,
-                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
-                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
-            };
-            return sendRequest("GET", params);
+            if (UserInfo.CURRENT_USER.isLoggedIn()) {
+                String[] params = {
+                        EVENT_TYPE_STR, EVENT_GET_RECIPE_STR,
+                        RECIPE_ID_STR, "" + recipeId,
+                        USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                        PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
+                };
+                return sendRequest("GET", params);
+            }else {
+                String[] params = {
+                        EVENT_TYPE_STR, EVENT_GET_RECIPE_STR,
+                        RECIPE_ID_STR, "" + recipeId,
+                };
+                return sendRequest("GET", params);
+            }
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending createAccount request: " + e.getMessage());
@@ -469,17 +501,44 @@ public class LambdaRequests extends UserInfo{
         }
     }
 
-    public static LambdaResponse uploadImage(String s3URL, String androidURI) {
+    private static LambdaResponse uploadImage(Bitmap image) {
         try {
-            OkHttpClient client = new OkHttpClient();
-            File file = new File(androidURI);
-            RequestBody formBody = new MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart("file", file.getName(),
-                            RequestBody.create(MediaType.parse("text/plain"), file))
-                    .build();
-            Request request = new Request.Builder().url(s3URL).post(formBody).build();
-            return new LambdaResponse(client.newCall(request));
+            String[] params = {
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
+                    EVENT_TYPE_STR, EVENT_GET_S3_URL_STR,
+                    S3_REASON_STR, S3_REASON_UPLOAD_RECIPE_IMAGE,
+                    IMAGE_FILE_EXTENSION_STR, "png"
+            };
+
+            LambdaResponse response = sendRequest("GET", params);
+
+            if (!response.isError()) {
+                APP_CONTEXT.deleteFile(TEMP_FILE_PATH);
+                FileOutputStream fos = APP_CONTEXT.openFileOutput(TEMP_FILE_PATH, Context.MODE_PRIVATE);
+                image.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.flush();
+                fos.close();
+
+                File tmpFile = new File(APP_CONTEXT.getFilesDir(), TEMP_FILE_PATH);
+                String filename = response.getResponseJSON().getString("recipe_picture_id") + ".png";
+
+                WingitLogging.log("DDD " + filename);
+
+                String url = response.getResponseJSON().getString("url").replaceAll("\\\\/", "/");
+                WingitLogging.log("DDD " + url);
+                WingitLogging.log("DDD " + response.getResponseJSON().getString("fields").replaceAll("\\\\/", "/"));
+
+                OkHttpClient client = new OkHttpClient();
+                RequestBody formBody = buildImgForm(filename, response.getResponseJSON().getString("fields").replaceAll("\\\\/", "/"), tmpFile);
+                Request request = new Request.Builder().url(url).post(formBody).build();
+                LambdaResponse resp = new LambdaResponse(client.newCall(request));
+
+                if (!resp.isError()) return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, url + "/" + filename);
+                return resp;
+            }
+
+            return response;
         }catch(Exception e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, "Error uploading image: " + e.getMessage());
         }
@@ -545,5 +604,21 @@ public class LambdaRequests extends UserInfo{
         StringBuilder ret = new StringBuilder();
         for (String s : args){ ret.append(s).append(","); }
         return ret.substring(0, ret.length() - 1);
+    }
+
+    private static MultipartBody buildImgForm(String filename, String fields, File tmpFile) throws Exception{
+        JSONObject json = new JSONObject(fields);
+        MultipartBody.Builder formBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM);
+
+        Iterator<String> keys = json.keys();
+        while(keys.hasNext()){
+            String name = keys.next();
+            formBody.addFormDataPart(name, json.getString(name));
+        }
+
+        formBody.addFormDataPart("file", filename,
+                RequestBody.create(MediaType.parse("img/png"), tmpFile));
+        return formBody.build();
     }
 }

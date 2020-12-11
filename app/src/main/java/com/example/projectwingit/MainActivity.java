@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment;
 
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +20,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.example.projectwingit.debug.WingitLogging;
+import com.example.projectwingit.io.LambdaRequests;
+import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
+import com.example.projectwingit.utils.WingitUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 
@@ -102,13 +108,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             break;
                         case R.id.favorites:
                             // checks if user is logged in
-                            if (UserInfo.CURRENT_USER.isLoggedIn()) {
+                            Boolean isLoggedIn = UserInfo.CURRENT_USER.isLoggedIn();
+
+                            if (isLoggedIn) {
                                 fragment = new FavoritesFragment();
-                                toolbar.setTitle(R.string.favorites_title_toolbar);
                             }
                             else {
-                                //TODO transition to login page
+                                fragment = new FavoritesFragment(isLoggedIn);
                             }
+                            toolbar.setTitle(R.string.favorites_title_toolbar);
                             break;
 
                     }

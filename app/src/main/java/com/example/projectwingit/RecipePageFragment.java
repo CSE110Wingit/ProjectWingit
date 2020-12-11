@@ -1,9 +1,13 @@
 package com.example.projectwingit;
 
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +15,7 @@ import android.widget.Button;
 import android.app.Dialog;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.projectwingit.io.LambdaResponse;
@@ -52,10 +57,12 @@ public class RecipePageFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private String tutorialString;
 
     private Button rateButton;
     Dialog rateDialog;
     private int recipeID;
+    private MaterialButton favoriteButton;
     /**
      * TODO: We will fill the following TextView widgets with recipe fields
      *
@@ -111,10 +118,8 @@ public class RecipePageFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_recipe_page, container, false);
         LambdaResponse recipeLambdaResponse = getRecipe(recipeID);
-        while (recipeLambdaResponse.isRunning()) {}
 
         JSONObject recipeObject = recipeLambdaResponse.getResponseJSON();
-        while (recipeLambdaResponse.isRunning()) {}
 
         ImageView recipeImage = v.findViewById(R.id.Recipe_ImageView);
         TextView titleText = v.findViewById(R.id.titleText);
@@ -123,6 +128,7 @@ public class RecipePageFragment extends Fragment {
         //TextView instructionsText = v.findViewById(R.id.textViewInstructions);
         TextView nutAllergyText = v.findViewById(R.id.textViewAllergy);
         TextView ratingText = v.findViewById(R.id.textViewNutritional);
+        favoriteButton = v.findViewById(R.id.recipe_page_fav_button);
 
         try {
 
@@ -130,9 +136,10 @@ public class RecipePageFragment extends Fragment {
             descriptionText.setText(recipeObject.getString(RECIPE_DESCRIPTION_STR));
             Glide.with(this).load(recipeObject.getString(RECIPE_PICTURE_STR)).into(recipeImage);
             ingredientsText.setText(recipeObject.getString(RECIPE_INGREDIENTS_STR));
+            tutorialString = recipeObject.getString(RECIPE_TUTORIAL_STR);
 
             String recipeRating = "Rating: ";
-            recipeRating += recipeObject.getDouble(RECIPE_RATING_STR);
+         //   recipeRating += recipeObject.getDouble(RECIPE_RATING_STR);
             recipeRating += " Stars";
             ratingText.setText(recipeRating);
             //instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
@@ -143,14 +150,39 @@ public class RecipePageFragment extends Fragment {
             if(recipeObject.getBoolean(GLUTEN_FREE_STR)) allergyString += "This recipe is gluten-free.";
             else allergyString += "This recipe contains gluten.";
             nutAllergyText.setText(allergyString);
+
+            String[] recipeIDList = null;
+            String recipeIDString = "";
+            recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
+
+            String currentRecipeID = Integer.toString(recipeID);
+
+            // Set Favorites button and text
+            if (UserInfo.CURRENT_USER.isLoggedIn()) {
+                boolean favVal = false;
+                for (int i = 0; i < recipeIDList.length; i++) {
+                    if (recipeIDList[i] != null) {
+                        recipeIDString = recipeIDList[i];
+                        if (currentRecipeID.equals(recipeIDString)) favVal = true;
+                    }
+                }
+                if (favVal) {
+                    favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
+                    favoriteButton.setText("In Favorites");
+                } else {
+                    favoriteButton.setIconResource(R.drawable.ic_add_to_fav);
+                    favoriteButton.setText("Save to favorites");
+                }
+            }
+            else {
+                favoriteButton.setTextColor(getResources().getColor(R.color.secondary));
+                favoriteButton.setIconTint(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
+            }
+
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
-
-
-
 
 
 
@@ -169,7 +201,6 @@ public class RecipePageFragment extends Fragment {
         Button cancel = rateDialog.findViewById(R.id.cancel_dialog_button);
         Button okay = rateDialog.findViewById(R.id.ok_dialog_button);
         Button cookingTutorialButton = v.findViewById(R.id.Tutorial_Button);
-        MaterialButton favoriteButton = v.findViewById(R.id.recipe_page_fav_button);
 
         cancel.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -182,35 +213,38 @@ public class RecipePageFragment extends Fragment {
             @Override
             public void onClick(View v){
 
-                LambdaResponse lr = getRecipe(recipeID);
+                if (UserInfo.CURRENT_USER.isLoggedIn()) {
+                    String[] recipeIDList;
+                    String recipeIDString = "";
+                    recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
+                    String currentRecipeID = Integer.toString(recipeID);
 
-                JSONObject joe = lr.getResponseJSON();
-                while (lr.isRunning()) {}
-
-                JSONArray favs = new JSONArray();
-                try {
-                    favs = joe.getJSONArray(FAVORITED_RECIPES_STR);
-                } catch (JSONException e){
-                    e.printStackTrace();
-                }
-
-                try {
                     boolean favVal = false;
-                    for (int i = 0; i < favs.length(); i++) {
-                        if (favs.getString(i).equals("" + recipeID)) favVal = true;
+                    for (int i = 0; i < recipeIDList.length; i++) {
+                        if (recipeIDList[i] != null) {
+                            recipeIDString = recipeIDList[i];
+                            if (currentRecipeID.equals(recipeIDString)) favVal = true;
+                        }
                     }
-
-
-                    LambdaResponse favreq = favoriteRecipe("" + recipeID);
-                    //LambdaResponse favreq = unfavoriteRecipe("" + recipeID);
-
-                    favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
-                    favoriteButton.setText("In Favorites");
+                    if (!favVal) {
+                        if (currentRecipeID != null) {
+                            LambdaResponse favreq = favoriteRecipe(currentRecipeID);
+                        }
+                        favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
+                        favoriteButton.setText("In Favorites");
+                    } else {
+                        if (currentRecipeID != null) {
+                            LambdaResponse favreq = unfavoriteRecipe(currentRecipeID);
+                        }
+                        favoriteButton.setIconResource(R.drawable.ic_add_to_fav);
+                        favoriteButton.setText("Save to favorites");
+                    }
                 }
-                catch (JSONException e){
-                    e.printStackTrace();
+                else {
+                    Toast.makeText(getActivity().getApplicationContext(), "Please log in to add to favorites.", Toast.LENGTH_LONG).show();
                 }
             }
+
         });
 
         okay.setOnClickListener(new View.OnClickListener(){
@@ -233,7 +267,7 @@ public class RecipePageFragment extends Fragment {
         cookingTutorialButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageInstructionFragment(recipeID)).addToBackStack(null).commit();
+                getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageInstructionFragment(tutorialString, recipeID)).addToBackStack(null).commit();
             }
         });
 

@@ -67,6 +67,7 @@ public class RecipeListRecyclerViewAdapter extends RecyclerView.Adapter<RecipeLi
         if(mIsFavorited.get(position)) {
             holder.favoriteButton.setText("In Favorites");
             holder.favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
+            holder.favoriteButton.setVisibility(View.VISIBLE);
         }
 
         holder.recipeCard.setOnClickListener(holder);
@@ -93,7 +94,7 @@ public class RecipeListRecyclerViewAdapter extends RecyclerView.Adapter<RecipeLi
             recipeTitle = itemView.findViewById(R.id.recipe_title);
             recipeCategory = itemView.findViewById(R.id.recipe_category);
             recipeDescription = itemView.findViewById(R.id.recipe_description);
-            favoriteButton = itemView.findViewById(R.id.favoite_button);
+            favoriteButton = itemView.findViewById(R.id.favorite_button);
             this.recipeCard = itemView.findViewById(R.id.recipe_card_id);
             this.onRecipeListener = onRecipeListener;
             

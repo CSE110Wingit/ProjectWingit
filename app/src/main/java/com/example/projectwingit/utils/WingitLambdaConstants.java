@@ -45,4 +45,9 @@ public class WingitLambdaConstants {
     public static final String FAVORITED_RECIPES_STR = "favorited_recipes";
     public static final String QUERY_RESULTS_STR = "query_results";
     public static final int PASSWORD_CHANGE_CODE_SIZE = 6;
+    public static final String S3_REASON_STR = "s3_reason";
+    public static final String EVENT_GET_S3_URL_STR = "get_s3";
+    public static final String S3_REASON_UPLOAD_RECIPE_IMAGE = "recipe_image_upload";
+    public static final String S3_REASON_UPLOAD_USER_PROFILE_IMAGE = "user_profile_image_upload";
+    public static final String IMAGE_FILE_EXTENSION_STR = "image_file_ext";
 }

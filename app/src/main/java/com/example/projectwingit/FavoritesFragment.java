@@ -24,10 +24,15 @@ public class FavoritesFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private Boolean loginStatus = true;
+
     public FavoritesFragment() {
         // Required empty public constructor
     }
 
+    public FavoritesFragment(Boolean loginStatus) {
+        this.loginStatus = loginStatus;
+    }
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -58,9 +63,14 @@ public class FavoritesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        RecipeList spicyList = new RecipeList();
-        spicyList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5, Boolean.TRUE);
-        getFragmentManager().beginTransaction().replace(R.id.container, spicyList).addToBackStack(null).commit();
+        if (loginStatus) {
+            RecipeList favList = new RecipeList();
+            favList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5, Boolean.TRUE);
+            getFragmentManager().beginTransaction().replace(R.id.container, favList).addToBackStack(null).commit();
+        }
+        else {
+
+        }
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_favorites, container, false);
