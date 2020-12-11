@@ -355,25 +355,12 @@ public class CreateRecipe extends Fragment {
                 // Tutorial. One big string separated by newlines.
                 String recipeTutorial;
                 StringBuilder recipeTutorialBuilder = new StringBuilder();
-                for (String step : mRecipeStepList) {
-                    recipeTutorialBuilder.append(step + "\n");
+                for (int i = 0; i < mRecipeStepList.size(); i++) {
+                    recipeTutorialBuilder.append(String.format("%d. %s\n", i + 1, mRecipeStepList.get(i)));
                 }
                 recipeTutorial = recipeTutorialBuilder.toString().trim();
-                String[] logRecipeTutorial = recipeTutorial.split("\n");
-                for (String instruction: logRecipeTutorial) {
-                    Log.i(tag, instruction);
-                }
 
-//                Log.i(tag, "Recipe name: " + recipeTitle);
-//                Log.i(tag, "Recipe description: " + recipeDescription);
-//                Log.i(tag, "Recipe ingredients: " + recipeIngredients.toString());
-//                Log.i(tag, "Tutorial: " + recipeTutorial);
-//                Log.i(tag, "Contains nuts " + containsNuts);
-//                Log.i(tag, "Is gluten free " + isGlutenFree);
-//                Log.i(tag, "Spiciness level " + spicinessLevel);
-//                Log.i(tag, "Is private " + isPrivate);
-//                Log.i(tag, "Current user " + UserInfo.CURRENT_USER.getUsername());
-
+                Log.i(tag, "Tutorial: " + recipeTutorial.replace("\n", "\\n"));
 
                 LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
                         recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
