@@ -63,7 +63,7 @@ public class LambdaResponse extends Thread{
             }
         } catch (IOException e){
             this.errorState = ErrorState.CLIENT_ERROR;
-            this.errorMessage = "IOException while executing the request to the server.";
+            this.errorMessage = "IOException while executing the request to the server: " + e.getMessage();
         }catch (JSONException e){
             this.errorState = ErrorState.CLIENT_ERROR;
             this.errorMessage = "Error reading response JSON: " + e.getMessage();
@@ -73,10 +73,16 @@ public class LambdaResponse extends Thread{
     }
 
     private void interpretResponse(String response) throws JSONException{
+        if (response.isEmpty()){
+            this.errorState = ErrorState.NO_ERROR;
+            this.json = new JSONObject("{\"" + RETURN_INFO_STR + "\":\"Successfully uploaded image to s3!\"}");
+            return;
+        }
+
         this.json = new JSONObject(response);
 
         // If there was a server error
-        if (!this.json.isNull(WingitLambdaConstants.RETURN_ERROR_CODE_STR)){
+        if (!this.json.isNull(WingitLambdaConstants.RETURN_ERROR_CODE_STR) && !this.json.isNull("url")){
             WingitLogging.log("Got error");
             this.errorState = ErrorState.SERVER_ERROR;
             this.errorMessage = "Error Code " + this.json.getString(WingitLambdaConstants.RETURN_ERROR_CODE_STR)
@@ -87,7 +93,8 @@ public class LambdaResponse extends Thread{
             this.errorMessage = "ERROR_UNCAUGHT_SERVER_ERROR: Error was not caught by main try/catch block:\n" + json.getString("message");
         }else{
             this.errorState = ErrorState.NO_ERROR;
-            this.errorMessage = this.json.getString(WingitLambdaConstants.RETURN_INFO_STR);
+            if (this.json.isNull("url"))
+                this.errorMessage = this.json.getString(WingitLambdaConstants.RETURN_INFO_STR);
         }
 
         fixJSONResponse();
