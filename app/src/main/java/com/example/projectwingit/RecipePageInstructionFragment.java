@@ -7,7 +7,12 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
 import com.example.projectwingit.io.LambdaResponse;
@@ -15,6 +20,7 @@ import com.example.projectwingit.io.LambdaResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import static com.example.projectwingit.io.LambdaRequests.getRecipe;
@@ -42,13 +48,20 @@ public class RecipePageInstructionFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private String tutorialString;
+    private String[] arrayTutorial = null;
+    private int arraySize;
     private int recipeID;
+    private Button nextButton;
+    private Button prevButton;
+    private Button finishButton;
 
     public RecipePageInstructionFragment() {
         // Required empty public constructor
     }
 
-    public RecipePageInstructionFragment(int recipeID) {
+    public RecipePageInstructionFragment(String tutorialString, int recipeID) {
+        this.tutorialString = tutorialString;
         this.recipeID = recipeID;
     }
 
@@ -85,30 +98,46 @@ public class RecipePageInstructionFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_recipe_page_instruction, container, false);
 
-        LambdaResponse recipeLambdaResponse = getRecipe(recipeID);
-        while (recipeLambdaResponse.isRunning()) {}
+        // Set button visibility
+        nextButton = (Button) v.findViewById((R.id.nextButton));
+        nextButton.setVisibility(View.GONE);
 
-        JSONObject recipeObject = recipeLambdaResponse.getResponseJSON();
-        while (recipeLambdaResponse.isRunning()) {}
+        prevButton = (Button) v.findViewById((R.id.prevButton));
+        prevButton.setVisibility(View.GONE);
 
+        finishButton = (Button) v.findViewById((R.id.finishButton));
+        finishButton.setVisibility(View.GONE);
+
+        // Set text using an array
         TextView instructionsText = v.findViewById(R.id.englargedinstructions);
+        arrayTutorial = tutorialString.split("\n");
 
-        String newInstruct = "";
-        try {
-            String oldInstruct = recipeObject.getString(RECIPE_TUTORIAL_STR);
-            newInstruct = oldInstruct.replaceAll("\n", "\n\n");
-            instructionsText.setText(newInstruct);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        arraySize = arrayTutorial.length;
+        for(int i = 0; i < arraySize; i++) {
+            instructionsText.append(arrayTutorial[i]);
+            instructionsText.append("\n\n");
         }
 
-        /*try {
-            instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
+        // Swap between step by step view and infinite scroll view
+        Switch toggle = (Switch) v.findViewById(R.id.switchView);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // Step by step view
+                    getFragmentManager().beginTransaction().replace(R.id.container, new RecipeInstructionSingleviewFragment(tutorialString, recipeID)).commit();
+                } else {
+                    //Shouldn't be able to reach this case but will "reload" the page if it does
+                    getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageInstructionFragment(tutorialString, recipeID)).commit();
+                }
+            }
+        });
 
         // Inflate the layout for this fragment
         return v;
+    }
+
+    //try to figure out how to strikethrough text on click later
+    public void onTextClick(View  view){
+
     }
 }
