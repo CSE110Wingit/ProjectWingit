@@ -27,6 +27,8 @@ public class HomeFragment extends Fragment {
     private String mParam2;
 
     private MaterialCardView category1;
+    private MaterialCardView category2;
+    private MaterialCardView category3;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -82,6 +84,28 @@ public class HomeFragment extends Fragment {
                 RecipeList spicyList = new RecipeList();
                 spicyList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, spicyList).addToBackStack(null).commit();
+            }
+        });
+
+        //TODO: Implement Vegetarian User Characteristic and then put it into the method below
+        category2 = v.findViewById(R.id.category2);
+        category2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                RecipeList vegetarianList = new RecipeList();
+                vegetarianList.typeResults("Vegan Vegetarian", Boolean.FALSE, Boolean.FALSE, 3, Boolean.FALSE);
+                getFragmentManager().beginTransaction().replace(R.id.container, vegetarianList).addToBackStack(null).commit();
+            }
+        });
+
+        //TODO: Implement Sweetness User Characteristic and then put it into the method below
+        category3 = v.findViewById(R.id.category3);
+        category3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                RecipeList sweetList = new RecipeList();
+                sweetList.typeResults("Sweet", Boolean.FALSE, Boolean.FALSE, 3, Boolean.FALSE);
+                getFragmentManager().beginTransaction().replace(R.id.container, sweetList).addToBackStack(null).commit();
             }
         });
 

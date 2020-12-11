@@ -15,6 +15,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -143,8 +144,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 toolbar.setTitle(R.string.home_title_toolbar);
                 break;
             case R.id.hamburger_create_recipe:
-                getSupportFragmentManager().beginTransaction().replace(R.id.container, new CreateRecipe()).commit();
-                toolbar.setTitle(R.string.create_recipe_title_toolbar);
+                if (UserInfo.CURRENT_USER.isLoggedIn()) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.container, new CreateRecipe()).commit();
+                    toolbar.setTitle(R.string.create_recipe_title_toolbar);
+                } else {
+                    Intent intent = new Intent(this, UserAccount.class);
+                    String create_recipe_protected = "Log in to create a recipe!";
+                    intent.putExtra("protected_destination", create_recipe_protected);
+                    startActivity(intent);
+                }
                 break;
             case R.id.hamburger_local_venues:
 			    String url = "https://www.google.com/maps/search/?api=1&query=wings";

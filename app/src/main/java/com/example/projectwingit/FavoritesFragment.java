@@ -58,9 +58,9 @@ public class FavoritesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        RecipeList spicyList = new RecipeList();
-        spicyList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5, Boolean.TRUE);
-        getFragmentManager().beginTransaction().replace(R.id.container, spicyList).addToBackStack(null).commit();
+        RecipeList favList = new RecipeList();
+        favList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5, Boolean.TRUE);
+        getFragmentManager().beginTransaction().replace(R.id.container, favList).addToBackStack(null).commit();
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_favorites, container, false);
