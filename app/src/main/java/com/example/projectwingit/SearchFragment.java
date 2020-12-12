@@ -78,13 +78,27 @@ public class SearchFragment extends Fragment {
                 searchRecipeText = searchText.getText().toString();
                 RecipeList rl = new RecipeList();
                 if(UserInfo.CURRENT_USER.isLoggedIn()){
-                    rl.typeResults(searchRecipeText, UserInfo.CURRENT_USER.getNutAllergy(),
-                            UserInfo.CURRENT_USER.getGlutenFree(),
+                    Boolean containsNuts;
+                    Boolean glutenFree;
+                    if(UserInfo.CURRENT_USER.getNutAllergy()){
+                        containsNuts = false;
+                    }
+                    else{
+                        containsNuts = null;
+                    }
+                    if(UserInfo.CURRENT_USER.getGlutenFree()){
+                        glutenFree = true;
+                    }
+                    else{
+                        glutenFree = null;
+                    }
+                    rl.typeResults(searchRecipeText, containsNuts,
+                            glutenFree,
                             UserInfo.CURRENT_USER.getSpicinessLevel(), null,
                             Boolean.FALSE);
                 }
                 else{
-                    rl.typeResults(searchRecipeText, Boolean.FALSE, Boolean.FALSE, -1, null,Boolean.FALSE);
+                    rl.typeResults(searchRecipeText, null, null, -1, null,Boolean.FALSE);
                 }
                 getFragmentManager().beginTransaction().replace(R.id.container, rl).addToBackStack(null).commit();
             }
