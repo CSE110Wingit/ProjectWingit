@@ -93,7 +93,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList vegetarianList = new RecipeList();
-                vegetarianList.typeResults("Vegan Vegetarian", Boolean.FALSE, Boolean.FALSE, 3, Boolean.FALSE);
+                vegetarianList.typeResults("Vegan Vegetarian", Boolean.FALSE, Boolean.FALSE, -1, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, vegetarianList).addToBackStack(null).commit();
             }
         });
