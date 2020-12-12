@@ -43,6 +43,8 @@ public class RegisterFragment extends Fragment implements OnClickListener {
     boolean containsGlutenAllergy;
     Spinner spicinessSelect;
     int spiciness;
+    boolean nutAllergy;
+    boolean glutenFree;
 
     public RegisterFragment() {
         // Required empty public constructor
@@ -100,6 +102,11 @@ public class RegisterFragment extends Fragment implements OnClickListener {
         emailText = (EditText) view.findViewById(R.id.emailReg);
         passText = (EditText) view.findViewById(R.id.passReg);
 
+        setUpContainsNutsCheckbox();
+        setUpGlutenFreeCheckbox();
+
+        spicinessSelected();
+
 
         back_Login.setOnClickListener(new OnClickListener() {
             @Override
@@ -113,7 +120,7 @@ public class RegisterFragment extends Fragment implements OnClickListener {
         signUpText.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                userRegister(v);
+                userRegister();
             }
         });
     }
@@ -122,17 +129,18 @@ public class RegisterFragment extends Fragment implements OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_register, container, false);
+        rootView = inflater.inflate(R.layout.fragment_register, container, false);
+        return rootView;
     }
 
-    private void userRegister(View v) {
+    private void userRegister() {
         String username, email, password, hashPass;
         username = userText.getText().toString();
         email = emailText.getText().toString();
         password = passText.getText().toString();
         hashPass = com.example.projectwingit.utils.WingitUtils.hashPassword(password);
         if (password.length() >= 8) {
-            LambdaResponse registration = LambdaRequests.createAccount(username, email, hashPass, true, true, 3);
+            LambdaResponse registration = LambdaRequests.createAccount(username, email, hashPass, this.nutAllergy, this.glutenFree, this.spiciness);
 
             signUpText.post(new Runnable() {
                 @Override
@@ -185,47 +193,41 @@ public class RegisterFragment extends Fragment implements OnClickListener {
         }
     }
 
-    public boolean setUpContainsNutsCheckbox(View v) {
-        checkBoxContainsNutAllergy = (CheckBox) v.findViewById(R.id.nutAllergy);
-        containsNutAllergy = false;
+    public void setUpContainsNutsCheckbox() {
+        checkBoxContainsNutAllergy = (CheckBox) rootView.findViewById(R.id.nutAllergy);
+        this.nutAllergy = false;
         checkBoxContainsNutAllergy.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                containsNutAllergy = isChecked;
+                nutAllergy = isChecked;
             }
         });
-        return containsNutAllergy;
     }
 
-    public boolean setUpGlutenFreeCheckbox(View v) {
-        checkBoxGlutenAllergy = (CheckBox) v.findViewById(R.id.glutenAllergy);
-        containsGlutenAllergy = false;
+    public void setUpGlutenFreeCheckbox() {
+        checkBoxGlutenAllergy = (CheckBox) rootView.findViewById(R.id.glutenAllergy);
+        glutenFree = false;
         checkBoxGlutenAllergy.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                containsGlutenAllergy = isChecked;
+                glutenFree = isChecked;
             }
         });
-        return containsGlutenAllergy;
     }
 
-    public int spicinessSelected(View v) {
+    public void spicinessSelected() {
         // Spiciness level selection.
-        spicinessSelect = (Spinner) v.findViewById(R.id.spicinessSelector);
+        spicinessSelect = (Spinner) rootView.findViewById(R.id.spicinessSelector);
         ArrayAdapter<CharSequence> spicinessLevelAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spiciness_level_array, android.R.layout.simple_spinner_item);
         spicinessLevelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spicinessSelect.setAdapter(spicinessLevelAdapter);
 
-        spiciness = -1;
+        this.spiciness = -1;
         spicinessSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, int id) {
-                spiciness = id;
-            }
-
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+                spiciness = (int) id;
             }
 
             @Override
@@ -234,7 +236,6 @@ public class RegisterFragment extends Fragment implements OnClickListener {
                 ;
             }
         });
-        return spiciness;
     }
 
 }
