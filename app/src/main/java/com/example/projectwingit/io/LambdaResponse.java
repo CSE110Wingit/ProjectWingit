@@ -109,13 +109,13 @@ public class LambdaResponse extends Thread{
             if (!json.isNull(NUT_ALLERGY_STR)) {
                 String str = json.getString(NUT_ALLERGY_STR);
                 json.remove(NUT_ALLERGY_STR);
-                json.put(NUT_ALLERGY_STR, str.toLowerCase().equals("true"));
+                json.put(NUT_ALLERGY_STR, str.toLowerCase().equals("1"));
             }
 
             if (!json.isNull(GLUTEN_FREE_STR)) {
                 String str = json.getString(GLUTEN_FREE_STR);
                 json.remove(GLUTEN_FREE_STR);
-                json.put(GLUTEN_FREE_STR, str.toLowerCase().equals("true"));
+                json.put(GLUTEN_FREE_STR, str.toLowerCase().equals("1"));
             }
 
             if (!json.isNull(SPICINESS_LEVEL_STR)) {

@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.projectwingit.io.UserInfo;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link SearchFragment#newInstance} factory method to
@@ -75,7 +77,15 @@ public class SearchFragment extends Fragment {
             public void onClick(View v) {
                 searchRecipeText = searchText.getText().toString();
                 RecipeList rl = new RecipeList();
-                rl.typeResults(searchRecipeText, Boolean.FALSE, Boolean.FALSE, -1, Boolean.FALSE);
+                if(UserInfo.CURRENT_USER.isLoggedIn()){
+                    rl.typeResults(searchRecipeText, UserInfo.CURRENT_USER.getNutAllergy(),
+                            UserInfo.CURRENT_USER.getGlutenFree(),
+                            UserInfo.CURRENT_USER.getSpicinessLevel(),
+                            Boolean.FALSE);
+                }
+                else{
+                    rl.typeResults(searchRecipeText, Boolean.FALSE, Boolean.FALSE, -1, Boolean.FALSE);
+                }
                 getFragmentManager().beginTransaction().replace(R.id.container, rl).addToBackStack(null).commit();
             }
         });
