@@ -82,7 +82,8 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList spicyList = new RecipeList();
-                spicyList.typeResults("", null, null, 4, null, Boolean.FALSE);
+                spicyList.typeResults("", null, null,
+                        4, null, Boolean.FALSE, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, spicyList).addToBackStack(null).commit();
             }
         });
@@ -93,19 +94,21 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList vegetarianList = new RecipeList();
-                vegetarianList.typeResults("Vegan Vegetarian", null, null, -1, Boolean.TRUE, Boolean.FALSE);
+                vegetarianList.typeResults("Vegan Vegetarian", null, null,
+                        -1, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, vegetarianList).addToBackStack(null).commit();
             }
         });
 
-        //TODO: Implement Sweetness User Characteristic and then put it into the method below
+
         category3 = v.findViewById(R.id.category3);
         category3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v){
-                RecipeList sweetList = new RecipeList();
-                sweetList.typeResults("Sweet", null, null, -1, null, Boolean.FALSE);
-                getFragmentManager().beginTransaction().replace(R.id.container, sweetList).addToBackStack(null).commit();
+                RecipeList ourFavs = new RecipeList();
+                ourFavs.typeResults("Sweet", null, null,
+                        -1, null, Boolean.FALSE, Boolean.TRUE);
+                getFragmentManager().beginTransaction().replace(R.id.container, ourFavs).addToBackStack(null).commit();
             }
         });
 

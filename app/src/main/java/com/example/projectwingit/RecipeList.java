@@ -71,6 +71,8 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
     private Boolean glutenFree;
     private Boolean vegetarian;
     private Boolean isFavoritesPage;
+    private Boolean isOurFavoritesPage;
+
 
     private Boolean initializedCards = Boolean.FALSE;
     private JSONObject recipeCardInfo;
@@ -114,6 +116,9 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
         if (isFavoritesPage) {
             initFavorites(v);
+        }
+        else if (isOurFavoritesPage) {
+            initOurFavorites(v);
         }
         else {
             initImageBitmaps(v);
@@ -231,13 +236,15 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
      *      2. This String represents the recipe that the user would like to search in the WingIt Database
      *      3. We will make a request to the Lambda API using this string in the onCreateView method above.
      */
-    public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness, Boolean vegetarian, Boolean isFavoritesPage) {
+    public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness,
+                            Boolean vegetarian, Boolean isFavoritesPage, Boolean isOurFavoritesPage) {
         this.recipeSearchText = recipeSearchText;
         this.spiciness = spiciness;
         this.nutAllergy = nutAllergy;
         this.glutenFree = glutenFree;
         this.vegetarian = vegetarian;
         this.isFavoritesPage = isFavoritesPage;
+        this.isOurFavoritesPage = isOurFavoritesPage;
     }
 
     private void initFavorites(View v) {
@@ -248,7 +255,6 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
             String[] recipeIDList;
             recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
 
-            JSONObject recipeID = new JSONObject();
             LambdaResponse recipeObject;
             String recipeIDString = "";
             JSONObject recipeJSONObject;
@@ -268,6 +274,61 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                         mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
                         mRecipeID.add(id);
                         mIsFavorites.add(Boolean.TRUE);
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            initRecyclerView(v);
+        }
+
+    }
+
+    private void initOurFavorites(View v) {
+        if(initializedCards) initRecyclerView(v);
+        else {
+            initializedCards = Boolean.TRUE;
+
+            String[] recipeIDList = {"25","19","35","9","29"};
+
+            LambdaResponse recipeObject;
+            String recipeIDString = "";
+            JSONObject recipeJSONObject;
+
+            try {
+                for (int i = 0; i < recipeIDList.length; i++) {
+                    if (recipeIDList[i] != null) {
+                        recipeIDString = recipeIDList[i];
+                        int id = Integer.parseInt(recipeIDString);
+                        recipeObject = getRecipe(id);
+
+                        recipeJSONObject = recipeObject.getResponseJSON();
+
+                        mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
+                        mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
+                        mRecipeCategories.add("Category " + i);
+                        mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
+                        mRecipeID.add(id);
+
+                        String[] userFavs;
+                        userFavs = UserInfo.CURRENT_USER.getFavoritedRecipes();
+                        if (userFavs != null) {
+                            boolean favVal = false;
+
+                            for (int z = 0; z < userFavs.length; z++) {
+                                if (userFavs[z] != null) {
+                                    if (userFavs[z].equals(recipeIDString)) favVal = true;
+                                }
+                            }
+
+                            mIsFavorites.add(favVal);
+                            mRecipeID.add(id);
+                        }
+                        else {
+                            mIsFavorites.add(false);
+                            mRecipeID.add(id);
+                        }
                     }
                 }
             } catch (JSONException e) {
