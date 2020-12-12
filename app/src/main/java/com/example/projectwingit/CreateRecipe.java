@@ -257,7 +257,7 @@ public class CreateRecipe extends Fragment {
         r = new Runnable() {
             @Override
             public void run() {
-                showToast("Recipe successfully created! Recipe ID " + recipeId);
+                showToast("Recipe successfully created!");
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
             }
