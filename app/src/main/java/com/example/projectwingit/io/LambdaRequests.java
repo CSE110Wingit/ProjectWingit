@@ -611,7 +611,7 @@ public class LambdaRequests extends UserInfo{
     private static MultipartBody buildParams(String[] params){
         MultipartBody.Builder requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
         for(int i = 0; i < params.length; i+=2){
-            requestBody = requestBody.addFormDataPart(params[i], params[i+1]);
+            requestBody = requestBody.addFormDataPart(params[i], params[i+1].replaceAll("\r", "\n"));
         }
         return requestBody.build();
     }
