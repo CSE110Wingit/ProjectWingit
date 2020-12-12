@@ -363,9 +363,9 @@ public class CreateRecipe extends Fragment {
 
                 LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
                         recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
-                        isGlutenFree, (int) spicinessLevel, isPrivate, null);
+                        isGlutenFree, false, (int) spicinessLevel, isPrivate, null);
 
-                new ProcessCreateRecipeResponseThread(createRecipeResponse).run();
+                new ProcessCreateRecipeResponseThread(createRecipeResponse).start();
 
             }
         });
