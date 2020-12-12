@@ -140,6 +140,7 @@ public class RecipeInstructionSingleviewFragment extends Fragment {
         finishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                getFragmentManager().popBackStack();
                 getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageFragment(recipeID)).commit();
             }
         });
