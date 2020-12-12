@@ -82,7 +82,7 @@ public class LambdaResponse extends Thread{
         this.json = new JSONObject(response);
 
         // If there was a server error
-        if (!this.json.isNull(WingitLambdaConstants.RETURN_ERROR_CODE_STR) && !this.json.isNull("url")){
+        if (!this.json.isNull(WingitLambdaConstants.RETURN_ERROR_CODE_STR) && this.json.isNull("url")){
             WingitLogging.log("Got error");
             this.errorState = ErrorState.SERVER_ERROR;
             this.errorMessage = "Error Code " + this.json.getString(WingitLambdaConstants.RETURN_ERROR_CODE_STR)
