@@ -106,7 +106,7 @@ public class RecipePageInstructionFragment extends Fragment {
         prevButton.setVisibility(View.GONE);
 
         finishButton = (Button) v.findViewById((R.id.finishButton));
-        finishButton.setVisibility(View.GONE);
+        finishButton.setVisibility(View.VISIBLE);
 
         // Set text using an array
         TextView instructionsText = v.findViewById(R.id.englargedinstructions);
@@ -117,6 +117,14 @@ public class RecipePageInstructionFragment extends Fragment {
             instructionsText.append(arrayTutorial[i]);
             instructionsText.append("\n\n");
         }
+
+        finishButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+                getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageFragment(recipeID)).commit();
+            }
+        });
 
         // Swap between step by step view and infinite scroll view
         Switch toggle = (Switch) v.findViewById(R.id.switchView);
@@ -136,8 +144,4 @@ public class RecipePageInstructionFragment extends Fragment {
         return v;
     }
 
-    //try to figure out how to strikethrough text on click later
-    public void onTextClick(View  view){
-
-    }
 }
