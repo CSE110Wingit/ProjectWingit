@@ -131,36 +131,58 @@ public class RegisterFragment extends Fragment implements OnClickListener {
         email = emailText.getText().toString();
         password = passText.getText().toString();
         hashPass = com.example.projectwingit.utils.WingitUtils.hashPassword(password);
-        LambdaResponse registration = LambdaRequests.createAccount(username, email, hashPass, true, true, 3);
+        if (password.length() <= 8) {
+            LambdaResponse registration = LambdaRequests.createAccount(username, email, hashPass, true, true, 3);
 
-        signUpText.post(new Runnable() {
-            @Override
-            public void run() {
-                errorDialog = new Dialog(getActivity());
-                errorDialog.setContentView(R.layout.error_dialog);
-                errorText = (TextView)errorDialog.findViewById(R.id.error_dialog_text1);
-                errorText.setText(registration.getResponseInfo());
-                errorDialog.show();
-                errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
-                errorButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        errorDialog.cancel();
+            signUpText.post(new Runnable() {
+                @Override
+                public void run() {
+                    errorDialog = new Dialog(getActivity());
+                    errorDialog.setContentView(R.layout.error_dialog);
+                    errorText = (TextView) errorDialog.findViewById(R.id.error_dialog_text1);
+                    errorText.setText(registration.getResponseInfo());
+                    errorDialog.show();
+                    LambdaRequests.logout();
+                    errorButton = (Button) errorDialog.findViewById(R.id.error_dialog_button);
+                    errorButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            errorDialog.cancel();
+                        }
+                    });
+                    if (!registration.isError()) {
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        startActivity(intent);
                     }
-                });
-            }
-        });
+                }
 
-        if (TextUtils.isEmpty(username)) {
-            Toast.makeText(getActivity().getApplicationContext(), "Enter a username", Toast.LENGTH_LONG).show();
-        }
-        if (TextUtils.isEmpty(email)) {
-            Toast.makeText(getActivity().getApplicationContext(), "Enter an email", Toast.LENGTH_LONG).show();
-        }
-        if (TextUtils.isEmpty(password)) {
-            Toast.makeText(getActivity().getApplicationContext(), "Enter a password", Toast.LENGTH_LONG).show();
-        }
+            });
 
+
+//        if (TextUtils.isEmpty(username)) {
+//            Toast.makeText(getActivity().getApplicationContext(), "Enter a username", Toast.LENGTH_LONG).show();
+//        }
+//        if (TextUtils.isEmpty(email)) {
+//            Toast.makeText(getActivity().getApplicationContext(), "Enter an email", Toast.LENGTH_LONG).show();
+//        }
+//        if (TextUtils.isEmpty(password)) {
+//            Toast.makeText(getActivity().getApplicationContext(), "Enter a password", Toast.LENGTH_LONG).show();
+//        }
+
+        } else {
+            errorDialog = new Dialog(getActivity());
+            errorDialog.setContentView(R.layout.error_dialog);
+            errorText = (TextView) errorDialog.findViewById(R.id.error_dialog_text1);
+            errorText.setText("Password must be a minimum of 8 characters");
+            errorDialog.show();
+            errorButton = (Button) errorDialog.findViewById(R.id.error_dialog_button);
+            errorButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    errorDialog.cancel();
+                }
+            });
+        }
     }
 
     public boolean setUpContainsNutsCheckbox(View v) {

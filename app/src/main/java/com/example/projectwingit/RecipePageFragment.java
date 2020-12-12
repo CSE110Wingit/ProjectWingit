@@ -135,7 +135,15 @@ public class RecipePageFragment extends Fragment {
             titleText.setText(recipeObject.getString(RECIPE_TITLE_STR));
             descriptionText.setText(recipeObject.getString(RECIPE_DESCRIPTION_STR));
             Glide.with(this).load(recipeObject.getString(RECIPE_PICTURE_STR)).into(recipeImage);
-            ingredientsText.setText(recipeObject.getString(RECIPE_INGREDIENTS_STR));
+            //ingredientsText.setText(recipeObject.getString(RECIPE_INGREDIENTS_STR));
+            String ingredientString = recipeObject.getString(RECIPE_INGREDIENTS_STR);
+
+            // Turns out this isn't an array and just looks like one so removing quotes and bracket
+            ingredientString = ingredientString.replace("\"","");
+            ingredientString = ingredientString.replace("[","");
+            ingredientString = ingredientString.replace("]","");
+            ingredientsText.setText(ingredientString);
+
             tutorialString = recipeObject.getString(RECIPE_TUTORIAL_STR);
 
             String recipeRating = "Rating: ";

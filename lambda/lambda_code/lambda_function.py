@@ -2,6 +2,8 @@ from lambda_code.actions import *
 from lambda_code.utils import *
 import urllib.parse
 
+_multiform_split = "\r\n\r\n"
+
 
 def lambda_handler(event, context):
     """
@@ -11,8 +13,6 @@ def lambda_handler(event, context):
         See info for context here: https://docs.aws.amazon.com/lambda/latest/dg/python-context.html
     """
 
-    # Main error thing to at least hopefully catch any error that occurs
-    #try:
     if event[HTTP_METHOD_STR] == GET_REQUEST_STR:
         return _get(event, context)
     elif event[HTTP_METHOD_STR] == POST_REQUEST_STR:
@@ -21,8 +21,6 @@ def lambda_handler(event, context):
         return _delete(event, context)
     else:
         return error(ERROR_UNIMPLEMENTED_HTTP_REQUEST, event[HTTP_METHOD_STR])
-    #except Exception as e:
-        #return error(ERROR_INTERNAL_SERVER_ERROR, repr(e))
 
 
 def _get(event, context):
@@ -163,15 +161,27 @@ def _parse_url(url_params):
     return ret
 
 
+def _get_next_bit(s):
+    if _multiform_split not in s:
+        return None, None
+    idx = s.index(_multiform_split)
+    return s[:idx], s[idx + len(_multiform_split):]
+
+
 def _parse_content(content):
     """
     Parses the POST if it has content headers
     """
-    lines = content.split('\n')
-
     ret = {}
-    for i in range(len(lines)):
-        if lines[i].startswith("Content-Disposition"):
-            ret[lines[i].split('name="')[1][:-2]] = lines[i + 3][:-1]
+    while True:
+        curr, content = _get_next_bit(content)
+        if curr is None:
+            break
+        parts = curr.split("\r\n")
+        size = int(parts[2].split(" ")[1])
+        curr_content = content[:size]
+        content = content[size + 2:]
+        parts.append(curr_content)
+        ret[parts[1].split("name=")[1][1:-1]] = parts[-1]
 
     return ret

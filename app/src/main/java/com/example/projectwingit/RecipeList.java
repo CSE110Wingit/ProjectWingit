@@ -157,7 +157,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                     recipeJSONObject = recipeObject.getResponseJSON();
 
                     String testRecipeName = recipeJSONObject.getString(RECIPE_TITLE_STR);
-                    String recipeRating = "Rating: ";
+                    String recipeRating = "";
                     if(!(testRecipeName.contains("recipe1"))) {
                         mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
                         Log.d("Picture URL: ", recipeJSONObject.getString(RECIPE_PICTURE_STR));
@@ -166,8 +166,12 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                         mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
                         mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
 
-                        //recipeRating += recipeJSONObject.getDouble(RECIPE_RATING_STR);
-                        recipeRating += " Stars";
+                        if(recipeJSONObject.getString(RECIPE_RATING_STR).equalsIgnoreCase("null")){
+                            recipeRating += "Not Rated";
+                        }
+                        else{
+                            recipeRating += "Rating: " + recipeJSONObject.getString(RECIPE_RATING_STR) + " Stars";
+                        }
                         mRecipeCategories.add(recipeRating);
 
                         String[] recipeIDList;
