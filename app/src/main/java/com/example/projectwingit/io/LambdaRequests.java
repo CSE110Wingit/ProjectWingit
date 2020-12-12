@@ -522,6 +522,9 @@ public class LambdaRequests extends UserInfo{
             if (spicinessLevel == null || spicinessLevel < 0) {
                 params.add(SPICINESS_LEVEL_STR);
                 params.add("-1");
+            }else{
+                params.add(SPICINESS_LEVEL_STR);
+                params.add(spicinessLevel.toString());
             }
             if (vegetarian != null){
                 params.add(VEGETARIAN_STR);

@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
+import com.example.projectwingit.io.UserInfo;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -89,6 +91,16 @@ public class passwordChangeFragment extends Fragment {
         newPass = view.findViewById(R.id.cp_newPass);
         cp_Button = view.findViewById(R.id.change_password_button);
 
+        if (UserInfo.CURRENT_USER.isLoggedIn()) {
+            currentEmail.setVisibility(View.INVISIBLE);
+            currentPass.setHint("Current Password");
+            currentPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        }else{
+            currentEmail.setVisibility(View.VISIBLE);
+            currentPass.setHint("Password Change Code");
+            currentPass.setInputType(InputType.TYPE_CLASS_TEXT);
+        }
+
         cp_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,7 +116,9 @@ public class passwordChangeFragment extends Fragment {
         currentPassword = currentPass.getText().toString();
         newPassword = newPass.getText().toString();
 
-        hashCurrentPass = com.example.projectwingit.utils.WingitUtils.hashPassword(currentPassword);
+        if (UserInfo.CURRENT_USER.isLoggedIn())
+            hashCurrentPass = com.example.projectwingit.utils.WingitUtils.hashPassword(currentPassword);
+        else hashCurrentPass = currentPassword;
         hashNewPass = com.example.projectwingit.utils.WingitUtils.hashPassword(newPassword);
 
 

@@ -405,7 +405,7 @@ def do_query(query, nut_allergy, gluten_free, vegetarian, spiciness, public_resu
 
     # Sort the recipe tuples by their value
     recipes = list(sorted(recipes, key=lambda x: x[1], reverse=True))
-    recipes = [r for r in recipes if r[1] > QUERY_MIN_RETURN_VALUE]
+    recipes = [r for r in recipes if r[1] >= QUERY_MIN_RETURN_VALUE]
 
     # Return the top_n result ids
     ret_recipes = recipes[:min(top_n, len(recipes))]
