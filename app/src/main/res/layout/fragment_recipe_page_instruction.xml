@@ -6,9 +6,8 @@
     tools:context=".RecipePageInstructionFragment">
 
     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <LinearLayout
@@ -31,8 +30,16 @@
                 android:layout_height="match_parent"
                 android:paddingLeft="15dp"
                 android:paddingTop="65dp"
-                android:text="Toggle View" />
+                android:text="Toggle View"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:layout_marginTop="30sp">
 
         <TextView
             android:id="@+id/englargedinstructions"
@@ -91,6 +98,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=" " />
+        </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>

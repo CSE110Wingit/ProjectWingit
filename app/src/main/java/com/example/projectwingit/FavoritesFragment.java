@@ -67,7 +67,7 @@ public class FavoritesFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_favorites, container, false);
         if (UserInfo.CURRENT_USER.isLoggedIn()) {
-            if (UserInfo.CURRENT_USER.getFavoritedRecipes() == null) {
+            if (UserInfo.CURRENT_USER.getFavoritedRecipes().length == 0) {
                 TextView favoritesText = v.findViewById(R.id.favorites_text);
                 favoritesText.setHint("Add some favorite recipes and they will appear here.");
             }
