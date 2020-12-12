@@ -49,6 +49,7 @@ ERROR_UNKNOWN_RECIPE = (404, "Error 404: recipe not found (id:%s)", True)
 ERROR_INVALID_RECIPE_ID = (405, "Invalid recipe id: %s", True)
 ERROR_RECIPE_NOT_FAVORITED = (406, "Recipe (id: %s) is not favorited by user '%s', but tried to delete", True)
 ERROR_INVALID_RATING = (407, "Invalid recipe rating (should be integer in range [0, 5]): %s", True)
+ERROR_INVALID_VEGETARIAN = (408, "Invalid vegetarian: %s", True)
 
 # The error codes, and their reverse dictionaries
 # This is done in a really weird way because I'm smart (or maybe just lazy...)

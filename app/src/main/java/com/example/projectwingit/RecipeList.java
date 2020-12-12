@@ -131,7 +131,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
         }
         else {
             initializedCards = Boolean.TRUE;
-            LambdaResponse lr = searchRecipes(recipeSearchText, nutAllergy, glutenFree, spiciness);
+            LambdaResponse lr = searchRecipes(recipeSearchText, nutAllergy, glutenFree, null, spiciness);
 
             JSONObject joe = lr.getResponseJSON();
 
