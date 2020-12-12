@@ -114,7 +114,12 @@ public class passwordChangeFragment extends Fragment {
 
     private void changePassword() {
         String email, currentPassword, newPassword, hashCurrentPass, hashNewPass;
-        email = currentEmail.getText().toString();
+        if(UserInfo.CURRENT_USER.isLoggedIn()){
+            email = UserInfo.CURRENT_USER.getEmail();
+        }
+        else{
+            email = currentEmail.getText().toString();
+        }
         currentPassword = currentPass.getText().toString();
         newPassword = newPass.getText().toString();
 
