@@ -152,6 +152,7 @@ public class LoginFragment extends Fragment {
                 errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
                 if (!userLog.isError()) {
                     Intent intent = new Intent(getActivity(), MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
 //                Toast.makeText(getActivity().getApplicationContext(), LoginInfo.CURRENT_LOGIN.username, Toast.LENGTH_LONG).show();
