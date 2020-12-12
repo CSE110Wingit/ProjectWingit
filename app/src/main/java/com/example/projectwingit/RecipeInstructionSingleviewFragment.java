@@ -93,8 +93,15 @@ public class RecipeInstructionSingleviewFragment extends Fragment {
         finishButton = (Button) v.findViewById((R.id.finishButton));
         finishButton.setVisibility(View.GONE);
 
-        // Next button functionality
         nextButton = (Button) v.findViewById(R.id.nextButton);
+
+        // Special case for only 1 step recipe
+        if(arraySize == 1){
+            nextButton.setVisibility(View.GONE);
+            finishButton.setVisibility(View.VISIBLE);
+        }
+
+        // Next button functionality
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,6 +147,7 @@ public class RecipeInstructionSingleviewFragment extends Fragment {
         finishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                getFragmentManager().popBackStack();
                 getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageFragment(recipeID)).commit();
             }
         });

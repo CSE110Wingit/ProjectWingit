@@ -410,7 +410,7 @@ public class LambdaRequests extends UserInfo{
      * @param imageURL the url to the image, or null/"" if you don't want an image
      * @return A LambdaResponse of the response
      */
-    private static LambdaResponse _editRecipe(String title, String[] ingredients, String description,
+    private static LambdaResponse _editRecipe(String recipeId, String title, String[] ingredients, String description,
                                             String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                             boolean isVegetarian, int spicinessLevel, boolean isPrivate,
                                               String imageURL){
@@ -418,6 +418,7 @@ public class LambdaRequests extends UserInfo{
             String[] params = {
                     USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
                     PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
+                    RECIPE_ID_STR, recipeId,
                     RECIPE_TITLE_STR, title,
                     RECIPE_INGREDIENTS_STR, mergeArray(ingredients),
                     RECIPE_DESCRIPTION_STR, description,
@@ -438,24 +439,24 @@ public class LambdaRequests extends UserInfo{
         }
     }
 
-    public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
+    public static LambdaResponse editRecipe(String recipeId, String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                               boolean isVegetarian, int spicinessLevel, boolean isPrivate){
-        return _editRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+        return _editRecipe(recipeId, title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
                 isVegetarian, spicinessLevel, isPrivate, null);
     }
 
-    public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
+    public static LambdaResponse editRecipe(String recipeId, String title, String[] ingredients, String description,
                                             String tutorial, boolean isNutAllergy, boolean isGlutenFree,
                                             boolean isVegetarian, int spicinessLevel, boolean isPrivate,
                                             Bitmap recipeImage){
         if (recipeImage == null){
-            return _editRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+            return _editRecipe(recipeId, title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
                     isVegetarian, spicinessLevel, isPrivate, null);
         }
         LambdaResponse response = uploadImage(recipeImage);
         if (!response.isError()){
-            return _editRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
+            return _editRecipe(recipeId, title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
                     isVegetarian, spicinessLevel, isPrivate, response.getExactErrorMessage());
         }
         return response;
@@ -500,7 +501,7 @@ public class LambdaRequests extends UserInfo{
      *                       If an integer in range [0, 5]: filter results so those recipes that
      *                          match are more likely to be pushed to the top
      */
-    public static LambdaResponse searchRecipes(String query, Boolean nutAllergy, Boolean glutenFree,
+    public static LambdaResponse searchRecipes(String query, Boolean containsNuts, Boolean glutenFree,
                                                Boolean vegetarian, Integer spicinessLevel){
         try{
             ArrayList<String> params = new ArrayList<>();
@@ -509,9 +510,9 @@ public class LambdaRequests extends UserInfo{
             params.add(EVENT_TYPE_STR);
             params.add(EVENT_QUERY_RECIPES_STR);
 
-            if (nutAllergy != null) {
+            if (containsNuts != null) {
                 params.add(NUT_ALLERGY_STR);
-                params.add(nutAllergy.toString());
+                params.add(containsNuts.toString());
             }
             if (glutenFree != null) {
                 params.add(GLUTEN_FREE_STR);

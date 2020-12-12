@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.app.Dialog;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import org.json.JSONObject;
 import static com.example.projectwingit.io.LambdaRequests.deleteRecipe;
 import static com.example.projectwingit.io.LambdaRequests.favoriteRecipe;
 import static com.example.projectwingit.io.LambdaRequests.getRecipe;
+import static com.example.projectwingit.io.LambdaRequests.rateRecipe;
 import static com.example.projectwingit.io.LambdaRequests.unfavoriteRecipe;
 import static com.example.projectwingit.utils.WingitLambdaConstants.FAVORITED_RECIPES_STR;
 import static com.example.projectwingit.utils.WingitLambdaConstants.GLUTEN_FREE_STR;
@@ -61,6 +63,7 @@ public class RecipePageFragment extends Fragment {
 
     private Button rateButton;
     Dialog rateDialog;
+    RatingBar userRating;
     private int recipeID;
     private MaterialButton favoriteButton;
     /**
@@ -146,9 +149,13 @@ public class RecipePageFragment extends Fragment {
 
             tutorialString = recipeObject.getString(RECIPE_TUTORIAL_STR);
 
-            String recipeRating = "Rating: ";
-         //   recipeRating += recipeObject.getDouble(RECIPE_RATING_STR);
-            recipeRating += " Stars";
+            String recipeRating = "";
+            if(recipeObject.getString(RECIPE_RATING_STR).equalsIgnoreCase("null")){
+                recipeRating += "Not Rated";
+            }
+            else{
+                recipeRating += "Rating: " + recipeObject.getString(RECIPE_RATING_STR) + " Stars";
+            }
             ratingText.setText(recipeRating);
             //instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
 
@@ -206,6 +213,8 @@ public class RecipePageFragment extends Fragment {
         rateDialog.setContentView(R.layout.rating_dialog);
         rateDialog.setCancelable(false);
 
+        userRating = rateDialog.findViewById(R.id.dialog_ratingbar);
+
         Button cancel = rateDialog.findViewById(R.id.cancel_dialog_button);
         Button okay = rateDialog.findViewById(R.id.ok_dialog_button);
         Button cookingTutorialButton = v.findViewById(R.id.Tutorial_Button);
@@ -258,7 +267,13 @@ public class RecipePageFragment extends Fragment {
         okay.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                rateDialog.dismiss();
+                LambdaResponse sendRating = rateRecipe(Integer.toString(recipeID),userRating.getNumStars());
+                if(!sendRating.isError()){
+                    rateDialog.dismiss();
+                }
+                else{
+                    System.out.println(sendRating.getErrorMessage());
+                }
             }
         });
 

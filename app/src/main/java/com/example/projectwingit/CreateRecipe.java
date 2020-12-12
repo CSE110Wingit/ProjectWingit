@@ -310,6 +310,7 @@ public class CreateRecipe extends Fragment {
                 JSONObject responseJSON = response.getResponseJSON();
                 try {
                     int recipeID = responseJSON.getInt(WingitLambdaConstants.RECIPE_ID_STR);
+                    LambdaResponse responseFavorite = LambdaRequests.favoriteRecipe(String.valueOf(recipeID));
                     navigateToRecipePage(recipeID);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -360,11 +361,9 @@ public class CreateRecipe extends Fragment {
                 }
                 recipeTutorial = recipeTutorialBuilder.toString().trim();
 
-                Log.i(tag, "Tutorial: " + recipeTutorial.replace("\n", "\\n"));
-
                 LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
                         recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
-                        isGlutenFree, false, (int) spicinessLevel, isPrivate, null);
+                        isGlutenFree, false, (int) spicinessLevel, isPrivate, imageBitmap);
 
                 new ProcessCreateRecipeResponseThread(createRecipeResponse).start();
             }
