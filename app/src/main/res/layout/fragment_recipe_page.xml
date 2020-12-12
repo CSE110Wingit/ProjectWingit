@@ -304,14 +304,6 @@
 
                 </com.google.android.material.card.MaterialCardView>
 
-
-                <TextView
-                    android:id="@+id/textViewFoodPairings"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Food pairings go here" />
-
                 <Space
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
