@@ -56,14 +56,7 @@ public class LambdaRequests extends UserInfo{
                     SPICINESS_LEVEL_STR, preferredSpiciness == -1 ? "None" : "" + preferredSpiciness
             };
 
-            LambdaResponse ret = sendRequest("POST", params);
-            if (!ret.isError()) {
-                String log = UserInfo.CURRENT_USER.setCurrentLogin(username, email, passwordHash, nutAllergy,
-                        glutenFree, preferredSpiciness, null, null, null);
-                if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
-            }
-
-            return ret;
+            return sendRequest("POST", params);
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending createAccount request: " + e.getMessage());
