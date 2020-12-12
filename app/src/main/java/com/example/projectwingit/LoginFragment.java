@@ -51,7 +51,6 @@ public class LoginFragment extends Fragment {
     Button loginButton;
     Button errorButton;
     ProgressBar loadingProgressBar;
-    TextView forgot_User;
     TextView forgot_Pass;
     TextView create_Account;
 
@@ -92,7 +91,6 @@ public class LoginFragment extends Fragment {
         passwordEditText = view.findViewById(R.id.password);
         loginButton = view.findViewById(R.id.login);
         loadingProgressBar = view.findViewById(R.id.loading);
-        forgot_User = view.findViewById(R.id.forgot_User);
         forgot_Pass = view.findViewById(R.id.forgot_Pass);
         create_Account = view.findViewById(R.id.create_Account);
 
@@ -115,15 +113,6 @@ public class LoginFragment extends Fragment {
             public void onClick(View v) {
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.container_user_account, new forgot_pass_Fragment());
-                ft.commit();
-            }
-        });
-
-        forgot_User.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.container_user_account, new forgot_user_Fragment());
                 ft.commit();
             }
         });

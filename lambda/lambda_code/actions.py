@@ -431,7 +431,7 @@ def _make_recipe_return(result):
         SPICINESS_LEVEL_STR: result[SPICINESS_LEVEL_STR],
         VEGETARIAN_STR: result[VEGETARIAN_STR],
         RECIPE_RATING_STR: result[RECIPE_TOTAL_RATING_STR] / result[RECIPE_NUMBER_OF_RATINGS_STR] \
-            if result[RECIPE_TOTAL_RATING_STR] not in [None, 0] else None,
+            if result[RECIPE_NUMBER_OF_RATINGS_STR] not in [None, 0] else None,
     }
 
 
@@ -609,7 +609,12 @@ def rate_recipe(body):
         cursor.execute(UPDATE_RATED_RECIPES_SQL, [rated_recipes, username])
         conn.commit()
 
-        return return_message(good_message="Recipe Ratings Updated!")
+        # Get the new rating
+        cursor.execute(GET_RECIPE_BY_ID_SQL, [int(recipe_id)])
+        result = cursor.fetchone()
+        new_recipe_rating = result[RECIPE_TOTAL_RATING_STR] / result[RECIPE_NUMBER_OF_RATINGS_STR]
+
+        return return_message(good_message="Recipe Ratings Updated!", data={RECIPE_RATING_STR: new_recipe_rating})
     except Exception as e:
         return error(ERROR_UNKNOWN_ERROR, "14", repr(e))
 

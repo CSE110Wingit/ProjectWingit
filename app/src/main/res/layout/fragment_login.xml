@@ -75,19 +75,6 @@
         app:layout_constraintVertical_bias="0.3" />
 
     <TextView
-        android:id="@+id/forgot_User"
-        android:layout_width="84dp"
-        android:layout_height="16dp"
-        android:text="Forgot Username?"
-        android:textSize="10sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.733"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/username"
-        app:layout_constraintVertical_bias="0.021" />
-
-    <TextView
         android:id="@+id/forgot_Pass"
         android:layout_width="84dp"
         android:layout_height="16dp"

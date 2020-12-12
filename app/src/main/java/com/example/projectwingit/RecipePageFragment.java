@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.projectwingit.debug.WingitLogging;
 import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
 import com.google.android.material.button.MaterialButton;
@@ -269,6 +270,11 @@ public class RecipePageFragment extends Fragment {
             public void onClick(View v){
                 LambdaResponse sendRating = rateRecipe(Integer.toString(recipeID), (int)userRating.getRating());
                 if(!sendRating.isError()){
+                    try{
+                        ratingText.setText("Rating: " + sendRating.getResponseJSON().getString(RECIPE_RATING_STR) + " Stars");
+                    }catch (Exception e){
+                        WingitLogging.log("BAAAAAD updating rating stars: " + e.getMessage());
+                    }
                     rateDialog.dismiss();
                 }
                 else{
