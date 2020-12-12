@@ -52,4 +52,6 @@ public class WingitLambdaConstants {
     public static final String IMAGE_FILE_EXTENSION_STR = "image_file_ext";
     public static final String VEGETARIAN_STR = "vegetarian";
     public static final String RECIPE_IMAGES_DIR = "recipe_images";
+    public static final String NEW_USERNAME_STR = "new_username";
+    public static final String NEW_EMAIL_STR = "new_email";
 }
