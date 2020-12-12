@@ -67,12 +67,6 @@ public class EditCharacteristicsFragment extends Fragment{
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_edit_characteristics, container, false);
 
-//        CheckBox veganCB = v.findViewById(R.id.checkbox_vegan);
-//        veganCB.setChecked(UserInfo.CURRENT_USER.;
-
-//        CheckBox vegetarianCB = v.findViewById(R.id.checkbox_vegetarian);
-//        vegetarianCB.setChecked(false);
-
         CheckBox glutenCB = v.findViewById(R.id.checkbox_gluten_free);
         glutenCB.setChecked(UserInfo.CURRENT_USER.getGlutenFree());
 
@@ -82,14 +76,8 @@ public class EditCharacteristicsFragment extends Fragment{
         SeekBar spiceSB = v.findViewById(R.id.spice_seekbar);
         spiceSB.setProgress(UserInfo.CURRENT_USER.getSpicinessLevel());
 
-//        SeekBar sweetSB = v.findViewById(R.id.sweet_seekbar);
-//        sweetSB.setProgress(UserAccount.prefSweetness);
-
         TextView spiceTB = v.findViewById(R.id.spice_textview);
         spiceTB.setText("Spice Level Preference: " + UserInfo.CURRENT_USER.getSpicinessLevel());
-
-//        TextView sweetTB = v.findViewById(R.id.sweetness_textView);
-//        sweetTB.setText("Sweetness Level Preference: None");
 
         // setting listeners for the edit preference sweet and spicy seekbars
         spiceSB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -107,22 +95,6 @@ public class EditCharacteristicsFragment extends Fragment{
                 UserAccount.prefSpiciness = progress;
             }
         });
-
-//        sweetSB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {}
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {}
-//
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
-//                TextView sweetTV = v.findViewById(R.id.sweetness_textView);
-//                sweetTV.setText("Sweetness Level Preference: " + progress);
-//                UserAccount.prefSweetness = progress;
-//            }
-//        });
 
         return v;
     }

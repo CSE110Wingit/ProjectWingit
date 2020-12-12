@@ -134,16 +134,6 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
                 if (checked) prefNutAllergy = true;
                 else prefNutAllergy = false;
                 break;
-
-            case R.id.checkbox_vegan:
-                if (checked) prefVegan = true;
-                else prefVegan = false;
-                break;
-
-            case R.id.checkbox_vegetarian:
-                if (checked) prefVegetarian = true;
-                else prefVegetarian = false;
-                break;
         }
     }
 
@@ -163,18 +153,10 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
     public void onResetClicked(View view){
         Button resetButton = findViewById(R.id.prefResetButton);
 
-        prefVegetarian = false;
-        prefVegan = false;
         prefGlutenFree = false;
         prefNutAllergy = false;
         prefSpiciness = -1;
-        prefSweetness = -1;
 
-        CheckBox veganCB = findViewById(R.id.checkbox_vegan);
-        veganCB.setChecked(false);
-
-        CheckBox vegetarianCB = findViewById(R.id.checkbox_vegetarian);
-        vegetarianCB.setChecked(false);
 
         CheckBox glutenCB = findViewById(R.id.checkbox_gluten_free);
         glutenCB.setChecked(false);
@@ -185,17 +167,10 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
         SeekBar spiceSB = findViewById(R.id.spice_seekbar);
         spiceSB.setProgress(0);
 
-        SeekBar sweetSB = findViewById(R.id.sweet_seekbar);
-        sweetSB.setProgress(0);
-
         TextView spiceTB = findViewById(R.id.spice_textview);
         spiceTB.setText("Spice Level Preference: None");
 
-        TextView sweetTB = findViewById(R.id.sweetness_textView);
-        sweetTB.setText("Sweetness Level Preference: None");
-
-
-        // TODO calls lambda method on reset
+                // TODO calls lambda method on reset
         LambdaResponse recipe = LambdaRequests.editPersonalCharacteristics(loginUsername, loginEmail, false, false, -1);
         Toast.makeText(getApplicationContext(), "Your preferences have been reset!", Toast.LENGTH_LONG).show();
 

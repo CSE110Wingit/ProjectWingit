@@ -269,7 +269,6 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                         mRecipeID.add(id);
                         mIsFavorites.add(Boolean.TRUE);
                     }
-
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
