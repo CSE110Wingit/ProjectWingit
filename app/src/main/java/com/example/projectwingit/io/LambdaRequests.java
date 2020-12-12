@@ -501,7 +501,7 @@ public class LambdaRequests extends UserInfo{
      *                       If an integer in range [0, 5]: filter results so those recipes that
      *                          match are more likely to be pushed to the top
      */
-    public static LambdaResponse searchRecipes(String query, Boolean nutAllergy, Boolean glutenFree,
+    public static LambdaResponse searchRecipes(String query, Boolean containsNuts, Boolean glutenFree,
                                                Boolean vegetarian, Integer spicinessLevel){
         try{
             ArrayList<String> params = new ArrayList<>();
@@ -510,9 +510,9 @@ public class LambdaRequests extends UserInfo{
             params.add(EVENT_TYPE_STR);
             params.add(EVENT_QUERY_RECIPES_STR);
 
-            if (nutAllergy != null) {
+            if (containsNuts != null) {
                 params.add(NUT_ALLERGY_STR);
-                params.add(nutAllergy.toString());
+                params.add(containsNuts.toString());
             }
             if (glutenFree != null) {
                 params.add(GLUTEN_FREE_STR);
