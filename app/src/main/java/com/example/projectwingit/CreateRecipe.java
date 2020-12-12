@@ -310,6 +310,7 @@ public class CreateRecipe extends Fragment {
                 JSONObject responseJSON = response.getResponseJSON();
                 try {
                     int recipeID = responseJSON.getInt(WingitLambdaConstants.RECIPE_ID_STR);
+                    LambdaResponse responseFavorite = LambdaRequests.favoriteRecipe(String.valueOf(recipeID));
                     navigateToRecipePage(recipeID);
                 } catch (JSONException e) {
                     e.printStackTrace();
