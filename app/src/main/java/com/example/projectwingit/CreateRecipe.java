@@ -33,6 +33,10 @@ import android.widget.Toast;
 import com.example.projectwingit.io.LambdaRequests;
 import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
+import com.example.projectwingit.utils.WingitLambdaConstants;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -253,9 +257,9 @@ public class CreateRecipe extends Fragment {
         r = new Runnable() {
             @Override
             public void run() {
-//                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//                    transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
-                showToast("Recipe successfully created! Recipe ID " + recipeId);
+                showToast("Recipe successfully created!");
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
             }
         };
         getActivity().runOnUiThread(r);
@@ -303,7 +307,13 @@ public class CreateRecipe extends Fragment {
                 // FIXME: replace -1 with the recipe's id.
                 Log.i(tag, "Success: " + response.getErrorMessage());
                 Log.i(tag, response.getResponseInfo());
-                navigateToRecipePage(-1);
+                JSONObject responseJSON = response.getResponseJSON();
+                try {
+                    int recipeID = responseJSON.getInt(WingitLambdaConstants.RECIPE_ID_STR);
+                    navigateToRecipePage(recipeID);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -345,25 +355,16 @@ public class CreateRecipe extends Fragment {
                 // Tutorial. One big string separated by newlines.
                 String recipeTutorial;
                 StringBuilder recipeTutorialBuilder = new StringBuilder();
-                for (String step : mRecipeStepList) {
-                    recipeTutorialBuilder.append(step + "\n");
+                for (int i = 0; i < mRecipeStepList.size(); i++) {
+                    recipeTutorialBuilder.append(String.format("%d. %s\n", i + 1, mRecipeStepList.get(i)));
                 }
                 recipeTutorial = recipeTutorialBuilder.toString().trim();
 
-//                Log.i(tag, "Recipe name: " + recipeTitle);
-//                Log.i(tag, "Recipe description: " + recipeDescription);
-//                Log.i(tag, "Recipe ingredients: " + recipeIngredients.toString());
-//                Log.i(tag, "Tutorial: " + recipeTutorial);
-//                Log.i(tag, "Contains nuts " + containsNuts);
-//                Log.i(tag, "Is gluten free " + isGlutenFree);
-//                Log.i(tag, "Spiciness level " + spicinessLevel);
-//                Log.i(tag, "Is private " + isPrivate);
-//                Log.i(tag, "Current user " + UserInfo.CURRENT_USER.getUsername());
-
+                Log.i(tag, "Tutorial: " + recipeTutorial.replace("\n", "\\n"));
 
                 LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
                         recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
-                        isGlutenFree, (int) spicinessLevel, isPrivate, null);
+                        isGlutenFree, (int) spicinessLevel, isPrivate, imageBitmap);
 
                 new ProcessCreateRecipeResponseThread(createRecipeResponse).run();
 
