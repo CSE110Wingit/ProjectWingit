@@ -431,7 +431,7 @@ def _make_recipe_return(result):
         SPICINESS_LEVEL_STR: result[SPICINESS_LEVEL_STR],
         VEGETARIAN_STR: result[VEGETARIAN_STR],
         RECIPE_RATING_STR: result[RECIPE_TOTAL_RATING_STR] / result[RECIPE_NUMBER_OF_RATINGS_STR] \
-            if result[RECIPE_TOTAL_RATING_STR] is not None else None,
+            if result[RECIPE_TOTAL_RATING_STR] not in [None, 0] else None,
     }
 
 
