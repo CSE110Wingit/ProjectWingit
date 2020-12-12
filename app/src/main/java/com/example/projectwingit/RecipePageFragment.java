@@ -62,7 +62,7 @@ public class RecipePageFragment extends Fragment {
     private String mParam2;
     private String tutorialString;
 
-    private Button rateButton;
+    private MaterialButton rateButton;
     Dialog rateDialog;
     RatingBar userRating;
     private int recipeID;
@@ -288,11 +288,20 @@ public class RecipePageFragment extends Fragment {
         });
 
         // rating button characteristics
-        rateButton = (Button) v.findViewById(R.id.ratebutton);
+        rateButton = (MaterialButton) v.findViewById(R.id.ratebutton);
+        if(!UserInfo.CURRENT_USER.isLoggedIn()){
+            rateButton.setTextColor(getResources().getColor(R.color.secondary));
+            rateButton.setIconTint(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
+        }
         rateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rateDialog.show();
+                if(UserInfo.CURRENT_USER.isLoggedIn()){
+                    rateDialog.show();
+                }
+                else{
+                    Toast.makeText(getActivity().getApplicationContext(), "Please login to rate the recipe", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
