@@ -253,6 +253,7 @@ public class LambdaRequests extends UserInfo{
             };
 
             LambdaResponse response = sendRequest("POST", params);
+            WingitLogging.log("HHHHHHHHHH "+recipeStarRating+"  "+response.getResponseInfo());
             if (!response.isError()) UserInfo.CURRENT_USER.addRated(recipeID);
 
             return response;
@@ -491,7 +492,7 @@ public class LambdaRequests extends UserInfo{
     /**
      * SR11 query recipes
      * @param query the query string
-     * @param nutAllergy if null: ignore nut allergy.
+     * @param containsNuts if null: ignore containsNuts.
      *                   If True/False: filter results so those recipes that match are more likely
      *                      to be pushed to the top
      * @param glutenFree if null: ignore gluten free.

@@ -572,7 +572,7 @@ def rate_recipe(body):
     all_good, ret_dict = get_cleaned_params(body, RECIPE_ID_STR, RECIPE_RATING_STR)
     if not all_good:
         return ret_dict
-    recipe_id, rating = ret_dict[RECIPE_ID_STR], ret_dict[RECIPE_RATING_STR]
+    recipe_id, rating = str(ret_dict[RECIPE_ID_STR]), ret_dict[RECIPE_RATING_STR]
 
     try:
         conn = get_new_db_conn()
@@ -584,28 +584,28 @@ def rate_recipe(body):
         ids = [] if result[RATED_RECIPES_STR] == '' else result[RATED_RECIPES_STR].split(',')
         ids, ratings = ([], []) if len(ids) == 0 else ([i.split(':')[0] for i in ids], [i.split(':')[1] for i in ids])
 
-        if str(recipe_id) in ids:
+        if recipe_id in ids:
             recipe_rating_inc = rating - int(ratings[ids.index(recipe_id)])
             recipe_rating_count = 0
             ratings[ids.index(recipe_id)] = rating
         else:
             recipe_rating_inc = rating
             recipe_rating_count = 1
-            ids.append(str(recipe_id))
+            ids.append(recipe_id)
             ratings.append(str(rating))
 
         # Make sure this recipe is not private
-        cursor.execute(GET_RECIPE_BY_ID_SQL, [recipe_id])
+        cursor.execute(GET_RECIPE_BY_ID_SQL, [int(recipe_id)])
         result = cursor.fetchone()
         if result is None or result[RECIPE_PRIVATE_STR] == 1:
-            return error(ERROR_UNKNOWN_RECIPE, [recipe_id])
+            return error(ERROR_UNKNOWN_RECIPE, [int(recipe_id)])
 
         # Update the recipe ratings
-        cursor.execute(UPDATE_RECIPE_RATING_SQL, [recipe_rating_inc, recipe_rating_count, recipe_id])
+        cursor.execute(UPDATE_RECIPE_RATING_SQL, [recipe_rating_inc, recipe_rating_count, int(recipe_id)])
         conn.commit()
 
         # Update the user info
-        rated_recipes = ",".join([ids[i] + ':' + ratings[i] for i in range(len(ids))])
+        rated_recipes = ",".join([str(ids[i]) + ':' + str(ratings[i]) for i in range(len(ids))])
         cursor.execute(UPDATE_RATED_RECIPES_SQL, [rated_recipes, username])
         conn.commit()
 

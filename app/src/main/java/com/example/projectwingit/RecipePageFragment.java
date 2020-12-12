@@ -267,7 +267,7 @@ public class RecipePageFragment extends Fragment {
         okay.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                LambdaResponse sendRating = rateRecipe(Integer.toString(recipeID),userRating.getNumStars());
+                LambdaResponse sendRating = rateRecipe(Integer.toString(recipeID), (int)userRating.getRating());
                 if(!sendRating.isError()){
                     rateDialog.dismiss();
                 }
