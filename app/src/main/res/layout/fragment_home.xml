@@ -174,7 +174,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Our Favorites"
+                            android:text="Our Picks"
                             android:textSize="45sp"
                             android:textColor="@color/white"
                             android:textStyle="bold"
