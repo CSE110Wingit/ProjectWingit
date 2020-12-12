@@ -267,18 +267,22 @@ public class RecipePageFragment extends Fragment {
 
         okay.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v){
-                LambdaResponse sendRating = rateRecipe(Integer.toString(recipeID), (int)userRating.getRating());
-                if(!sendRating.isError()){
-                    try{
-                        ratingText.setText("Rating: " + sendRating.getResponseJSON().getString(RECIPE_RATING_STR) + " Stars");
-                    }catch (Exception e){
-                        WingitLogging.log("BAAAAAD updating rating stars: " + e.getMessage());
-                    }
+            public void onClick(View v) {
+                if (!UserInfo.CURRENT_USER.isLoggedIn()) {
                     rateDialog.dismiss();
-                }
-                else{
-                    System.out.println(sendRating.getErrorMessage());
+                    Toast.makeText(getActivity().getApplicationContext(), "Please login to rate the recipe", Toast.LENGTH_LONG).show();
+                } else {
+                    LambdaResponse sendRating = rateRecipe(Integer.toString(recipeID), (int) userRating.getRating());
+                    if (!sendRating.isError()) {
+                        try {
+                            ratingText.setText("Rating: " + sendRating.getResponseJSON().getString(RECIPE_RATING_STR) + " Stars");
+                        } catch (Exception e) {
+                            WingitLogging.log("BAAAAAD updating rating stars: " + e.getMessage());
+                        }
+                        rateDialog.dismiss();
+                    } else {
+                        System.out.println(sendRating.getErrorMessage());
+                    }
                 }
             }
         });
