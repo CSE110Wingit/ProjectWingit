@@ -26,8 +26,6 @@ import com.example.projectwingit.io.LambdaResponse;
 
 import org.w3c.dom.Text;
 
-import static com.example.projectwingit.utils.WingitUtils.goodPassword;
-
 
 public class RegisterFragment extends Fragment implements OnClickListener {
 
@@ -133,7 +131,7 @@ public class RegisterFragment extends Fragment implements OnClickListener {
         email = emailText.getText().toString();
         password = passText.getText().toString();
         hashPass = com.example.projectwingit.utils.WingitUtils.hashPassword(password);
-        if (goodPassword(password)) {
+        if (password.length() >= 8) {
             LambdaResponse registration = LambdaRequests.createAccount(username, email, hashPass, true, true, 3);
 
             signUpText.post(new Runnable() {
