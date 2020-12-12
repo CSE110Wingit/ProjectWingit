@@ -98,7 +98,7 @@ public class SearchFragment extends Fragment {
                             Boolean.FALSE);
                 }
                 else{
-                    rl.typeResults(searchRecipeText, null, null, -1, null,Boolean.FALSE);
+                    rl.typeResults(searchRecipeText, null, null, 3, null,Boolean.FALSE);
                 }
                 getFragmentManager().beginTransaction().replace(R.id.container, rl).addToBackStack(null).commit();
             }
