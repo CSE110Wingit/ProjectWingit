@@ -138,9 +138,13 @@ public class RecipePageFragment extends Fragment {
             ingredientsText.setText(recipeObject.getString(RECIPE_INGREDIENTS_STR));
             tutorialString = recipeObject.getString(RECIPE_TUTORIAL_STR);
 
-            String recipeRating = "Rating: ";
-         //   recipeRating += recipeObject.getDouble(RECIPE_RATING_STR);
-            recipeRating += " Stars";
+            String recipeRating = "";
+            if(recipeObject.getString(RECIPE_RATING_STR).equalsIgnoreCase("null")){
+                recipeRating += "Not Rated";
+            }
+            else{
+                recipeRating += "Rating: " + recipeObject.getString(RECIPE_RATING_STR) + " Stars";
+            }
             ratingText.setText(recipeRating);
             //instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
 
