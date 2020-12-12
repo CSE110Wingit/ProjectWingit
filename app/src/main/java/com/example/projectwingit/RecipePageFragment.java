@@ -131,7 +131,7 @@ public class RecipePageFragment extends Fragment {
         TextView ingredientsText = v.findViewById(R.id.Ingredients_TextView);
         //TextView instructionsText = v.findViewById(R.id.textViewInstructions);
         TextView nutAllergyText = v.findViewById(R.id.textViewAllergy);
-        TextView ratingText = v.findViewById(R.id.textViewNutritional);
+        RatingBar ratingBar = v.findViewById(R.id.textViewNutritional);
         favoriteButton = v.findViewById(R.id.recipe_page_fav_button);
 
         try {
@@ -150,14 +150,12 @@ public class RecipePageFragment extends Fragment {
 
             tutorialString = recipeObject.getString(RECIPE_TUTORIAL_STR);
 
-            String recipeRating = "";
             if(recipeObject.getString(RECIPE_RATING_STR).equalsIgnoreCase("null")){
-                recipeRating += "Not Rated";
+                ratingBar.setNumStars(0);
             }
             else{
-                recipeRating += "Rating: " + recipeObject.getString(RECIPE_RATING_STR) + " Stars";
+                ratingBar.setRating(Float.parseFloat(recipeObject.getString(RECIPE_RATING_STR)));
             }
-            ratingText.setText(recipeRating);
             //instructionsText.setText(recipeObject.getString(RECIPE_TUTORIAL_STR));
 
             String allergyString = "";
@@ -275,7 +273,7 @@ public class RecipePageFragment extends Fragment {
                     LambdaResponse sendRating = rateRecipe(Integer.toString(recipeID), (int) userRating.getRating());
                     if (!sendRating.isError()) {
                         try {
-                            ratingText.setText("Rating: " + sendRating.getResponseJSON().getString(RECIPE_RATING_STR) + " Stars");
+                            ratingBar.setRating(Float.parseFloat(sendRating.getResponseJSON().getString(RECIPE_RATING_STR)));
                         } catch (Exception e) {
                             WingitLogging.log("BAAAAAD updating rating stars: " + e.getMessage());
                         }
