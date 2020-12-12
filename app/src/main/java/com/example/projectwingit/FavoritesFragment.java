@@ -73,7 +73,7 @@ public class FavoritesFragment extends Fragment {
             }
             else {
                 RecipeList favList = new RecipeList();
-                favList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5, Boolean.TRUE);
+                favList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5, null, Boolean.TRUE);
                 getFragmentManager().beginTransaction().replace(R.id.container, favList).commit();
             }
 

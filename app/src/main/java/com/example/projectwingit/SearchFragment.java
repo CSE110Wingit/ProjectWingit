@@ -80,11 +80,11 @@ public class SearchFragment extends Fragment {
                 if(UserInfo.CURRENT_USER.isLoggedIn()){
                     rl.typeResults(searchRecipeText, UserInfo.CURRENT_USER.getNutAllergy(),
                             UserInfo.CURRENT_USER.getGlutenFree(),
-                            UserInfo.CURRENT_USER.getSpicinessLevel(),
+                            UserInfo.CURRENT_USER.getSpicinessLevel(), null,
                             Boolean.FALSE);
                 }
                 else{
-                    rl.typeResults(searchRecipeText, Boolean.FALSE, Boolean.FALSE, -1, Boolean.FALSE);
+                    rl.typeResults(searchRecipeText, Boolean.FALSE, Boolean.FALSE, -1, null,Boolean.FALSE);
                 }
                 getFragmentManager().beginTransaction().replace(R.id.container, rl).addToBackStack(null).commit();
             }

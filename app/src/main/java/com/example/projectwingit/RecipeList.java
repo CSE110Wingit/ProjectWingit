@@ -69,6 +69,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
     private int spiciness;
     private Boolean nutAllergy;
     private Boolean glutenFree;
+    private Boolean vegetarian;
     private Boolean isFavoritesPage;
 
     private Boolean initializedCards = Boolean.FALSE;
@@ -131,7 +132,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
         }
         else {
             initializedCards = Boolean.TRUE;
-            LambdaResponse lr = searchRecipes(recipeSearchText, nutAllergy, glutenFree, null, spiciness);
+            LambdaResponse lr = searchRecipes(recipeSearchText, nutAllergy, glutenFree, vegetarian, spiciness);
 
             JSONObject joe = lr.getResponseJSON();
 
@@ -230,11 +231,12 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
      *      2. This String represents the recipe that the user would like to search in the WingIt Database
      *      3. We will make a request to the Lambda API using this string in the onCreateView method above.
      */
-    public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness, Boolean isFavoritesPage) {
+    public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness, Boolean vegetarian, Boolean isFavoritesPage) {
         this.recipeSearchText = recipeSearchText;
         this.spiciness = spiciness;
         this.nutAllergy = nutAllergy;
         this.glutenFree = glutenFree;
+        this.vegetarian = vegetarian;
         this.isFavoritesPage = isFavoritesPage;
     }
 

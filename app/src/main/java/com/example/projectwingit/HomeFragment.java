@@ -82,7 +82,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList spicyList = new RecipeList();
-                spicyList.typeResults("", Boolean.FALSE, Boolean.FALSE, 5, Boolean.FALSE);
+                spicyList.typeResults("", null, null, 4, null, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, spicyList).addToBackStack(null).commit();
             }
         });
@@ -93,7 +93,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList vegetarianList = new RecipeList();
-                vegetarianList.typeResults("Vegan Vegetarian", Boolean.FALSE, Boolean.FALSE, -1, Boolean.FALSE);
+                vegetarianList.typeResults("Vegan Vegetarian", null, null, -1, Boolean.TRUE, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, vegetarianList).addToBackStack(null).commit();
             }
         });
@@ -104,7 +104,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList sweetList = new RecipeList();
-                sweetList.typeResults("Sweet", Boolean.FALSE, Boolean.FALSE, 3, Boolean.FALSE);
+                sweetList.typeResults("Sweet", null, null, -1, null, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, sweetList).addToBackStack(null).commit();
             }
         });
