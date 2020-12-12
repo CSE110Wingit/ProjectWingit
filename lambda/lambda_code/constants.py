@@ -110,6 +110,7 @@ RATED_RECIPES_STR = 'rated_recipes'
 NUT_ALLERGY_STR = 'nut_allergy'
 SPICINESS_LEVEL_STR = 'spiciness_level'
 GLUTEN_FREE_STR = 'gluten_free'
+VEGETARIAN_STR = 'vegetarian'
 PASSWORD_HASH_STR = 'password_hash'  # Password_hash name on database
 NEW_PASSWORD_HASH_STR = 'new_hash'
 QUERY_RESULTS_STR = 'query_results'
@@ -156,9 +157,9 @@ RECIPE_ID_STR, NEXT_RECIPE_ID_STR, RECIPES_TABLE_NAME)
 UPDATE_CREATED_RECIPES_SQL = "UPDATE {0} SET {1} = %s WHERE {2} LIKE %s".format(USERS_TABLE_NAME, CREATED_RECIPES_STR,
                                                                                 USERNAME_STR)
 
-CREATE_RECIPE_SQL = "INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" \
+CREATE_RECIPE_SQL = "INSERT INTO {0} ({1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" \
     .format(RECIPES_TABLE_NAME, RECIPE_ID_STR, RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR,
-            RECIPE_TUTORIAL_STR, RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR, SPICINESS_LEVEL_STR,
+            RECIPE_TUTORIAL_STR, RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR, VEGETARIAN_STR, SPICINESS_LEVEL_STR,
             RECIPE_PICTURE_STR, RECIPE_AUTHOR_STR)
 
 UPDATE_USER_PROFILE_SQL = "UPDATE {0} SET {1}=%s, {2}=%s, {3}=%s, {4}=%s, {5}=%s WHERE {1} LIKE %s" \
@@ -167,9 +168,9 @@ UPDATE_USER_PROFILE_SQL = "UPDATE {0} SET {1}=%s, {2}=%s, {3}=%s, {4}=%s, {5}=%s
 UPDATE_FAVORITED_RECIEPS_SQL = "UPDATE {0} SET {1}=%s WHERE {2} LIKE %s" \
     .format(USERS_TABLE_NAME, FAVORITED_RECIPES_STR, USERNAME_STR)
 
-UPDATE_RECIPE_SQL = "UPDATE {0} SET {1}=%s, {2}=%s, {3}=%s, {4}=%s, {5}=%s, {6}=%s, {7}=%s, {8}=%s, {9}=%s WHERE {10}=%s" \
+UPDATE_RECIPE_SQL = "UPDATE {0} SET {1}=%s, {2}=%s, {3}=%s, {4}=%s, {5}=%s, {6}=%s, {7}=%s, {8}=%s, {9}=%s, {10}=%s WHERE {11}=%s" \
     .format(RECIPES_TABLE_NAME, RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR, RECIPE_TUTORIAL_STR,
-            RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR, SPICINESS_LEVEL_STR, RECIPE_PICTURE_STR,
+            RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR, VEGETARIAN_STR, SPICINESS_LEVEL_STR, RECIPE_PICTURE_STR,
             RECIPE_ID_STR)
 
 UPDATE_RECIPE_RATING_SQL = "UPDATE {0} SET {1}={1}+%s, {2}={2}+%s WHERE {3}=%s" \

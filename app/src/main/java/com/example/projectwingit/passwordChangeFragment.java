@@ -107,30 +107,46 @@ public class passwordChangeFragment extends Fragment {
         hashCurrentPass = com.example.projectwingit.utils.WingitUtils.hashPassword(currentPassword);
         hashNewPass = com.example.projectwingit.utils.WingitUtils.hashPassword(newPassword);
 
-        LambdaResponse changePassword = LambdaRequests.changePassword(email, hashCurrentPass, hashNewPass);
 
-        cp_Button.post(new Runnable() {
-            @Override
-            public void run() {
-                errorDialog = new Dialog(getActivity());
-                errorDialog.setContentView(R.layout.error_dialog);
-                errorText = (TextView)errorDialog.findViewById(R.id.error_dialog_text1);
-                errorText.setText(changePassword.getResponseInfo());
-                errorDialog.show();
-                errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
-                if (!changePassword.isError()) {
-                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                    startActivity(intent);
-                }
-//                Toast.makeText(getActivity().getApplicationContext(), LoginInfo.CURRENT_LOGIN.username, Toast.LENGTH_LONG).show();
-                errorButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        errorDialog.cancel();
+        if (newPassword.length() >= 8) {
+            LambdaResponse changePassword = LambdaRequests.changePassword(email, hashCurrentPass, hashNewPass);
+
+            cp_Button.post(new Runnable() {
+                @Override
+                public void run() {
+                    errorDialog = new Dialog(getActivity());
+                    errorDialog.setContentView(R.layout.error_dialog);
+                    errorText = (TextView) errorDialog.findViewById(R.id.error_dialog_text1);
+                    errorText.setText(changePassword.getResponseInfo());
+                    errorDialog.show();
+                    errorButton = (Button) errorDialog.findViewById(R.id.error_dialog_button);
+                    if (!changePassword.isError()) {
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        startActivity(intent);
                     }
-                });
-            }
-        });
+//                Toast.makeText(getActivity().getApplicationContext(), LoginInfo.CURRENT_LOGIN.username, Toast.LENGTH_LONG).show();
+                    errorButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            errorDialog.cancel();
+                        }
+                    });
+                }
+            });
 
+        } else {
+            errorDialog = new Dialog(getActivity());
+            errorDialog.setContentView(R.layout.error_dialog);
+            errorText = (TextView) errorDialog.findViewById(R.id.error_dialog_text1);
+            errorText.setText("New password must be a minimum of 8 characters");
+            errorDialog.show();
+            errorButton = (Button) errorDialog.findViewById(R.id.error_dialog_button);
+            errorButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    errorDialog.cancel();
+                }
+            });
+        }
     }
 }

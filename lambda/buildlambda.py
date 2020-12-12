@@ -56,8 +56,8 @@ def rebuild_database(conn):
     cursor.execute(*make_insert_sql(USERS_TABLE_NAME, **TEST_ACCOUNT_UNVERIFIED_KWARGS))
 
     # Insert into the recipes table
-    recipe1 = [-1, "recipe1", "", "", "", False, "", "dhfashfujhdasjfnajksd", False, False, 0]
-    recipe2 = [-2, "recipe2", "", "", "", True, "", "dhfashfujhdasjfnajksd", False, False, 0]
+    recipe1 = [-1, "recipe1", "", "", "", False, "", "dhfashfujhdasjfnajksd", False, False, False, 0]
+    recipe2 = [-2, "recipe2", "", "", "", True, "", "dhfashfujhdasjfnajksd", False, False, False, 0]
     cursor.execute(CREATE_RECIPE_SQL, recipe1)
     cursor.execute(CREATE_RECIPE_SQL, recipe2)
 

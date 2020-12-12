@@ -11,8 +11,8 @@ import pickle
 import re
 
 
-_PARAMS_BOOLEAN_NAMES = [NUT_ALLERGY_STR, GLUTEN_FREE_STR, RECIPE_PRIVATE_STR]
-_PARAMS_BOOLEAN_ERRORS = [ERROR_INVALID_NUT_ALLERGY, ERROR_INVALID_GLUTEN_FREE, ERROR_INVALID_RECIPE_PRIVATE]
+_PARAMS_BOOLEAN_NAMES = [NUT_ALLERGY_STR, GLUTEN_FREE_STR, RECIPE_PRIVATE_STR, VEGETARIAN_STR]
+_PARAMS_BOOLEAN_ERRORS = [ERROR_INVALID_NUT_ALLERGY, ERROR_INVALID_GLUTEN_FREE, ERROR_INVALID_RECIPE_PRIVATE, ERROR_INVALID_VEGETARIAN]
 
 
 def username_valid(username):
@@ -322,9 +322,10 @@ QUERY_END_OF_TEXT_MULT = 0.5
 QUERY_TITLE_STR_MULT = 8
 QUERY_OTHER_STR_MULT = 1
 QUERY_AUTHOR_STR_VAL = 5
+QUERY_SAME_VEGETARIAN = 8
 
 
-def do_query(query, nut_allergy, gluten_free, spiciness, public_results, private_results, top_n=100):
+def do_query(query, nut_allergy, gluten_free, vegetarian, spiciness, public_results, private_results, top_n=100):
     """
     The actual search engine bit
     """
@@ -351,6 +352,10 @@ def do_query(query, nut_allergy, gluten_free, spiciness, public_results, private
         # Spiciness
         if spiciness is not None and spiciness != -1:
             val += (5 - abs(spiciness - r[SPICINESS_LEVEL_STR])) * QUERY_SPICINESS_MULT
+
+        # Vegetarian
+        if vegetarian is not None and r[VEGETARIAN_STR] == (1 if vegetarian else 0):
+            val += QUERY_SAME_VEGETARIAN
 
         # Go through each word in query
         for word in [w for w in query.lower().split(" ") if w not in stop_words]:

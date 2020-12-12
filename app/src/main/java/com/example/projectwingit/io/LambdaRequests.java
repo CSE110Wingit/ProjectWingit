@@ -119,8 +119,10 @@ public class LambdaRequests extends UserInfo{
                     PASSWORD_HASH_STR, passwordHash,
                     EVENT_TYPE_STR, EVENT_DELETE_ACCOUNT_STR,
             };
-            UserInfo.CURRENT_USER.deleteLoginInfo();
-            return sendRequest("DELETE", params);
+            LambdaResponse response = sendRequest("DELETE", params);
+            if (!response.isError())
+                UserInfo.CURRENT_USER.deleteLoginInfo();
+            return response;
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending delete account request: " + e.getMessage());
@@ -209,8 +211,9 @@ public class LambdaRequests extends UserInfo{
                                                              int spicinessLevel){
         try{
             String[] params = {
-                    USERNAME_STR, newUsername,
-                    EMAIL_STR, newEmail,
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    NEW_USERNAME_STR, newUsername,
+                    NEW_EMAIL_STR, newEmail,
                     PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
                     NUT_ALLERGY_STR, ""+nutAllergy,
                     GLUTEN_FREE_STR, ""+glutenFree,
@@ -222,6 +225,8 @@ public class LambdaRequests extends UserInfo{
             if (!response.isError()){
                 String log = UserInfo.CURRENT_USER.epc(newUsername, newEmail, nutAllergy, glutenFree, spicinessLevel);
                 if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
+            }else{
+                WingitLogging.log(response.getErrorMessage());
             }
 
             return response;
@@ -311,7 +316,8 @@ public class LambdaRequests extends UserInfo{
      */
     private static LambdaResponse _createRecipe(String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
-                                              int spicinessLevel, boolean isPrivate, String imageURL){
+                                              boolean isVegetarian, int spicinessLevel, boolean isPrivate,
+                                                String imageURL){
         try{
             String[] params = {
                     USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
@@ -323,6 +329,7 @@ public class LambdaRequests extends UserInfo{
                     RECIPE_PRIVATE_STR, ""+isPrivate,
                     NUT_ALLERGY_STR, ""+isNutAllergy,
                     GLUTEN_FREE_STR, ""+isGlutenFree,
+                    VEGETARIAN_STR, ""+isVegetarian,
                     SPICINESS_LEVEL_STR, ""+spicinessLevel,
                     RECIPE_PICTURE_STR, imageURL == null ? "" : imageURL,
                     EVENT_TYPE_STR, EVENT_CREATE_RECIPE_STR,
@@ -342,22 +349,23 @@ public class LambdaRequests extends UserInfo{
 
     public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
-                                              int spicinessLevel, boolean isPrivate){
+                                              boolean isVegetarian, int spicinessLevel, boolean isPrivate){
         return _createRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
-                spicinessLevel, isPrivate, null);
+                isVegetarian, spicinessLevel, isPrivate, null);
     }
 
     public static LambdaResponse createRecipe(String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
-                                              int spicinessLevel, boolean isPrivate, Bitmap recipeImage){
+                                              boolean isVegetarian, int spicinessLevel, boolean isPrivate,
+                                              Bitmap recipeImage){
         if (recipeImage == null){
             return _createRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
-                    spicinessLevel, isPrivate, null);
+                    isVegetarian, spicinessLevel, isPrivate, null);
         }
         LambdaResponse response = uploadImage(recipeImage);
         if (!response.isError()){
             return _createRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
-                    spicinessLevel, isPrivate, response.getExactErrorMessage());
+                    isVegetarian, spicinessLevel, isPrivate, response.getExactErrorMessage());
         }
         return response;
     }
@@ -404,7 +412,8 @@ public class LambdaRequests extends UserInfo{
      */
     private static LambdaResponse _editRecipe(String title, String[] ingredients, String description,
                                             String tutorial, boolean isNutAllergy, boolean isGlutenFree,
-                                            int spicinessLevel, boolean isPrivate, String imageURL){
+                                            boolean isVegetarian, int spicinessLevel, boolean isPrivate,
+                                              String imageURL){
         try{
             String[] params = {
                     USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
@@ -416,6 +425,7 @@ public class LambdaRequests extends UserInfo{
                     RECIPE_PRIVATE_STR, ""+isPrivate,
                     NUT_ALLERGY_STR, ""+isNutAllergy,
                     GLUTEN_FREE_STR, ""+isGlutenFree,
+                    VEGETARIAN_STR, ""+isVegetarian,
                     SPICINESS_LEVEL_STR, ""+spicinessLevel,
                     RECIPE_PICTURE_STR, imageURL == null ? "" : imageURL,
                     EVENT_TYPE_STR, EVENT_UPDATE_RECIPE_STR,
@@ -430,22 +440,23 @@ public class LambdaRequests extends UserInfo{
 
     public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
                                               String tutorial, boolean isNutAllergy, boolean isGlutenFree,
-                                              int spicinessLevel, boolean isPrivate){
+                                              boolean isVegetarian, int spicinessLevel, boolean isPrivate){
         return _editRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
-            spicinessLevel, isPrivate, null);
+                isVegetarian, spicinessLevel, isPrivate, null);
     }
 
     public static LambdaResponse editRecipe(String title, String[] ingredients, String description,
                                             String tutorial, boolean isNutAllergy, boolean isGlutenFree,
-                                            int spicinessLevel, boolean isPrivate, Bitmap recipeImage){
+                                            boolean isVegetarian, int spicinessLevel, boolean isPrivate,
+                                            Bitmap recipeImage){
         if (recipeImage == null){
             return _editRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
-                    spicinessLevel, isPrivate, null);
+                    isVegetarian, spicinessLevel, isPrivate, null);
         }
         LambdaResponse response = uploadImage(recipeImage);
         if (!response.isError()){
             return _editRecipe(title, ingredients, description, tutorial, isNutAllergy, isGlutenFree,
-                    spicinessLevel, isPrivate, response.getExactErrorMessage());
+                    isVegetarian, spicinessLevel, isPrivate, response.getExactErrorMessage());
         }
         return response;
     }
@@ -489,7 +500,8 @@ public class LambdaRequests extends UserInfo{
      *                       If an integer in range [0, 5]: filter results so those recipes that
      *                          match are more likely to be pushed to the top
      */
-    public static LambdaResponse searchRecipes(String query, Boolean nutAllergy, Boolean glutenFree, Integer spicinessLevel){
+    public static LambdaResponse searchRecipes(String query, Boolean nutAllergy, Boolean glutenFree,
+                                               Boolean vegetarian, Integer spicinessLevel){
         try{
             ArrayList<String> params = new ArrayList<>();
             params.add(QUERY_STR);
@@ -508,6 +520,10 @@ public class LambdaRequests extends UserInfo{
             if (spicinessLevel == null || spicinessLevel < 0) {
                 params.add(SPICINESS_LEVEL_STR);
                 params.add("-1");
+            }
+            if (vegetarian != null){
+                params.add(VEGETARIAN_STR);
+                params.add(vegetarian.toString());
             }
 
             String[] req = new String[params.size()];
@@ -553,7 +569,7 @@ public class LambdaRequests extends UserInfo{
                 Request request = new Request.Builder().url(url).post(formBody).build();
                 LambdaResponse resp = new LambdaResponse(client.newCall(request));
 
-                if (!resp.isError()) return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, url + "recipe_images/" + filename);
+                if (!resp.isError()) return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, url + RECIPE_IMAGES_DIR + "/" + filename);
                 return resp;
             }
 

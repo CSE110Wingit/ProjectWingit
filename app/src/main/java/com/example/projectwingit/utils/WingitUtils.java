@@ -38,6 +38,10 @@ public class WingitUtils {
         return hexString.toString();
     }
 
+    public static boolean goodPassword(String password){
+        return password.length() >= 8;
+    }
+
     public static RequestBody inputStreamRequest(final MediaType mediaType, final InputStream inputStream) {
         return new RequestBody() {
             @Override

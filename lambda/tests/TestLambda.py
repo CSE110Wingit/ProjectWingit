@@ -541,6 +541,7 @@ class TestLambda:
             RECIPE_PRIVATE_STR: False,
             NUT_ALLERGY_STR: False,
             GLUTEN_FREE_STR: False,
+            VEGETARIAN_STR: False,
             SPICINESS_LEVEL_STR: 0,
         }
 
@@ -616,6 +617,7 @@ class TestLambda:
             RECIPE_PRIVATE_STR: True,
             NUT_ALLERGY_STR: False,
             GLUTEN_FREE_STR: False,
+            VEGETARIAN_STR: False,
             SPICINESS_LEVEL_STR: 0,
         }
         self.assert_no_server_error(**params)
@@ -694,9 +696,6 @@ class TestLambda:
 
         # Test cant change username/email to ones that already exist
         params[NEW_USERNAME_STR] = TEST_ACCOUNT_UNVERIFIED_USERNAME
-        self.assert_server_error(ERROR_USERNAME_ALREADY_EXISTS, **params)
-        params[NEW_USERNAME_STR] = TEST_ACCOUNT_VERIFIED_USERNAME
-        params[NEW_EMAIL_STR] = TEST_ACCOUNT_UNVERIFIED_EMAIL
         self.assert_server_error(ERROR_USERNAME_ALREADY_EXISTS, **params)
 
         # Test things actually change
@@ -814,7 +813,7 @@ class TestLambda:
 
         # Make a recipe owned by TEST_ACCOUNT_VERIFIED
         recipe_id = -123412
-        create_args = [recipe_id, "A", "B", "", "JFDANSIJPNFIUANSFUINJAS", False, False, False, -1,
+        create_args = [recipe_id, "A", "B", "", "JFDANSIJPNFIUANSFUINJAS", False, False, False, False, -1,
                        "RECIPE_PICTURE_STR", TEST_ACCOUNT_VERIFIED_USERNAME]
         conn = get_new_db_conn()
         cursor = conn.cursor()
@@ -831,6 +830,7 @@ class TestLambda:
             RECIPE_PRIVATE_STR: 1,
             NUT_ALLERGY_STR: 1,
             GLUTEN_FREE_STR: 1,
+            VEGETARIAN_STR: 1,
             SPICINESS_LEVEL_STR: 5,
             RECIPE_PICTURE_STR: ""
         }
@@ -882,9 +882,9 @@ class TestLambda:
         # Add in a few recipes that are able to rate
         conn = get_new_db_conn()
         cursor = conn.cursor()
-        recipe1 = [-142, "title1", "", "", "", False, False, False, -1, "", "sda"]
-        recipe2 = [-143, "title2", "", "", "", False, False, False, -1, "", "sda2"]
-        recipe3 = [-144, "title3", "", "", "", False, False, False, -1, "", "sda3"]
+        recipe1 = [-142, "title1", "", "", "", False, False, False, False, -1, "", "sda"]
+        recipe2 = [-143, "title2", "", "", "", False, False, False, False, -1, "", "sda2"]
+        recipe3 = [-144, "title3", "", "", "", False, False, False, False, -1, "", "sda3"]
         cursor.execute(CREATE_RECIPE_SQL, recipe1)
         cursor.execute(CREATE_RECIPE_SQL, recipe2)
         cursor.execute(CREATE_RECIPE_SQL, recipe3)
@@ -980,7 +980,8 @@ class TestLambda:
                     RECIPE_TUTORIAL_STR: recipe[3],
                     NUT_ALLERGY_STR: recipe[4] == '1',
                     GLUTEN_FREE_STR: recipe[5] == '1',
-                    SPICINESS_LEVEL_STR: int(recipe[6]),
+                    VEGETARIAN_STR: recipe[6] == '1',
+                    SPICINESS_LEVEL_STR: int(recipe[7]),
                     RECIPE_PRIVATE_STR: False,
                 }
                 self.assert_no_server_error(**params)
@@ -1007,6 +1008,11 @@ class TestLambda:
         print("Only spic, val (%d):" % params[SPICINESS_LEVEL_STR], request(**params))
 
         del params[SPICINESS_LEVEL_STR]
+        params[VEGETARIAN_STR] = True
+        self.assert_true(len(self.assert_no_server_error(**params)[QUERY_RESULTS_STR]) > 0)
+        print("Only veg:", request(**params))
+
+        del params[VEGETARIAN_STR]
         params[QUERY_STR] = "Crispy Chicken Wings"
         print("Full:", request(**params))
 
