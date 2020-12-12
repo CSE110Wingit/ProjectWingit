@@ -308,7 +308,7 @@ def create_recipe(body):
 
     all_good, ret_dict = get_cleaned_params(body, RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR,
                                             RECIPE_TUTORIAL_STR, RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR,
-                                            SPICINESS_LEVEL_STR)
+                                            VEGETARIAN_STR, SPICINESS_LEVEL_STR)
     if not all_good:
         return ret_dict
     data = [ret_dict[s] for s in [RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR,
@@ -429,6 +429,7 @@ def _make_recipe_return(result):
         NUT_ALLERGY_STR: result[NUT_ALLERGY_STR],
         GLUTEN_FREE_STR: result[GLUTEN_FREE_STR],
         SPICINESS_LEVEL_STR: result[SPICINESS_LEVEL_STR],
+        VEGETARIAN_STR: result[VEGETARIAN_STR],
         RECIPE_RATING_STR: result[RECIPE_TOTAL_RATING_STR] / result[RECIPE_NUMBER_OF_RATINGS_STR] \
             if result[RECIPE_TOTAL_RATING_STR] is not None else None,
     }
@@ -448,7 +449,8 @@ def update_recipe(body):
     recipe_id = ret_dict[RECIPE_ID_STR]
 
     recipe_params = [RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR, RECIPE_TUTORIAL_STR,
-                     RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR, SPICINESS_LEVEL_STR, RECIPE_PICTURE_STR]
+                     RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR, VEGETARIAN_STR, SPICINESS_LEVEL_STR,
+                     RECIPE_PICTURE_STR]
     all_good, ret_dict = get_params_if_exist(body, *recipe_params)
     if not all_good:
         return ret_dict
@@ -622,10 +624,11 @@ def query_recipes(params):
         return ret_dict
     query = ret_dict[QUERY_STR]
 
-    all_good, ret_dict = get_params_if_exist(params, NUT_ALLERGY_STR, GLUTEN_FREE_STR, SPICINESS_LEVEL_STR)
+    all_good, ret_dict = get_params_if_exist(params, NUT_ALLERGY_STR, GLUTEN_FREE_STR, VEGETARIAN_STR, SPICINESS_LEVEL_STR)
     if not all_good:
         return ret_dict
-    nut_allergy, gluten_free, spiciness = ret_dict[NUT_ALLERGY_STR], ret_dict[GLUTEN_FREE_STR], ret_dict[SPICINESS_LEVEL_STR]
+    nut_allergy, gluten_free, vegetarian, spiciness = ret_dict[NUT_ALLERGY_STR], ret_dict[GLUTEN_FREE_STR], \
+                                                      ret_dict[VEGETARIAN_STR], ret_dict[SPICINESS_LEVEL_STR]
 
     try:
         conn = get_new_db_conn()
@@ -638,6 +641,6 @@ def query_recipes(params):
         else:
             private_results = []
 
-        return do_query(query, nut_allergy, gluten_free, spiciness, public_results, private_results)
+        return do_query(query, nut_allergy, gluten_free, vegetarian, spiciness, public_results, private_results)
     except Exception as e:
         return error(ERROR_UNKNOWN_ERROR, "15", repr(e))
