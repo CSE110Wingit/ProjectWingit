@@ -29,7 +29,7 @@
             android:layout_width="383dp"
             android:layout_height="65dp"
             android:gravity="center_horizontal"
-            android:text="The password was sent to the email which was specified during registration. Once you receive it, click the 'Change Password' link below."
+            android:text="A code was sent to the email. Once you receive it, click the 'Change Password' link below."
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

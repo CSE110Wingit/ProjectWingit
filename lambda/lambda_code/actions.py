@@ -293,7 +293,7 @@ def get_password_change_code(params):
         cursor.execute(UPDATE_PASSWORD_CHANGE_CODE_SQL.replace('%d', str(current_time())), [code, result[USERNAME_STR]])
         conn.commit()
 
-        return send_password_change_code_email(username, result[EMAIL_STR], code)
+        return send_password_change_code_email(result[USERNAME_STR], result[EMAIL_STR], code)
     except Exception as e:
         return error(ERROR_UNKNOWN_ERROR, "7", repr(e))
 
