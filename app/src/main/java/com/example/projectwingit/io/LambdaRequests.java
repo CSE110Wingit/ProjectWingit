@@ -119,8 +119,10 @@ public class LambdaRequests extends UserInfo{
                     PASSWORD_HASH_STR, passwordHash,
                     EVENT_TYPE_STR, EVENT_DELETE_ACCOUNT_STR,
             };
-            UserInfo.CURRENT_USER.deleteLoginInfo();
-            return sendRequest("DELETE", params);
+            LambdaResponse response = sendRequest("DELETE", params);
+            if (!response.isError())
+                UserInfo.CURRENT_USER.deleteLoginInfo();
+            return response;
         }catch (IOException e){
             return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR,
                     "Error sending delete account request: " + e.getMessage());
