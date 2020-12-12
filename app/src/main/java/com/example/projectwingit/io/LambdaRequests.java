@@ -560,7 +560,7 @@ public class LambdaRequests extends UserInfo{
                 Request request = new Request.Builder().url(url).post(formBody).build();
                 LambdaResponse resp = new LambdaResponse(client.newCall(request));
 
-                if (!resp.isError()) return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, url + "/recipe_images/" + filename);
+                if (!resp.isError()) return new LambdaResponse(LambdaResponse.ErrorState.NO_ERROR, url + "recipe_images/" + filename);
                 return resp;
             }
 
