@@ -360,8 +360,6 @@ public class CreateRecipe extends Fragment {
                 }
                 recipeTutorial = recipeTutorialBuilder.toString().trim();
 
-                Log.i(tag, "Tutorial: " + recipeTutorial.replace("\n", "\\n"));
-
                 LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
                         recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
                         isGlutenFree, (int) spicinessLevel, isPrivate, imageBitmap);
