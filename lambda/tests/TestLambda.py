@@ -697,9 +697,6 @@ class TestLambda:
         # Test cant change username/email to ones that already exist
         params[NEW_USERNAME_STR] = TEST_ACCOUNT_UNVERIFIED_USERNAME
         self.assert_server_error(ERROR_USERNAME_ALREADY_EXISTS, **params)
-        params[NEW_USERNAME_STR] = TEST_ACCOUNT_VERIFIED_USERNAME
-        params[NEW_EMAIL_STR] = TEST_ACCOUNT_UNVERIFIED_EMAIL
-        self.assert_server_error(ERROR_USERNAME_ALREADY_EXISTS, **params)
 
         # Test things actually change
         email, username = random_valid_email(), random_valid_username()

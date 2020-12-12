@@ -501,15 +501,16 @@ def update_user_profile(body):
 
         new_username = result[USERNAME_STR] if ret_dict[NEW_USERNAME_STR] == '' else ret_dict[NEW_USERNAME_STR]
         new_email = result[EMAIL_STR] if ret_dict[NEW_EMAIL_STR] == '' else ret_dict[NEW_EMAIL_STR]
-        new_nut, new_glut, new_spicy = ret_dict[NUT_ALLERGY_STR], ret_dict[GLUTEN_FREE_STR], ret_dict[
-            SPICINESS_LEVEL_STR]
+        new_nut, new_glut, new_spicy = ret_dict[NUT_ALLERGY_STR], ret_dict[GLUTEN_FREE_STR], ret_dict[SPICINESS_LEVEL_STR]
 
         # Check for username/email already exists
         cursor.execute(GET_WHERE_USERNAME_LIKE_SQL, new_username)
-        if cursor.fetchone() is not None:
+        result = cursor.fetchone()
+        if username != new_username and result is not None:
             return error(ERROR_USERNAME_ALREADY_EXISTS, new_username)
         cursor.execute(GET_WHERE_EMAIL_LIKE_SQL, new_email)
-        if cursor.fetchone() is not None:
+        result = cursor.fetchone()
+        if result is not None and username != result[USERNAME_STR]:
             return error(ERROR_EMAIL_ALREADY_IN_USE, new_email)
 
         cursor.execute(UPDATE_USER_PROFILE_SQL, [new_username, new_email, new_nut, new_glut, new_spicy, username])
