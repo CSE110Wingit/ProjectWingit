@@ -313,7 +313,7 @@ def create_recipe(body):
         return ret_dict
     data = [ret_dict[s] for s in [RECIPE_TITLE_STR, RECIPE_INGREDIENTS_STR, RECIPE_DESCRIPTION_STR,
                                   RECIPE_TUTORIAL_STR, RECIPE_PRIVATE_STR, NUT_ALLERGY_STR, GLUTEN_FREE_STR,
-                                  SPICINESS_LEVEL_STR]]
+                                  VEGETARIAN_STR, SPICINESS_LEVEL_STR]]
 
     # Check for a possible recipe_picture id
     recipe_pic = body[RECIPE_PICTURE_STR] if RECIPE_PICTURE_STR in body else None

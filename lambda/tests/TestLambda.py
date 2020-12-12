@@ -885,9 +885,9 @@ class TestLambda:
         # Add in a few recipes that are able to rate
         conn = get_new_db_conn()
         cursor = conn.cursor()
-        recipe1 = [-142, "title1", "", "", "", False, False, False, -1, "", "sda"]
-        recipe2 = [-143, "title2", "", "", "", False, False, False, -1, "", "sda2"]
-        recipe3 = [-144, "title3", "", "", "", False, False, False, -1, "", "sda3"]
+        recipe1 = [-142, "title1", "", "", "", False, False, False, False, -1, "", "sda"]
+        recipe2 = [-143, "title2", "", "", "", False, False, False, False, -1, "", "sda2"]
+        recipe3 = [-144, "title3", "", "", "", False, False, False, False, -1, "", "sda3"]
         cursor.execute(CREATE_RECIPE_SQL, recipe1)
         cursor.execute(CREATE_RECIPE_SQL, recipe2)
         cursor.execute(CREATE_RECIPE_SQL, recipe3)
