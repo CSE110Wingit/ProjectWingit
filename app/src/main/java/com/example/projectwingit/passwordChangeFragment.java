@@ -101,6 +101,8 @@ public class passwordChangeFragment extends Fragment {
             currentPass.setInputType(InputType.TYPE_CLASS_TEXT);
         }
 
+        newPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
         cp_Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

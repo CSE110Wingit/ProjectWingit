@@ -1,6 +1,7 @@
 package com.example.projectwingit;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -17,12 +18,18 @@ import android.widget.TextView;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
 
+import com.example.projectwingit.io.LambdaRequests;
+import com.example.projectwingit.io.LambdaResponse;
+
 
 public class forgot_pass_Fragment extends Fragment implements OnClickListener {
 
     private EditText fp_Email;
     private Button link_Password;
     private EditText back_Login;
+    Dialog errorDialog;
+    Button errorButton;
+    TextView errorText;
     public forgot_pass_Fragment() {
         // Required empty public constructor
     }
@@ -72,7 +79,36 @@ public class forgot_pass_Fragment extends Fragment implements OnClickListener {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         TextView back_Login = getActivity().findViewById(R.id.back_fp);
+        Button sendLink = getActivity().findViewById(R.id.link_fp);
         back_Login.setOnClickListener((View.OnClickListener) this);
+        fp_Email = getActivity().findViewById(R.id.rec_pass_email);
+
+        sendLink.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LambdaResponse response = LambdaRequests.requestPasswordChangeCode(fp_Email.getText().toString());
+
+                errorDialog = new Dialog(getActivity());
+                errorDialog.setContentView(R.layout.error_dialog);
+                errorText = (TextView)errorDialog.findViewById(R.id.error_dialog_text1);
+                errorText.setText(response.getResponseInfo());
+                errorDialog.show();
+                errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
+
+                if (!response.isError()) {
+                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                    ft.replace(R.id.container_user_account, new forgotPassDisplayFragment());
+                    ft.commit();
+                }
+//                Toast.makeText(getActivity().getApplicationContext(), LoginInfo.CURRENT_LOGIN.username, Toast.LENGTH_LONG).show();
+                errorButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        errorDialog.cancel();
+                    }
+                });
+            }
+        });
     }
 
     @Override

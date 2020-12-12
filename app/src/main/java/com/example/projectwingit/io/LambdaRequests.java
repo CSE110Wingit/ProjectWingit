@@ -133,10 +133,10 @@ public class LambdaRequests extends UserInfo{
      * SR7 Request a change password code to be sent to the currently active user's email.
      * @return
      */
-    public static LambdaResponse requestPasswordChangeCode(){
+    public static LambdaResponse requestPasswordChangeCode(String email){
         try{
             String[] params = {
-                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    EMAIL_STR, email,
                     EVENT_TYPE_STR, EVENT_GET_PASSWORD_CHANGE_CODE_STR,
             };
             return sendRequest("GET", params);

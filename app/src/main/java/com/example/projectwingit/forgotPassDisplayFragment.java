@@ -1,9 +1,9 @@
 package com.example.projectwingit;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import android.view.View.OnClickListener;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,8 +54,12 @@ public class forgotPassDisplayFragment extends Fragment implements OnClickListen
 
     @Override
     public void onClick(View view) {
-        Intent intent = new Intent(getActivity(), MainActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(getActivity(), MainActivity.class);
+        //startActivity(intent);
+
+        final FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.container_user_account, new passwordChangeFragment());
+        ft.commit();
     }
 
     @Override
