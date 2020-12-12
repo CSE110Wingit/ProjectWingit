@@ -211,8 +211,9 @@ public class LambdaRequests extends UserInfo{
                                                              int spicinessLevel){
         try{
             String[] params = {
-                    USERNAME_STR, newUsername,
-                    EMAIL_STR, newEmail,
+                    USERNAME_STR, UserInfo.CURRENT_USER.getUsername(),
+                    NEW_USERNAME_STR, newUsername,
+                    NEW_EMAIL_STR, newEmail,
                     PASSWORD_HASH_STR, UserInfo.CURRENT_USER.getPasswordHash(),
                     NUT_ALLERGY_STR, ""+nutAllergy,
                     GLUTEN_FREE_STR, ""+glutenFree,
@@ -224,6 +225,8 @@ public class LambdaRequests extends UserInfo{
             if (!response.isError()){
                 String log = UserInfo.CURRENT_USER.epc(newUsername, newEmail, nutAllergy, glutenFree, spicinessLevel);
                 if (!log.isEmpty()) return new LambdaResponse(LambdaResponse.ErrorState.CLIENT_ERROR, log);
+            }else{
+                WingitLogging.log(response.getErrorMessage());
             }
 
             return response;
