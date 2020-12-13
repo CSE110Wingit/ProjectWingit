@@ -241,13 +241,6 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
     @Override
     public void onRecipeClick(int position) {
-        /**
-         * TODO: 1. Pass recipe_id from (int position) <- which is the recipe card, i presume
-         * TODO: 2. Debug recipe list duplication upon pressing the back button
-         * TODO:      a. we could delete all current recipe cards (int positions) upon entering this method
-         */
-
-        // TODO eventually we will pass in an entire recipe object here but for now it is just the title
         Fragment recipeFragment = new RecipePageFragment(mRecipeID.get(position));
         getFragmentManager().beginTransaction().replace(R.id.container, recipeFragment).addToBackStack(null).commit();
     }
@@ -366,11 +359,9 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                             }
 
                             mIsFavorites.add(favVal);
-                            mRecipeID.add(id);
                         }
                         else {
                             mIsFavorites.add(false);
-                            mRecipeID.add(id);
                         }
                     }
                 }
