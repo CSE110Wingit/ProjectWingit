@@ -108,22 +108,14 @@ public class DeleteAccountFragment extends Fragment implements View.OnClickListe
         deleteButton.post(new Runnable() {
             @Override
             public void run() {
-                errorDialog = new Dialog(getActivity());
-                errorDialog.setContentView(R.layout.error_dialog);
-                errorText = (TextView)errorDialog.findViewById(R.id.error_dialog_text1);
-                errorText.setText(passForDelete.getResponseInfo());
-                errorDialog.show();
-                errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
                 if (!passForDelete.isError()) {
                     Intent intent = new Intent(getActivity(), MainActivity.class);
                     startActivity(intent);
+                    Toast.makeText(getActivity().getApplicationContext(), "Account has been deleted", Toast.LENGTH_LONG).show();
                 }
-                errorButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        errorDialog.cancel();
-                    }
-                });
+                else{
+                    Toast.makeText(getActivity().getApplicationContext(), passForDelete.getErrorMessage(), Toast.LENGTH_LONG).show();
+                }
             }
         });
 

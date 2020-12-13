@@ -88,25 +88,14 @@ public class forgot_pass_Fragment extends Fragment implements OnClickListener {
             public void onClick(View v) {
                 LambdaResponse response = LambdaRequests.requestPasswordChangeCode(fp_Email.getText().toString());
 
-                errorDialog = new Dialog(getActivity());
-                errorDialog.setContentView(R.layout.error_dialog);
-                errorText = (TextView)errorDialog.findViewById(R.id.error_dialog_text1);
-                errorText.setText(response.getResponseInfo());
-                errorDialog.show();
-                errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
-
                 if (!response.isError()) {
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
                     ft.replace(R.id.container_user_account, new forgotPassDisplayFragment());
                     ft.commit();
                 }
-//                Toast.makeText(getActivity().getApplicationContext(), LoginInfo.CURRENT_LOGIN.username, Toast.LENGTH_LONG).show();
-                errorButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        errorDialog.cancel();
-                    }
-                });
+                else{
+                    Toast.makeText(getActivity().getApplicationContext(), response.getErrorMessage(), Toast.LENGTH_LONG).show();
+                }
             }
         });
     }

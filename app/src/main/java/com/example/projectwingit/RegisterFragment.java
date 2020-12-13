@@ -140,31 +140,30 @@ public class RegisterFragment extends Fragment implements OnClickListener {
         password = passText.getText().toString();
         hashPass = com.example.projectwingit.utils.WingitUtils.hashPassword(password);
         if (password.length() >= 8) {
-            LambdaResponse registration = LambdaRequests.createAccount(username, email, hashPass, this.nutAllergy, this.glutenFree, this.spiciness);
+            if(username.isEmpty()){
+                Toast.makeText(getActivity().getApplicationContext(), "Input a username", Toast.LENGTH_LONG).show();
+            }
+            else if(email.isEmpty()){
+                Toast.makeText(getActivity().getApplicationContext(), "Input an email", Toast.LENGTH_LONG).show();
+            }
+            else {
+                LambdaResponse registration = LambdaRequests.createAccount(username, email, hashPass, this.nutAllergy, this.glutenFree, this.spiciness);
 
-            signUpText.post(new Runnable() {
-                @Override
-                public void run() {
-                    errorDialog = new Dialog(getActivity());
-                    errorDialog.setContentView(R.layout.error_dialog);
-                    errorText = (TextView) errorDialog.findViewById(R.id.error_dialog_text1);
-                    errorText.setText(registration.getResponseInfo());
-                    errorDialog.show();
-                    LambdaRequests.logout();
-                    errorButton = (Button) errorDialog.findViewById(R.id.error_dialog_button);
-                    errorButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            errorDialog.cancel();
+                signUpText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        String error = registration.getExactErrorMessage();
+                        if (!registration.isError()) {
+                            Intent intent = new Intent(getActivity(), MainActivity.class);
+                            startActivity(intent);
+                            Toast.makeText(getActivity().getApplicationContext(), "Success! Please confirm your email and log in", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getActivity().getApplicationContext(), error, Toast.LENGTH_LONG).show();
                         }
-                    });
-                    if (!registration.isError()) {
-                        Intent intent = new Intent(getActivity(), MainActivity.class);
-                        startActivity(intent);
                     }
-                }
 
-            });
+                });
+            }
 
 
 //        if (TextUtils.isEmpty(username)) {
@@ -178,18 +177,7 @@ public class RegisterFragment extends Fragment implements OnClickListener {
 //        }
 
         } else {
-            errorDialog = new Dialog(getActivity());
-            errorDialog.setContentView(R.layout.error_dialog);
-            errorText = (TextView) errorDialog.findViewById(R.id.error_dialog_text1);
-            errorText.setText("Password must be a minimum of 8 characters");
-            errorDialog.show();
-            errorButton = (Button) errorDialog.findViewById(R.id.error_dialog_button);
-            errorButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    errorDialog.cancel();
-                }
-            });
+            Toast.makeText(getActivity().getApplicationContext(), "Password must be at least 8 characters long", Toast.LENGTH_LONG).show();
         }
     }
 
