@@ -45,7 +45,7 @@
             <item
                 android:id="@+id/user_account_characteristics"
                 android:icon="@drawable/ic_characteristics"
-                android:title="@string/characteristics" />
+                android:title="User Profile" />
 
         </menu>
     </item>
