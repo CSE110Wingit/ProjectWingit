@@ -133,37 +133,27 @@ public class LoginFragment extends Fragment {
         password = passwordEditText.getText().toString();
         String hashPass = com.example.projectwingit.utils.WingitUtils.hashPassword(password);
 
-        LambdaResponse userLog = LambdaRequests.login(username, hashPass);
         if (TextUtils.isEmpty(username)) {
             Toast.makeText(getActivity().getApplicationContext(), "Enter username", Toast.LENGTH_LONG).show();
         }
-        if (TextUtils.isEmpty(password)) {
+        else if (TextUtils.isEmpty(password)) {
             Toast.makeText(getActivity().getApplicationContext(), "Enter password", Toast.LENGTH_LONG).show();
-        }
-
-        loginButton.post(new Runnable() {
-            @Override
-            public void run() {
-                errorDialog = new Dialog(getActivity());
-                errorDialog.setContentView(R.layout.error_dialog);
-                errorText = (TextView)errorDialog.findViewById(R.id.error_dialog_text1);
-                errorText.setText(userLog.getResponseInfo());
-                errorDialog.show();
-                errorButton = (Button)errorDialog.findViewById(R.id.error_dialog_button);
-                if (!userLog.isError()) {
-                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-//                Toast.makeText(getActivity().getApplicationContext(), LoginInfo.CURRENT_LOGIN.username, Toast.LENGTH_LONG).show();
-                errorButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        errorDialog.cancel();
+        }else {
+            loginButton.post(new Runnable() {
+                LambdaResponse userLog = LambdaRequests.login(username, hashPass);
+                @Override
+                public void run() {
+                    if (!userLog.isError()) {
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        Toast.makeText(getActivity().getApplicationContext(), "Welcome: " + UserInfo.CURRENT_USER.getUsername() + "!", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getActivity().getApplicationContext(), userLog.getErrorMessage(), Toast.LENGTH_LONG).show();
                     }
-                });
-            }
-        });
+                }
+            });
+        }
 
     }
 

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.projectwingit.io.UserInfo;
 
@@ -101,6 +102,7 @@ public class SearchFragment extends Fragment {
                     rl.typeResults(searchRecipeText, null, null, 3, null,Boolean.FALSE, Boolean.FALSE);
                 }
                 getFragmentManager().beginTransaction().replace(R.id.container, rl).addToBackStack(null).commit();
+                Toast.makeText(getActivity().getApplicationContext(), "Searching, Please wait!", Toast.LENGTH_LONG).show();
             }
         });
 

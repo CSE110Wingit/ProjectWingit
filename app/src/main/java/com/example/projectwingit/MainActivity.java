@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 break;
             case R.id.hamburger_local_venues:
-			    String url = "https://www.google.com/maps/search/?api=1&query=wings";
+			    String url = "https://www.google.com/maps/search/?api=1&query=chicken+wings";
                 Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(webIntent);
                 break;
