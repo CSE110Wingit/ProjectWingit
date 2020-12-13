@@ -35,11 +35,26 @@ import com.example.projectwingit.io.LambdaResponse;
 import com.example.projectwingit.io.UserInfo;
 import com.example.projectwingit.utils.WingitLambdaConstants;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
+
+import static com.example.projectwingit.io.LambdaRequests.getRecipe;
+import static com.example.projectwingit.utils.WingitLambdaConstants.GLUTEN_FREE_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.NUT_ALLERGY_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_DESCRIPTION_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_INGREDIENTS_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_PICTURE_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_TITLE_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.RECIPE_TUTORIAL_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.SPICINESS_LEVEL_STR;
+import static com.example.projectwingit.utils.WingitLambdaConstants.VEGETARIAN_STR;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,11 +68,11 @@ public class EditRecipeFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
-    private String recipeID;
+
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final String tag = "CREATE RECIPE FRAGMENT";
+    private static final String tag = "EDIT RECIPE FRAGMENT";
     protected static final int UPLOAD_IMAGE = 1;
 
     protected ImageView wingImageView;
@@ -102,6 +117,20 @@ public class EditRecipeFragment extends Fragment {
 
     protected Button buttonSubmitRecipe;
 
+    // recipe params to load in
+    private String recipeID;
+    private String recipeTitle;
+    private String recipeDescription;
+    private String recipeTutorial;
+    private String recipePicLink;
+    private boolean nutAllergy;
+    private boolean glutenFree;
+    private boolean isVegetarian;
+    private boolean privated;
+    private int spiceLevel;
+    private JSONArray recipeIngredients;
+    private Bitmap recipeBitmap;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -113,6 +142,27 @@ public class EditRecipeFragment extends Fragment {
     public EditRecipeFragment(String recipeid) {
         // Required empty public constructor
         recipeID = recipeid;
+
+        LambdaResponse recipeObject;
+        JSONObject recipeJSONObject;
+
+        // initalize the recipe values in method
+        try {
+            recipeObject = getRecipe(Integer.parseInt(recipeID));
+            recipeJSONObject = recipeObject.getResponseJSON();
+
+            recipeTitle = recipeJSONObject.getString(RECIPE_TITLE_STR);
+            recipeDescription = recipeJSONObject.getString(RECIPE_DESCRIPTION_STR);
+            recipeTutorial = recipeJSONObject.getString(RECIPE_TUTORIAL_STR);
+            recipeIngredients = recipeJSONObject.getJSONArray(RECIPE_INGREDIENTS_STR);
+            recipePicLink = recipeJSONObject.getString(RECIPE_PICTURE_STR);
+            nutAllergy = recipeJSONObject.getBoolean(NUT_ALLERGY_STR);
+            glutenFree = recipeJSONObject.getBoolean(GLUTEN_FREE_STR);
+            isVegetarian = recipeJSONObject.getBoolean(VEGETARIAN_STR);
+            spiceLevel = recipeJSONObject.getInt(SPICINESS_LEVEL_STR);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -267,7 +317,7 @@ public class EditRecipeFragment extends Fragment {
         r = new Runnable() {
             @Override
             public void run() {
-                showToast("Recipe successfully created!");
+                showToast("Recipe successfully edited!");
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.container, new RecipePageFragment(recipeId)).commit();
             }
@@ -371,11 +421,11 @@ public class EditRecipeFragment extends Fragment {
                 }
                 recipeTutorial = recipeTutorialBuilder.toString().trim();
 
-                LambdaResponse createRecipeResponse = LambdaRequests.createRecipe(recipeTitle,
+                LambdaResponse editRecipeResponse = LambdaRequests.editRecipe(recipeID,recipeTitle,
                         recipeIngredients, recipeDescription, recipeTutorial, containsNuts,
                         isGlutenFree, false, (int) spicinessLevel, isPrivate, imageBitmap);
 
-                new ProcessCreateRecipeResponseThread(createRecipeResponse).start();
+                new ProcessCreateRecipeResponseThread(editRecipeResponse).start();
             }
         });
     }
@@ -419,9 +469,26 @@ public class EditRecipeFragment extends Fragment {
         buttonUploadImage = rootView.findViewById(R.id.ButtonUploadImage);
         buttonRemoveImage = rootView.findViewById(R.id.ButtonRemoveImage);
         wingImageView = rootView.findViewById(R.id.WingImageView);
-        imageURI = null;
-        imageURL = null;
-        imageBitmap = null;
+        //imageURI = Uri.parse(recipePicLink);
+        //wingImageView.setImageURI(imageURI);
+
+        URL url;
+        Uri uri = null;
+        try {
+            url = new URL(recipePicLink);
+            uri = Uri.parse( url.toURI().toString());
+        } catch (MalformedURLException e1) {
+            e1.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        try{
+         imageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+         wingImageView.setImageBitmap(imageBitmap);
+        } catch (IOException e) {
+                showToast("Unable to load image uri.");
+        }
 
         buttonUploadImage.setOnClickListener(new View.OnClickListener() {
 
@@ -493,9 +560,11 @@ public class EditRecipeFragment extends Fragment {
 
         // Set up recipe name.
         inputRecipeName = (EditText) rootView.findViewById(R.id.InputRecipeName);
+        inputRecipeName.setText(recipeTitle);
 
         // Set up recipe description.
         inputRecipeDescription = (EditText) rootView.findViewById(R.id.InputRecipeDescription);
+        inputRecipeDescription.setText(recipeDescription);
 
         setUpIngredientList();
         setUpInstructionList();

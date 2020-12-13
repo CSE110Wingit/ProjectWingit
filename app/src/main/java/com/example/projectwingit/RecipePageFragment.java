@@ -135,7 +135,7 @@ public class RecipePageFragment extends Fragment {
         TextView nutAllergyText = v.findViewById(R.id.textViewAllergy);
         RatingBar ratingBar = v.findViewById(R.id.textViewNutritional);
         favoriteButton = v.findViewById(R.id.recipe_page_fav_button);
-        editButton = v.findViewById(R.id.recipe_edit_button);
+        //editButton = v.findViewById(R.id.recipe_edit_button);
         deleteButton = v.findViewById(R.id.recipe_delete_button);
 
         try {
@@ -211,13 +211,13 @@ public class RecipePageFragment extends Fragment {
                 }
                 if (isMyRecipe) {
                     deleteButton.setVisibility(View.VISIBLE);
-                    editButton.setVisibility(View.VISIBLE);
+                    //editButton.setVisibility(View.VISIBLE);
 
                 }
             }
             else {
-                editButton.setTextColor(getResources().getColor(R.color.secondary));
-                editButton.setIconTint(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
+                //editButton.setTextColor(getResources().getColor(R.color.secondary));
+                //editButton.setIconTint(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
             }
 
 
@@ -252,13 +252,13 @@ public class RecipePageFragment extends Fragment {
             }
         });
 
-        editButton.setOnClickListener(new View.OnClickListener(){
+        /*editButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                //String currentRecipeID = Integer.toString(recipeID);
-                //getFragmentManager().beginTransaction().replace(R.id.container, new EditRecipeFragment(currentRecipeID)).addToBackStack(null).commit();
+                String currentRecipeID = Integer.toString(recipeID);
+                getFragmentManager().beginTransaction().replace(R.id.container, new EditRecipeFragment(currentRecipeID)).addToBackStack(null).commit();
             }
-        });
+        });*/
 
         deleteButton.setOnClickListener(new View.OnClickListener(){
             @Override
