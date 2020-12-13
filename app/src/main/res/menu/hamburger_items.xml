@@ -16,6 +16,11 @@
             android:title="Create Recipe" />
 
         <item
+            android:id="@+id/hamburger_my_recipes"
+            android:icon="@drawable/ic_baseline_folder_24"
+            android:title="My Recipes" />
+
+        <item
             android:id="@+id/hamburger_local_venues"
             android:icon="@drawable/ic_local_venue"
             android:title="Local Venues" />

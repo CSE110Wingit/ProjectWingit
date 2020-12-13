@@ -31,12 +31,13 @@ public class RecipeListRecyclerViewAdapter extends RecyclerView.Adapter<RecipeLi
     private ArrayList<String> mRecipeCategories = new ArrayList<>();
     private ArrayList<String> mRecipeDescriptions = new ArrayList<>();
     private ArrayList<Boolean> mIsFavorited = new ArrayList<>();
+    private ArrayList<Boolean> mIsMyRecipe = new ArrayList<>();
     private Context mContext;
     private OnRecipeListener monRecipeListener;
 
     public RecipeListRecyclerViewAdapter(ArrayList<String> mRecipeImages, ArrayList<String> mRecipeTitles,
                                          ArrayList<String> mRecipeCategories, ArrayList<String> mRecipeDescriptions,
-                                         Context mContext, OnRecipeListener onRecipeListener, ArrayList<Boolean> mIsFavorited) {
+                                         Context mContext, OnRecipeListener onRecipeListener, ArrayList<Boolean> mIsFavorited, ArrayList<Boolean> mIsMyRecipe) {
         this.mRecipeImages = mRecipeImages;
         this.mRecipeTitles = mRecipeTitles;
         this.mRecipeCategories = mRecipeCategories;
@@ -44,7 +45,7 @@ public class RecipeListRecyclerViewAdapter extends RecyclerView.Adapter<RecipeLi
         this.mContext = mContext;
         this.monRecipeListener = onRecipeListener;
         this.mIsFavorited = mIsFavorited;
-
+        this.mIsMyRecipe = mIsMyRecipe;
     }
 
     @NonNull
@@ -64,7 +65,12 @@ public class RecipeListRecyclerViewAdapter extends RecyclerView.Adapter<RecipeLi
         holder.recipeCategory.setText(mRecipeCategories.get(position));
         holder.recipeDescription.setText(mRecipeDescriptions.get(position));
 
-        if(mIsFavorited.get(position)) {
+        if(mIsMyRecipe.size() != 0 && mIsMyRecipe.get(position)) {
+        holder.favoriteButton.setText("Your Recipe!");
+            holder.favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
+            holder.favoriteButton.setVisibility(View.VISIBLE);
+        }
+        else if(mIsFavorited.size() != 0 && mIsFavorited.get(position)) {
             holder.favoriteButton.setText("In Favorites");
             holder.favoriteButton.setIconResource(R.drawable.ic_recipe_in_favorites);
             holder.favoriteButton.setVisibility(View.VISIBLE);

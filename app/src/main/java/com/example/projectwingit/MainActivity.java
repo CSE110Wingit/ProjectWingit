@@ -138,6 +138,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     startActivity(intent);
                 }
                 break;
+            case R.id.hamburger_my_recipes:
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, new CreatedRecipeList()).addToBackStack(null).commit();
+                break;
             case R.id.hamburger_local_venues:
 			    String url = "https://www.google.com/maps/search/?api=1&query=wings";
                 Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

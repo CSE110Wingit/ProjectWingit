@@ -67,6 +67,8 @@ public class RecipePageFragment extends Fragment {
     RatingBar userRating;
     private int recipeID;
     private MaterialButton favoriteButton;
+    private MaterialButton editButton;
+    private MaterialButton deleteButton;
     /**
      * TODO: We will fill the following TextView widgets with recipe fields
      *
@@ -133,6 +135,8 @@ public class RecipePageFragment extends Fragment {
         TextView nutAllergyText = v.findViewById(R.id.textViewAllergy);
         RatingBar ratingBar = v.findViewById(R.id.textViewNutritional);
         favoriteButton = v.findViewById(R.id.recipe_page_fav_button);
+        editButton = v.findViewById(R.id.recipe_edit_button);
+        deleteButton = v.findViewById(R.id.recipe_delete_button);
 
         try {
 
@@ -193,6 +197,29 @@ public class RecipePageFragment extends Fragment {
                 favoriteButton.setIconTint(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
             }
 
+            String[] createdRecipeList = null;
+            createdRecipeList = UserInfo.CURRENT_USER.getCreatedRecipes();
+
+            // set edit and delete recipe button
+            if (UserInfo.CURRENT_USER.isLoggedIn()) {
+                boolean isMyRecipe = false;
+                for (int i = 0; i < createdRecipeList.length; i++) {
+                    if (createdRecipeList[i] != null) {
+                        recipeIDString = createdRecipeList[i];
+                        if (currentRecipeID.equals(recipeIDString)) isMyRecipe = true;
+                    }
+                }
+                if (isMyRecipe) {
+                    deleteButton.setVisibility(View.VISIBLE);
+                    editButton.setVisibility(View.VISIBLE);
+
+                }
+            }
+            else {
+                editButton.setTextColor(getResources().getColor(R.color.secondary));
+                editButton.setIconTint(ColorStateList.valueOf(getResources().getColor(R.color.secondary)));
+            }
+
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -222,6 +249,23 @@ public class RecipePageFragment extends Fragment {
             @Override
             public void onClick(View v){
                 rateDialog.dismiss();
+            }
+        });
+
+        editButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                //String currentRecipeID = Integer.toString(recipeID);
+                //getFragmentManager().beginTransaction().replace(R.id.container, new EditRecipeFragment(currentRecipeID)).addToBackStack(null).commit();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                String currentRecipeID = Integer.toString(recipeID);
+                LambdaResponse delreq = deleteRecipe(currentRecipeID);
+                getFragmentManager().beginTransaction().replace(R.id.container, new HomeFragment()).addToBackStack(null).commit();
             }
         });
 

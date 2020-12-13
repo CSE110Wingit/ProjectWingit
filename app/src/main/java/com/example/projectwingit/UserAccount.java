@@ -146,7 +146,6 @@ public class UserAccount extends AppCompatActivity implements NavigationView.OnN
         // TODO call lambda method to confirm current changes
         LambdaResponse recipe = LambdaRequests.editPersonalCharacteristics(loginUsername, loginEmail, prefNutAllergy, prefGlutenFree, prefSpiciness);
         Toast.makeText(getApplicationContext(), "Your preferences have been updated!", Toast.LENGTH_LONG).show();
-
     }
 
     // resets all of the preference fields to their default values, tells the backend

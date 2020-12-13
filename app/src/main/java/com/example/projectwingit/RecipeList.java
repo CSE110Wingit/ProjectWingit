@@ -61,6 +61,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
     private ArrayList<String> mRecipeDescriptions = new ArrayList<>();
     private ArrayList<Integer> mRecipeID = new ArrayList<>();
     private ArrayList<Boolean> mIsFavorites = new ArrayList<>();
+    private ArrayList<Boolean> mIsMyRecipe = new ArrayList<>();
 
     private String loginUsername = "JustWingit";
     private String loginEmail = "cse110wingit@gmail.com";
@@ -72,6 +73,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
     private Boolean vegetarian;
     private Boolean isFavoritesPage;
     private Boolean isOurFavoritesPage;
+    private Boolean isMyRecipes;
 
 
     private Boolean initializedCards = Boolean.FALSE;
@@ -119,6 +121,9 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
         }
         else if (isOurFavoritesPage) {
             initOurFavorites(v);
+        }
+        else if(isMyRecipes) {
+            initCreatedRecipes(v);
         }
         else {
             initImageBitmaps(v);
@@ -181,7 +186,10 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                         mRecipeCategories.add(recipeRating);
 
                         String[] recipeIDList;
+                        String[] createdRecipesList;
                         recipeIDList = UserInfo.CURRENT_USER.getFavoritedRecipes();
+                        createdRecipesList = UserInfo.CURRENT_USER.getCreatedRecipes();
+
                         if (recipeIDList != null) {
                             boolean favVal = false;
 
@@ -199,6 +207,23 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                             mRecipeID.add(id);
                         }
 
+
+                        // for checking if the user created the recipe
+                        if(createdRecipesList != null){
+                            boolean isCreated = false;
+
+                            for (int z = 0; z < createdRecipesList.length; z++) {
+                                if (createdRecipesList[z] != null) {
+                                    if (createdRecipesList[z].equals(recipeIDString)) isCreated = true;
+                                }
+                            }
+
+                            mIsMyRecipe.add(isCreated);
+                        }
+                        else{
+                            mIsMyRecipe.add(false);
+                        }
+
                     }
                 }
             } catch (JSONException e) {
@@ -212,7 +237,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
     private void initRecyclerView(View v) {
         RecyclerView recyclerView = (RecyclerView)  v.findViewById(R.id.recycler_view_container);
-        RecipeListRecyclerViewAdapter adapter = new RecipeListRecyclerViewAdapter(mRecipeImageUrls, mRecipeTitles, mRecipeCategories,mRecipeDescriptions, getContext(), this, mIsFavorites);
+        RecipeListRecyclerViewAdapter adapter = new RecipeListRecyclerViewAdapter(mRecipeImageUrls, mRecipeTitles, mRecipeCategories,mRecipeDescriptions, getContext(), this, mIsFavorites, mIsMyRecipe);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
@@ -237,14 +262,19 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
      *      3. We will make a request to the Lambda API using this string in the onCreateView method above.
      */
     public void typeResults(String recipeSearchText, Boolean nutAllergy, Boolean glutenFree, int spiciness,
-                            Boolean vegetarian, Boolean isFavoritesPage, Boolean isOurFavoritesPage) {
+                            Boolean vegetarian, Boolean isFavoritesPage, Boolean isMyRecipes, Boolean isOurFavoritesPage) {
+
         this.recipeSearchText = recipeSearchText;
         this.spiciness = spiciness;
         this.nutAllergy = nutAllergy;
         this.glutenFree = glutenFree;
         this.vegetarian = vegetarian;
         this.isFavoritesPage = isFavoritesPage;
+
         this.isOurFavoritesPage = isOurFavoritesPage;
+
+        this.isMyRecipes = isMyRecipes;
+
     }
 
     private void initFavorites(View v) {
@@ -274,6 +304,7 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
                         mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
                         mRecipeID.add(id);
                         mIsFavorites.add(Boolean.TRUE);
+                        mIsMyRecipe.add(Boolean.FALSE);
                     }
                 }
             } catch (JSONException e) {
@@ -346,6 +377,46 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
             initRecyclerView(v);
         }
 
+    }
+
+    private void initCreatedRecipes(View v) {
+        if(initializedCards) initRecyclerView(v);
+        else {
+            initializedCards = Boolean.TRUE;
+
+            String[] recipeIDList;
+            recipeIDList = UserInfo.CURRENT_USER.getCreatedRecipes();
+
+            JSONObject recipeID = new JSONObject();
+            LambdaResponse recipeObject;
+            String recipeIDString = "";
+            JSONObject recipeJSONObject;
+
+            try {
+                for (int i = 0; i < recipeIDList.length; i++) {
+                    if (recipeIDList[i] != null) {
+                        recipeIDString = recipeIDList[i];
+                        int id = Integer.parseInt(recipeIDString);
+                        recipeObject = getRecipe(id);
+
+                        recipeJSONObject = recipeObject.getResponseJSON();
+
+                        mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
+                        mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
+                        mRecipeCategories.add("Category " + i);
+                        mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
+                        mRecipeID.add(id);
+                        mIsFavorites.add(Boolean.TRUE);
+                        mIsMyRecipe.add(Boolean.TRUE);
+                    }
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            initRecyclerView(v);
+        }
     }
 
 

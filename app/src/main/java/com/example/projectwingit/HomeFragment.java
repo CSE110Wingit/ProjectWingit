@@ -8,7 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.projectwingit.io.LambdaResponse;
 import com.google.android.material.card.MaterialCardView;
+
+import static com.example.projectwingit.io.LambdaRequests.login;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -75,6 +78,9 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_home, container, false);
 
+        // needed to log the user in from the start if user is logged in
+        // LambdaResponse login = login();
+
         // set the button to switch fragments
         // TODO replace button code using recyclerView which can make a button for all cards
         category1 = v.findViewById(R.id.category1);
@@ -83,7 +89,8 @@ public class HomeFragment extends Fragment {
             public void onClick(View v){
                 RecipeList spicyList = new RecipeList();
                 spicyList.typeResults("", null, null,
-                        4, null, Boolean.FALSE, Boolean.FALSE);
+                        4, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+
                 getFragmentManager().beginTransaction().replace(R.id.container, spicyList).addToBackStack(null).commit();
             }
         });
@@ -95,7 +102,8 @@ public class HomeFragment extends Fragment {
             public void onClick(View v){
                 RecipeList vegetarianList = new RecipeList();
                 vegetarianList.typeResults("Vegan Vegetarian", null, null,
-                        -1, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
+                        -1, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+
                 getFragmentManager().beginTransaction().replace(R.id.container, vegetarianList).addToBackStack(null).commit();
             }
         });
@@ -105,10 +113,12 @@ public class HomeFragment extends Fragment {
         category3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v){
+
                 RecipeList ourFavs = new RecipeList();
                 ourFavs.typeResults("Sweet", null, null,
-                        -1, null, Boolean.FALSE, Boolean.TRUE);
+                        -1, null, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE);
                 getFragmentManager().beginTransaction().replace(R.id.container, ourFavs).addToBackStack(null).commit();
+
             }
         });
 
