@@ -63,9 +63,6 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
     private ArrayList<Boolean> mIsFavorites = new ArrayList<>();
     private ArrayList<Boolean> mIsMyRecipe = new ArrayList<>();
 
-    private String loginUsername = "JustWingit";
-    private String loginEmail = "cse110wingit@gmail.com";
-
     private String recipeSearchText;
     private int spiciness;
     private Boolean nutAllergy;
