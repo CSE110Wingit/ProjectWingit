@@ -138,8 +138,9 @@ public class RecipePageFragment extends Fragment {
         //editButton = v.findViewById(R.id.recipe_edit_button);
         deleteButton = v.findViewById(R.id.recipe_delete_button);
 
-        if (!UserInfo.CURRENT_USER.isLoggedIn() && !UserInfo.CURRENT_USER.recipeIsCreated(""+recipeID))
+        if (!UserInfo.CURRENT_USER.isLoggedIn() || !UserInfo.CURRENT_USER.recipeIsCreated(""+recipeID)){
             deleteButton.setVisibility(View.INVISIBLE);
+        }
 
         try {
 
