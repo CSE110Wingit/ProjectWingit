@@ -82,7 +82,8 @@ def send_password_change_code_email(username, email, code):
     """
     Sends the activation email/link to the given username and email
     """
-    message = PASSWORD_CHANGE_EMAIL % (username, code)
+    message = VERIFICATION_EMAIL_HEADER % (GMAIL_USER, email, PASSWORD_CHANGE_SUBJECT,
+                                           PASSWORD_CHANGE_EMAIL % (username, code))
 
     # Set up the server and send the message
     try:

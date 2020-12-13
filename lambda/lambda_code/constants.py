@@ -44,6 +44,7 @@ PASSWORD_CHANGE_CODE_SIZE = 6  # Number of digits in the password change code
 VERIFICATION_LINK = "{0}?event_type=verify_account&username=%s&verification_code=%s".format(API_URL)
 VERIFICATION_EMAIL_HEADER = "\From: %s\nTo: %s\nSubject: %s\n\n%s"
 VERIFICATION_EMAIL_SUBJECT = "Wingit Account Activation"
+PASSWORD_CHANGE_SUBJECT = "Wingit Temporary Password Change Code"
 
 CHANGE_PASSWORD_TIMEOUT = 10 * 60 * 1000  # Timeout password change after 10 minutes
 

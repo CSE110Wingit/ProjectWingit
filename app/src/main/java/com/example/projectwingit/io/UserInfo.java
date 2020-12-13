@@ -52,6 +52,9 @@ public class UserInfo {
     public boolean recipeIsRated(String recipeId){
         return ratedRecipes.contains(recipeId);
     }
+    public boolean recipeIsCreated(String recipeId){
+        return createdRecipes.contains(recipeId);
+    }
 
     protected void addFavorite(String recipeId){
         WingitLogging.log("DDDDD: Adding favorite recipes: " + recipeId);
