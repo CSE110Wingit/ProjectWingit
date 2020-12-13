@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.material.card.MaterialCardView;
 
@@ -82,6 +83,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList spicyList = new RecipeList();
+                Toast.makeText(getActivity().getApplicationContext(), "Searching... Please wait", Toast.LENGTH_LONG).show();
                 spicyList.typeResults("", null, null,
                         4, null, Boolean.FALSE, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, spicyList).addToBackStack(null).commit();
@@ -94,6 +96,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList vegetarianList = new RecipeList();
+                Toast.makeText(getActivity().getApplicationContext(), "Searching... Please wait", Toast.LENGTH_LONG).show();
                 vegetarianList.typeResults("Vegan Vegetarian", null, null,
                         -1, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
                 getFragmentManager().beginTransaction().replace(R.id.container, vegetarianList).addToBackStack(null).commit();
@@ -106,6 +109,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v){
                 RecipeList ourFavs = new RecipeList();
+                Toast.makeText(getActivity().getApplicationContext(), "Searching... Please wait", Toast.LENGTH_LONG).show();
                 ourFavs.typeResults("Sweet", null, null,
                         -1, null, Boolean.FALSE, Boolean.TRUE);
                 getFragmentManager().beginTransaction().replace(R.id.container, ourFavs).addToBackStack(null).commit();
