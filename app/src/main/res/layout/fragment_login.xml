@@ -10,36 +10,39 @@
     <EditText
         android:id="@+id/username"
         android:layout_width="237dp"
-        android:layout_height="41dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="256dp"
         android:layout_marginEnd="24dp"
         android:hint="Email or Username"
         android:inputType="textEmailAddress"
         android:selectAllOnFocus="true"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/login_Header"
+        app:layout_constraintVertical_bias="0.162" />
 
     <EditText
         android:id="@+id/password"
         android:layout_width="237dp"
-        android:layout_height="41dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="40dp"
         android:layout_marginEnd="24dp"
         android:hint="Password"
         android:imeOptions="actionDone"
         android:inputType="textPassword"
         android:selectAllOnFocus="true"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/username" />
+        app:layout_constraintTop_toBottomOf="@+id/username"
+        app:layout_constraintVertical_bias="0.0" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/login"
         android:layout_width="203dp"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="start"
         android:layout_marginStart="48dp"
         android:layout_marginTop="16dp"
@@ -77,7 +80,7 @@
     <TextView
         android:id="@+id/forgot_Pass"
         android:layout_width="84dp"
-        android:layout_height="16dp"
+        android:layout_height="wrap_content"
         android:text="Forgot Password?"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -90,20 +93,19 @@
     <TextView
         android:id="@+id/create_Account"
         android:layout_width="117dp"
-        android:layout_height="19dp"
+        android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:text="Create Account"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.765" />
+        app:layout_constraintTop_toBottomOf="@+id/login"
+        app:layout_constraintVertical_bias="0.161" />
 
     <TextView
         android:id="@+id/login_Header"
         android:layout_width="225dp"
-        android:layout_height="45dp"
+        android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:text="Login"
         android:textSize="28sp"

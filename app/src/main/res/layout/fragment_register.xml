@@ -21,10 +21,10 @@
             android:inputType="textPersonName"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintHorizontal_bias="0.487"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.231" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_Header"
+            app:layout_constraintVertical_bias="0.089" />
 
         <EditText
             android:id="@+id/emailReg"
@@ -35,10 +35,10 @@
             android:inputType="textPersonName"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintHorizontal_bias="0.487"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/userReg"
-            app:layout_constraintVertical_bias="0.031" />
+            app:layout_constraintVertical_bias="0.028" />
 
         <EditText
             android:id="@+id/passReg"
@@ -49,10 +49,10 @@
             android:inputType="textPassword"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintHorizontal_bias="0.487"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/emailReg"
-            app:layout_constraintVertical_bias="0.033" />
+            app:layout_constraintVertical_bias="0.028" />
 
         <Button
             android:id="@+id/regSignUp"
@@ -64,8 +64,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/passReg"
-            app:layout_constraintVertical_bias="0.54" />
+            app:layout_constraintTop_toBottomOf="@+id/spicinessSelector"
+            app:layout_constraintVertical_bias="0.069" />
 
         <TextView
             android:id="@+id/tv_Header"
@@ -90,8 +90,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.336"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.186" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_Header"
+            app:layout_constraintVertical_bias="0.042" />
 
         <TextView
             android:id="@+id/tv_Footer"
@@ -111,10 +111,10 @@
             android:text="Do you have a nut allergy?"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.456"
+            app:layout_constraintHorizontal_bias="0.451"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.484" />
+            app:layout_constraintTop_toBottomOf="@+id/passReg"
+            app:layout_constraintVertical_bias="0.032" />
 
         <CheckBox
             android:id="@+id/glutenAllergy"
@@ -123,9 +123,10 @@
             android:text="Do you have a gluten allergy?"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.494"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.566" />
+            app:layout_constraintTop_toBottomOf="@+id/nutAllergy"
+            app:layout_constraintVertical_bias="0.032" />
 
         <TextView
             android:id="@+id/textView"
@@ -136,8 +137,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.497"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.622" />
+            app:layout_constraintTop_toBottomOf="@+id/glutenAllergy"
+            app:layout_constraintVertical_bias="0.054" />
 
         <Spinner
             android:id="@+id/spicinessSelector"
@@ -148,8 +149,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.664" />
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:layout_constraintVertical_bias="0.059" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
