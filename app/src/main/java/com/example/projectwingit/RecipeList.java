@@ -300,8 +300,15 @@ public class RecipeList extends Fragment implements RecipeListRecyclerViewAdapte
 
                         mRecipeImageUrls.add(recipeJSONObject.getString(RECIPE_PICTURE_STR));
                         mRecipeTitles.add(recipeJSONObject.getString(RECIPE_TITLE_STR));
-                        mRecipeCategories.add("Category " + i);
-                        mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
+
+                        String recipeRating = "";
+                        if(recipeJSONObject.getString(RECIPE_RATING_STR).equalsIgnoreCase("null")){
+                            recipeRating += "Not Rated";
+                        }
+                        else{
+                            recipeRating += "Rating: " + recipeJSONObject.getString(RECIPE_RATING_STR) + " Stars";
+                        }
+                        mRecipeCategories.add(recipeRating);                        mRecipeDescriptions.add(recipeJSONObject.getString(RECIPE_DESCRIPTION_STR));
                         mRecipeID.add(id);
                         mIsFavorites.add(Boolean.TRUE);
                         mIsMyRecipe.add(Boolean.FALSE);
