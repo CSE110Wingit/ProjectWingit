@@ -358,17 +358,7 @@ public class RecipePageFragment extends Fragment {
                 getFragmentManager().beginTransaction().replace(R.id.container, new RecipePageInstructionFragment(tutorialString, recipeID)).addToBackStack(null).commit();
             }
         });
-
-        /*cookingTutorialButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                HomeFragment h = new HomeFragment();
-                getFragmentManager().beginTransaction().replace(R.id.container, h).addToBackStack(null).commit();
-            }
-        });*/
-
-
-
+        
 
 
         // Inflate the layout for this fragment
